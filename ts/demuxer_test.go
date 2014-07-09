@@ -57,3 +57,38 @@ func TestDemuxingASingleStream(t *testing.T) {
 		t.Fatalf("Not enough packets read. Expected %d, got %d", 4, count)
 	}
 }
+
+func TestDemuxingUsingWheres(t *testing.T) {
+	source := io.MultiReader(nullPacketReader(), dataPacketReader(), nullPacketReader(), dataPacketReader(), nullPacketReader())
+	demux := ts.Demux(source)
+	dataStream := demux.Where(func(p *ts.TsPacket) bool { return p.PID == dataPacketPID })
+	junkStream := demux.Where(func(p *ts.TsPacket) bool { return p.PID != dataPacketPID })
+
+	eos := demux.Begin()
+
+	var done = false
+	dataCount := 0
+	junkCount := 0
+	for done == false {
+		select {
+		case <-dataStream:
+			dataCount++
+		case <-junkStream:
+			junkCount++
+		case <-eos:
+			done = true
+		}
+	}
+
+	if demux.Err() != io.ErrUnexpectedEOF {
+		t.Fatalf("Unxpected error: %s", demux.Err())
+	}
+
+	if dataCount != 2 {
+		t.Fatalf("Not enough packets read. Expected %d, got %d", 2, dataCount)
+	}
+
+	if junkCount != 3 {
+		t.Fatalf("Not enough packets read. Expected %d, got %d", 3, junkCount)
+	}
+}
