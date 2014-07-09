@@ -13,11 +13,13 @@ func Demux(source io.Reader) TransportStreamDemuxer {
 type TransportStreamDemuxer interface {
 	PID(uint32) <-chan *TsPacket
 	Begin() <-chan bool
+	Err() error
 }
 
 type tsDemuxer struct {
-	reader TransportStreamReader
-	reg    map[uint32]chan<- *TsPacket
+	reader  TransportStreamReader
+	reg     map[uint32]chan<- *TsPacket
+	lastErr error
 }
 
 func (tsd *tsDemuxer) PID(PID uint32) <-chan *TsPacket {
@@ -34,6 +36,7 @@ func (tsd *tsDemuxer) Begin() <-chan bool {
 			p, err := tsd.reader.Next()
 
 			if err != nil {
+				tsd.lastErr = err
 				done <- true
 				break
 			}
@@ -45,4 +48,8 @@ func (tsd *tsDemuxer) Begin() <-chan bool {
 	}()
 
 	return done
+}
+
+func (tsd *tsDemuxer) Err() error {
+	return tsd.lastErr
 }
