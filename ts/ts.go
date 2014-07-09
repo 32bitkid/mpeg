@@ -20,6 +20,8 @@ type tsReader struct {
 
 const SyncByte = 0x47
 
+var ErrNoSyncByte = errors.New("no sync byte")
+
 type TsPacket struct {
 	TransportErrorIndicator    bool
 	PayloadUnitStartIndicator  bool
@@ -46,12 +48,13 @@ func (tsr *tsReader) Next() (*TsPacket, error) {
 
 	if !aligned {
 		err = tsr.realign()
-		if isFatalErr(err) {
-			return nil, err
+		if err != nil {
+			return nil, ErrNoSyncByte
 		}
 	}
 
-	if err = tsr.Trash(8); isFatalErr(err) {
+	err = tsr.Trash(8)
+	if isFatalErr(err) {
 		return nil, err
 	}
 
@@ -116,9 +119,11 @@ func (tsr *tsReader) isAligned() (bool, error) {
 func (tsr *tsReader) realign() error {
 	log.Printf("Attempting to realign")
 	for i := 0; i < 188; i++ {
-		tsr.Trash(8)
+		if err := tsr.Trash(8); isFatalErr(err) {
+			return err
+		}
 		isAligned, err := tsr.isAligned()
-		if err != nil {
+		if isFatalErr(err) {
 			return err
 		}
 		if isAligned {
@@ -126,5 +131,5 @@ func (tsr *tsReader) realign() error {
 			return nil
 		}
 	}
-	return errors.New("Unable to find SyncByte")
+	return ErrNoSyncByte
 }
