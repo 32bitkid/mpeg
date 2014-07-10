@@ -36,6 +36,6 @@ func TestIncompletePacket(t *testing.T) {
 
 	_, err := reader.Next()
 	if err != io.ErrUnexpectedEOF {
-		t.Fatal("Expected an error %v", err)
+		t.Fatalf("Expected an error %v", err)
 	}
 }
