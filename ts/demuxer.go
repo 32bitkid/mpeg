@@ -2,7 +2,7 @@ package ts
 
 import "io"
 
-func alwaysTrue(p *TsPacket) bool { return true }
+func alwaysTrue(p *Packet) bool { return true }
 
 func Demux(source io.Reader) Demuxer {
 	reader := NewReader(source)
@@ -14,7 +14,7 @@ func Demux(source io.Reader) Demuxer {
 }
 
 type Demuxer interface {
-	Where(PacketTester) <-chan *TsPacket
+	Where(PacketTester) <-chan *Packet
 	Go() <-chan bool
 	Err() error
 
@@ -24,7 +24,7 @@ type Demuxer interface {
 
 type conditionalChannel struct {
 	test    PacketTester
-	channel chan<- *TsPacket
+	channel chan<- *Packet
 }
 
 type tsDemuxer struct {
@@ -35,8 +35,8 @@ type tsDemuxer struct {
 	takeWhile          PacketTester
 }
 
-func (tsd *tsDemuxer) Where(test PacketTester) <-chan *TsPacket {
-	channel := make(chan *TsPacket)
+func (tsd *tsDemuxer) Where(test PacketTester) <-chan *Packet {
+	channel := make(chan *Packet)
 	tsd.registeredChannels = append(tsd.registeredChannels, conditionalChannel{test, channel})
 	return channel
 }

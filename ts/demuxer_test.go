@@ -96,7 +96,7 @@ func TestDemuxingUsingWheres(t *testing.T) {
 func TestDemuxingRange(t *testing.T) {
 	source := io.MultiReader(fivePacketReader())
 	demux := ts.Demux(source)
-	allStream := demux.Where(func(p *ts.TsPacket) bool { return true })
+	allStream := demux.Where(func(p *ts.Packet) bool { return true })
 
 	count := 0
 

@@ -11,7 +11,7 @@ func NewReader(reader io.Reader) TransportStreamReader {
 }
 
 type TransportStreamReader interface {
-	Next() (*TsPacket, error)
+	Next() (*Packet, error)
 }
 
 type tsReader struct {
@@ -22,7 +22,7 @@ const SyncByte = 0x47
 
 var ErrNoSyncByte = errors.New("no sync byte")
 
-type TsPacket struct {
+type Packet struct {
 	TransportErrorIndicator    bool
 	PayloadUnitStartIndicator  bool
 	TransportPriority          bool
@@ -37,7 +37,7 @@ func isFatalErr(err error) bool {
 	return err != nil && err != io.EOF
 }
 
-func (tsr *tsReader) Next() (*TsPacket, error) {
+func (tsr *tsReader) Next() (*Packet, error) {
 
 	var err error
 
@@ -58,7 +58,7 @@ func (tsr *tsReader) Next() (*TsPacket, error) {
 		return nil, err
 	}
 
-	packet := TsPacket{}
+	packet := Packet{}
 
 	packet.TransportErrorIndicator, err = tsr.ReadBit()
 	if isFatalErr(err) {
