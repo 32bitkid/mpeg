@@ -25,7 +25,7 @@ var ErrNoSyncByte = errors.New("no sync byte")
 type TsPacket struct {
 	TransportErrorIndicator    bool
 	PayloadUnitStartIndicator  bool
-	TransportPrriority         bool
+	TransportPriority          bool
 	PID                        uint32
 	TransportScramblingControl uint32
 	AdaptationFieldControl     uint32
@@ -70,7 +70,7 @@ func (tsr *tsReader) Next() (*TsPacket, error) {
 		return nil, err
 	}
 
-	packet.TransportPrriority, err = tsr.ReadBit()
+	packet.TransportPriority, err = tsr.ReadBit()
 	if isFatalErr(err) {
 		return nil, err
 	}

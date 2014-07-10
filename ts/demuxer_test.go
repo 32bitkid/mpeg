@@ -9,9 +9,9 @@ func TestDemuxingASinglePacket(t *testing.T) {
 	source := io.MultiReader(nullPacketReader(), nullPacketReader())
 	demux := ts.Demux(source)
 
-	nullStream := demux.PID(nullPacketPID)
+	nullStream := demux.Where(ts.IsPID(nullPacketPID))
 
-	eos := demux.Begin()
+	stop := demux.Go()
 
 	var done = false
 	for done == false {
@@ -21,7 +21,7 @@ func TestDemuxingASinglePacket(t *testing.T) {
 				t.Fatalf("Unexpected PID. Expected %x, got %x", nullPacketPID, p.PID)
 			}
 			done = true
-		case <-eos:
+		case <-stop:
 			done = true
 		}
 	}
@@ -35,8 +35,8 @@ func TestDemuxingASingleStream(t *testing.T) {
 	source := io.MultiReader(nullPacketReader(), nullPacketReader(), nullPacketReader(), nullPacketReader())
 	demux := ts.Demux(source)
 
-	nullStream := demux.PID(nullPacketPID)
-	eos := demux.Begin()
+	nullStream := demux.Where(ts.IsPID(nullPacketPID))
+	stop := demux.Go()
 
 	var done = false
 	count := 0
@@ -44,7 +44,7 @@ func TestDemuxingASingleStream(t *testing.T) {
 		select {
 		case <-nullStream:
 			count++
-		case <-eos:
+		case <-stop:
 			done = true
 		}
 	}
@@ -61,10 +61,10 @@ func TestDemuxingASingleStream(t *testing.T) {
 func TestDemuxingUsingWheres(t *testing.T) {
 	source := io.MultiReader(nullPacketReader(), dataPacketReader(), nullPacketReader(), dataPacketReader(), nullPacketReader())
 	demux := ts.Demux(source)
-	dataStream := demux.Where(func(p *ts.TsPacket) bool { return p.PID == dataPacketPID })
-	junkStream := demux.Where(func(p *ts.TsPacket) bool { return p.PID != dataPacketPID })
+	dataStream := demux.Where(ts.IsPID(dataPacketPID))
+	junkStream := demux.Where(ts.IsPID(dataPacketPID).Not())
 
-	eos := demux.Begin()
+	stop := demux.Go()
 
 	var done = false
 	dataCount := 0
@@ -75,7 +75,7 @@ func TestDemuxingUsingWheres(t *testing.T) {
 			dataCount++
 		case <-junkStream:
 			junkCount++
-		case <-eos:
+		case <-stop:
 			done = true
 		}
 	}
@@ -90,5 +90,35 @@ func TestDemuxingUsingWheres(t *testing.T) {
 
 	if junkCount != 3 {
 		t.Fatalf("Not enough packets read. Expected %d, got %d", 3, junkCount)
+	}
+}
+
+func TestDemuxingRange(t *testing.T) {
+	source := io.MultiReader(fivePacketReader())
+	demux := ts.Demux(source)
+	allStream := demux.Where(func(p *ts.TsPacket) bool { return true })
+
+	count := 0
+
+	demux.SkipUntil(ts.IsPID(0x31))
+	demux.TakeWhile(ts.IsPID(0x41).Not())
+	stop := demux.Go()
+
+	var done = false
+	for done == false {
+		select {
+		case <-allStream:
+			count++
+		case <-stop:
+			done = true
+		}
+	}
+
+	if demux.Err() != nil {
+		t.Fatalf("Unxpected error: %s", demux.Err())
+	}
+
+	if count != 2 {
+		t.Fatalf("Not enough packets read. Expected %d, got %d", 2, count)
 	}
 }

@@ -2,47 +2,62 @@ package ts
 
 import "io"
 
+func alwaysTrue(p *TsPacket) bool { return true }
+
 func Demux(source io.Reader) Demuxer {
 	reader := NewReader(source)
 	return &tsDemuxer{
-		reader: reader,
+		reader:    reader,
+		skipUntil: alwaysTrue,
+		takeWhile: alwaysTrue,
 	}
 }
 
-type PacketPicker func(*TsPacket) bool
-
 type Demuxer interface {
-	Where(PacketPicker) <-chan *TsPacket
-	PID(uint32) <-chan *TsPacket
-	Begin() <-chan bool
+	Where(PacketTester) <-chan *TsPacket
+	Go() <-chan bool
 	Err() error
+
+	SkipUntil(PacketTester)
+	TakeWhile(PacketTester)
 }
 
-type packetPickerChannel struct {
-	picker  PacketPicker
+type conditionalChannel struct {
+	test    PacketTester
 	channel chan<- *TsPacket
 }
 
 type tsDemuxer struct {
-	reader         TransportStreamReader
-	packetChannels []packetPickerChannel
-	lastErr        error
+	reader             TransportStreamReader
+	registeredChannels []conditionalChannel
+	lastErr            error
+	skipUntil          PacketTester
+	takeWhile          PacketTester
 }
 
-func (tsd *tsDemuxer) PID(PID uint32) <-chan *TsPacket {
-	return tsd.Where(func(p *TsPacket) bool { return p.PID == PID })
-}
-
-func (tsd *tsDemuxer) Where(picker PacketPicker) <-chan *TsPacket {
+func (tsd *tsDemuxer) Where(test PacketTester) <-chan *TsPacket {
 	channel := make(chan *TsPacket)
-	tsd.packetChannels = append(tsd.packetChannels, packetPickerChannel{picker, channel})
+	tsd.registeredChannels = append(tsd.registeredChannels, conditionalChannel{test, channel})
 	return channel
 }
 
-func (tsd *tsDemuxer) Begin() <-chan bool {
+func (tsd *tsDemuxer) SkipUntil(skipUntil PacketTester) {
+	tsd.skipUntil = skipUntil
+}
+
+func (tsd *tsDemuxer) TakeWhile(takeWhile PacketTester) {
+	tsd.takeWhile = takeWhile
+}
+
+func (tsd *tsDemuxer) Go() <-chan bool {
+
 	done := make(chan bool)
+	var skipping = true
+	var skipUntil = tsd.skipUntil
+	var takeWhile = tsd.takeWhile
 
 	go func() {
+
 		for true {
 			p, err := tsd.reader.Next()
 
@@ -52,12 +67,26 @@ func (tsd *tsDemuxer) Begin() <-chan bool {
 				break
 			}
 
-			for _, item := range tsd.packetChannels {
-				if item.picker(p) {
+			if skipping {
+				if !skipUntil(p) {
+					continue
+				} else {
+					skipping = false
+				}
+			} else {
+				if !takeWhile(p) {
+					break
+				}
+			}
+
+			for _, item := range tsd.registeredChannels {
+				if item.test(p) {
 					item.channel <- p
 				}
 			}
+
 		}
+		done <- true
 	}()
 
 	return done
