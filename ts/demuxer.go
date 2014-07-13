@@ -86,6 +86,11 @@ func (tsd *tsDemuxer) Go() <-chan bool {
 			}
 
 		}
+
+		for _, item := range tsd.registeredChannels {
+			close(item.channel)
+		}
+
 		done <- true
 	}()
 
