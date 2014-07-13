@@ -30,6 +30,7 @@ type Packet struct {
 	TransportScramblingControl uint32
 	AdaptationFieldControl     uint32
 	ContinuityCounter          uint32
+	AdaptationField            *AdaptationField
 	Payload                    []byte
 }
 
@@ -95,17 +96,31 @@ func (tsr *tsReader) Next() (*Packet, error) {
 		return nil, err
 	}
 
-	// TODO handle adaptation field
+	var (
+		payloadSize uint32 = 184
+		val         uint32
+		i           uint32
+	)
 
-	packet.Payload = make([]byte, 184)
+	if packet.AdaptationFieldControl == FieldOnly || packet.AdaptationFieldControl == FieldThenPayload {
+		packet.AdaptationField, err = ReadAdaptationField(tsr)
 
-	var val uint32
-	for i := 0; i < 184; i++ {
-		val, err = tsr.Read32(8)
 		if isFatalErr(err) {
 			return nil, err
 		}
-		packet.Payload[i] = byte(val)
+		payloadSize -= packet.AdaptationField.Length + 1
+	}
+
+	if packet.AdaptationFieldControl == PayloadOnly || packet.AdaptationFieldControl == FieldThenPayload {
+		packet.Payload = make([]byte, payloadSize)
+
+		for i = 0; i < payloadSize; i++ {
+			val, err = tsr.Read32(8)
+			if isFatalErr(err) {
+				return nil, err
+			}
+			packet.Payload[i] = byte(val)
+		}
 	}
 
 	return &packet, nil
