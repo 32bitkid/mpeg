@@ -4,6 +4,19 @@ import "io"
 
 func alwaysTrue(p *Packet) bool { return true }
 
+type PacketChannel <-chan *Packet
+
+func (input PacketChannel) PayloadOnly() <-chan []byte {
+	output := make(chan []byte)
+	go func() {
+		for packet := range input {
+			output <- packet.Payload
+		}
+		close(output)
+	}()
+	return output
+}
+
 func Demux(source io.Reader) Demuxer {
 	reader := NewReader(source)
 	return &tsDemuxer{
@@ -14,7 +27,7 @@ func Demux(source io.Reader) Demuxer {
 }
 
 type Demuxer interface {
-	Where(PacketTester) <-chan *Packet
+	Where(PacketTester) PacketChannel
 	Go() <-chan bool
 	Err() error
 
@@ -35,7 +48,7 @@ type tsDemuxer struct {
 	takeWhile          PacketTester
 }
 
-func (tsd *tsDemuxer) Where(test PacketTester) <-chan *Packet {
+func (tsd *tsDemuxer) Where(test PacketTester) PacketChannel {
 	channel := make(chan *Packet)
 	tsd.registeredChannels = append(tsd.registeredChannels, conditionalChannel{test, channel})
 	return channel
