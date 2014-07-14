@@ -114,6 +114,7 @@ func (tsr *tsReader) Next() (*Packet, error) {
 	if packet.AdaptationFieldControl == PayloadOnly || packet.AdaptationFieldControl == FieldThenPayload {
 		packet.Payload = make([]byte, payloadSize)
 
+		// TODO replace with reader
 		for i = 0; i < payloadSize; i++ {
 			val, err = tsr.Read32(8)
 			if isFatalErr(err) {
