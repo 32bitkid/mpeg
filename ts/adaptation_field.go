@@ -1,6 +1,7 @@
 package ts
 
 import "github.com/32bitkid/bitreader"
+import "io"
 
 const (
 	_ = iota
@@ -32,15 +33,10 @@ func ReadAdaptationField(tsr bitreader.Reader32) (*AdaptationField, error) {
 	}
 
 	adaptationField.Junk = make([]byte, adaptationField.Length)
+	_, err = io.ReadAtLeast(tsr, adaptationField.Junk, int(adaptationField.Length))
 
-	var val uint32
-	var i uint32
-	for i = 0; i < adaptationField.Length; i++ {
-		val, err = tsr.Read32(8)
-		if isFatalErr(err) {
-			return nil, err
-		}
-		adaptationField.Junk[i] = byte(val)
+	if isFatalErr(err) {
+		return nil, err
 	}
 
 	return &adaptationField, nil
