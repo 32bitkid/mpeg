@@ -1,7 +1,6 @@
 package pes
 
 import "errors"
-import "log"
 import "github.com/32bitkid/bitreader"
 
 var (
@@ -36,7 +35,7 @@ type Header struct {
 	DecodingTimeStamp     uint32
 }
 
-func ReadPacket(reader bitreader.Reader32) (*Packet, error) {
+func ReadPacket(reader bitreader.Reader32, total int) (*Packet, error) {
 
 	var (
 		val uint32
@@ -68,6 +67,18 @@ func ReadPacket(reader bitreader.Reader32) (*Packet, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	var payloadLen = uint32(total) - packet.Header.HeaderDataLength - 3 - 6
+	packet.Payload = make([]byte, payloadLen)
+
+	// todo replace with traditional
+	for i := uint32(0); i < payloadLen; i++ {
+		val, err = reader.Read32(8)
+		if err != nil {
+			return nil, err
+		}
+		packet.Payload[i] = byte(val)
 	}
 
 	return &packet, nil
@@ -180,9 +191,6 @@ func ReadHeader(reader bitreader.Reader32) (*Header, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	val, _ = reader.Peek32(32)
-	log.Printf(">>> %0#8x", val)
 
 	return &header, nil
 }
