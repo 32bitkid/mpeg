@@ -1,22 +1,8 @@
 package ts
 
-import "io"
-import "log"
-import "errors"
 import "github.com/32bitkid/bitreader"
-
-func NewReader(reader io.Reader) TransportStreamReader {
-	br := bitreader.NewReader32(reader)
-	return &tsReader{br}
-}
-
-type TransportStreamReader interface {
-	Next() (*Packet, error)
-}
-
-type tsReader struct {
-	bitreader.Reader32
-}
+import "io"
+import "errors"
 
 const SyncByte = 0x47
 
@@ -24,6 +10,10 @@ var (
 	ErrNoSyncByte    = errors.New("no sync byte")
 	ErrNotEnoughData = errors.New("not enough data")
 )
+
+func isFatalErr(err error) bool {
+	return err != nil && err != io.EOF
+}
 
 type Packet struct {
 	TransportErrorIndicator    bool
@@ -37,15 +27,11 @@ type Packet struct {
 	Payload                    []byte
 }
 
-func isFatalErr(err error) bool {
-	return err != nil && err != io.EOF
-}
-
-func (tsr *tsReader) Next() (*Packet, error) {
+func ReadPacket(tsr bitreader.Reader32) (*Packet, error) {
 
 	var err error
 
-	aligned, err := tsr.isAligned()
+	aligned, err := isAligned(tsr)
 	if err != nil {
 		if err == bitreader.ErrNotAvailable {
 			return nil, ErrNotEnoughData
@@ -54,7 +40,7 @@ func (tsr *tsReader) Next() (*Packet, error) {
 	}
 
 	if !aligned {
-		err = tsr.realign()
+		err = realign(tsr)
 		if err != nil {
 			return nil, ErrNoSyncByte
 		}
@@ -128,23 +114,21 @@ func (tsr *tsReader) Next() (*Packet, error) {
 	return &packet, nil
 }
 
-func (tsr *tsReader) isAligned() (bool, error) {
+func isAligned(tsr bitreader.Reader32) (bool, error) {
 	val, err := tsr.Peek32(8)
 	return val == SyncByte, err
 }
 
-func (tsr *tsReader) realign() error {
-	log.Printf("Attempting to realign")
+func realign(tsr bitreader.Reader32) error {
 	for i := 0; i < 188; i++ {
 		if err := tsr.Trash(8); isFatalErr(err) {
 			return err
 		}
-		isAligned, err := tsr.isAligned()
+		isAligned, err := isAligned(tsr)
 		if isFatalErr(err) {
 			return err
 		}
 		if isAligned {
-			log.Printf("Realigned after %d bytes.\n", i)
 			return nil
 		}
 	}

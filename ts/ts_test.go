@@ -3,12 +3,13 @@ package ts_test
 import "testing"
 import "io"
 import "bytes"
+import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/mpeg-go/ts"
 
 func TestPacketParsing(t *testing.T) {
-	reader := ts.NewReader(nullPacketReader())
+	reader := bitreader.NewReader32(nullPacketReader())
 
-	p, err := reader.Next()
+	p, err := ts.ReadPacket(reader)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -18,17 +19,17 @@ func TestPacketParsing(t *testing.T) {
 }
 
 func TestIncompletePacket(t *testing.T) {
-	reader := ts.NewReader(io.LimitReader(nullPacketReader(), 100))
+	reader := bitreader.NewReader32(io.LimitReader(nullPacketReader(), 100))
 
-	_, err := reader.Next()
+	_, err := ts.ReadPacket(reader)
 	if err != io.ErrUnexpectedEOF {
 		t.Fatalf("unexpected error. expected %v, got %v", io.ErrUnexpectedEOF, err)
 	}
 }
 
 func TestAdaptationField(t *testing.T) {
-	reader := ts.NewReader(bytes.NewReader(adaptationFieldData))
-	packet, err := reader.Next()
+	reader := bitreader.NewReader32(bytes.NewReader(adaptationFieldData))
+	packet, err := ts.ReadPacket(reader)
 
 	if err != nil {
 		t.Fatal(err)

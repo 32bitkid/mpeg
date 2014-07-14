@@ -1,6 +1,7 @@
 package ts
 
 import "io"
+import "github.com/32bitkid/bitreader"
 
 func alwaysTrue(p *Packet) bool { return true }
 
@@ -18,7 +19,7 @@ func (input PacketChannel) PayloadOnly() <-chan []byte {
 }
 
 func Demux(source io.Reader) Demuxer {
-	reader := NewReader(source)
+	reader := bitreader.NewReader32(source)
 	return &tsDemuxer{
 		reader:    reader,
 		skipUntil: alwaysTrue,
@@ -41,7 +42,7 @@ type conditionalChannel struct {
 }
 
 type tsDemuxer struct {
-	reader             TransportStreamReader
+	reader             bitreader.Reader32
 	registeredChannels []conditionalChannel
 	lastErr            error
 	skipUntil          PacketTester
@@ -72,7 +73,7 @@ func (tsd *tsDemuxer) Go() <-chan bool {
 	go func() {
 
 		for true {
-			p, err := tsd.reader.Next()
+			p, err := ReadPacket(tsd.reader)
 
 			if err != nil {
 				tsd.lastErr = err

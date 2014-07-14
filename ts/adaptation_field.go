@@ -1,5 +1,7 @@
 package ts
 
+import "github.com/32bitkid/bitreader"
+
 const (
 	_ = iota
 	PayloadOnly
@@ -20,7 +22,7 @@ type AdaptationField struct {
 	Junk []byte
 }
 
-func ReadAdaptationField(tsr *tsReader) (*AdaptationField, error) {
+func ReadAdaptationField(tsr bitreader.Reader32) (*AdaptationField, error) {
 	var err error
 
 	adaptationField := AdaptationField{}
