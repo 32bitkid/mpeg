@@ -1,6 +1,7 @@
 package pes
 
 import "errors"
+import "io"
 import "github.com/32bitkid/bitreader"
 
 var (
@@ -69,16 +70,12 @@ func ReadPacket(reader bitreader.Reader32, total int) (*Packet, error) {
 		}
 	}
 
-	var payloadLen = uint32(total) - packet.Header.HeaderDataLength - 3 - 6
+	var payloadLen = total - int(packet.Header.HeaderDataLength) - 3 - 6
 	packet.Payload = make([]byte, payloadLen)
 
-	// todo replace with traditional
-	for i := uint32(0); i < payloadLen; i++ {
-		val, err = reader.Read32(8)
-		if err != nil {
-			return nil, err
-		}
-		packet.Payload[i] = byte(val)
+	_, err = io.ReadAtLeast(reader, packet.Payload, payloadLen)
+	if err != nil {
+		return nil, err
 	}
 
 	return &packet, nil

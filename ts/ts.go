@@ -98,8 +98,6 @@ func (tsr *tsReader) Next() (*Packet, error) {
 
 	var (
 		payloadSize uint32 = 184
-		val         uint32
-		i           uint32
 	)
 
 	if packet.AdaptationFieldControl == FieldOnly || packet.AdaptationFieldControl == FieldThenPayload {
@@ -115,12 +113,9 @@ func (tsr *tsReader) Next() (*Packet, error) {
 		packet.Payload = make([]byte, payloadSize)
 
 		// TODO replace with reader
-		for i = 0; i < payloadSize; i++ {
-			val, err = tsr.Read32(8)
-			if isFatalErr(err) {
-				return nil, err
-			}
-			packet.Payload[i] = byte(val)
+		_, err = io.ReadAtLeast(tsr, packet.Payload, int(payloadSize))
+		if isFatalErr(err) {
+			return nil, err
 		}
 	}
 
