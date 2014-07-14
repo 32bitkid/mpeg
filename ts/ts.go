@@ -20,7 +20,10 @@ type tsReader struct {
 
 const SyncByte = 0x47
 
-var ErrNoSyncByte = errors.New("no sync byte")
+var (
+	ErrNoSyncByte    = errors.New("no sync byte")
+	ErrNotEnoughData = errors.New("not enough data")
+)
 
 type Packet struct {
 	TransportErrorIndicator    bool
@@ -43,7 +46,10 @@ func (tsr *tsReader) Next() (*Packet, error) {
 	var err error
 
 	aligned, err := tsr.isAligned()
-	if isFatalErr(err) {
+	if err != nil {
+		if err == bitreader.ErrNotAvailable {
+			return nil, ErrNotEnoughData
+		}
 		return nil, err
 	}
 

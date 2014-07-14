@@ -49,7 +49,7 @@ func TestDemuxingASingleStream(t *testing.T) {
 		}
 	}
 
-	if demux.Err() != io.ErrUnexpectedEOF {
+	if demux.Err() != ts.ErrNotEnoughData {
 		t.Fatalf("Unxpected error: %s", demux.Err())
 	}
 
@@ -80,7 +80,7 @@ func TestDemuxingUsingWheres(t *testing.T) {
 		}
 	}
 
-	if demux.Err() != io.ErrUnexpectedEOF {
+	if demux.Err() != ts.ErrNotEnoughData {
 		t.Fatalf("Unxpected error: %s", demux.Err())
 	}
 
@@ -107,8 +107,10 @@ func TestDemuxingRange(t *testing.T) {
 	var done = false
 	for done == false {
 		select {
-		case <-allStream:
-			count++
+		case _, ok := <-allStream:
+			if ok {
+				count++
+			}
 		case <-stop:
 			done = true
 		}
