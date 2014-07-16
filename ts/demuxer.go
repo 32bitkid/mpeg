@@ -18,7 +18,7 @@ func (input PacketChannel) PayloadOnly() <-chan []byte {
 	return output
 }
 
-func Demux(source io.Reader) Demuxer {
+func NewDemuxer(source io.Reader) Demuxer {
 	reader := bitreader.NewReader32(source)
 	return &tsDemuxer{
 		reader:    reader,

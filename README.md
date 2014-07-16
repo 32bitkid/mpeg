@@ -35,7 +35,7 @@ import "io"
 func main() {
 	file, _ := os.Open("source.ts")
   
-  demux := ts.Demux(file)
+  demux := ts.NewDemuxer(file)
   packets := demux.Where(ts.IsPID(0x21))
 	demux.Go()
 	for packet := range packets {
@@ -53,7 +53,7 @@ import "io"
 func main() {
 	file, _ := os.Open("source.ts")
   
-  demux := ts.Demux(file)
+  demux := ts.NewDemuxer(file)
   hd := demux.Where(ts.IsPID(0x21))
   sd := demux.Where(ts.IsPID(0x31))
 	demux.Go()
@@ -83,7 +83,7 @@ func main() {
 	
 	pid := ts.IsPID(0x21)
 	
-	demux := ts.Demux(file)
+	demux := ts.NewDemuxer(file)
 	demux.SkipUntil(pid.And(ts.IsPayloadUnitStart))
 	
 	// file -> TS packets -> filtered to pid -> PES packets -> ES data
