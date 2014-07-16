@@ -5,19 +5,6 @@ import "bytes"
 import "github.com/32bitkid/mpeg-go/ts"
 import "github.com/32bitkid/bitreader"
 
-type PacketChannel <-chan *Packet
-
-func (input PacketChannel) PayloadOnly() <-chan []byte {
-	output := make(chan []byte)
-	go func() {
-		for packet := range input {
-			output <- packet.Payload
-		}
-		close(output)
-	}()
-	return output
-}
-
 func TsDecoder(input ts.PacketChannel) PacketChannel {
 	output := make(chan *Packet)
 
