@@ -7,7 +7,7 @@ import "github.com/32bitkid/mpeg-go/ts"
 func TestDemuxingASinglePacket(t *testing.T) {
 
 	source := io.MultiReader(nullPacketReader(), nullPacketReader())
-	demux := ts.Demux(source)
+	demux := ts.NewDemuxer(source)
 
 	nullStream := demux.Where(ts.IsPID(nullPacketPID))
 
@@ -33,7 +33,7 @@ func TestDemuxingASinglePacket(t *testing.T) {
 
 func TestDemuxingASingleStream(t *testing.T) {
 	source := io.MultiReader(nullPacketReader(), nullPacketReader(), nullPacketReader(), nullPacketReader())
-	demux := ts.Demux(source)
+	demux := ts.NewDemuxer(source)
 
 	nullStream := demux.Where(ts.IsPID(nullPacketPID))
 	stop := demux.Go()
@@ -60,7 +60,7 @@ func TestDemuxingASingleStream(t *testing.T) {
 
 func TestDemuxingUsingWheres(t *testing.T) {
 	source := io.MultiReader(nullPacketReader(), dataPacketReader(), nullPacketReader(), dataPacketReader(), nullPacketReader())
-	demux := ts.Demux(source)
+	demux := ts.NewDemuxer(source)
 	dataStream := demux.Where(ts.IsPID(dataPacketPID))
 	junkStream := demux.Where(ts.IsPID(dataPacketPID).Not())
 
@@ -95,7 +95,7 @@ func TestDemuxingUsingWheres(t *testing.T) {
 
 func TestDemuxingRange(t *testing.T) {
 	source := io.MultiReader(fivePacketReader())
-	demux := ts.Demux(source)
+	demux := ts.NewDemuxer(source)
 	allStream := demux.Where(func(p *ts.Packet) bool { return true })
 
 	count := 0

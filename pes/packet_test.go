@@ -26,8 +26,8 @@ func TestBasicPacketParsing(t *testing.T) {
 	if packet.PacketLength != 0 {
 		t.Fatalf("incorrect packet length. expected %#x got %#x", 0, packet.PacketLength)
 	}
-	
+
 	if packet.Header == nil {
-	  t.Fatalf("expected header")
+		t.Fatalf("expected header")
 	}
 }
