@@ -10,10 +10,10 @@ type PacketChannel <-chan *Packet
 func (input PacketChannel) PayloadOnly() <-chan []byte {
 	output := make(chan []byte)
 	go func() {
+		defer close(output)
 		for packet := range input {
 			output <- packet.Payload
 		}
-		close(output)
 	}()
 	return output
 }
@@ -72,13 +72,18 @@ func (tsd *tsDemuxer) Go() <-chan bool {
 
 	go func() {
 
+		defer func() { done <- true }()
+		for _, item := range tsd.registeredChannels {
+			defer close(item.channel)
+		}
+
 		for true {
 			p, err := ReadPacket(tsd.reader)
 
 			if err != nil {
 				tsd.lastErr = err
 				done <- true
-				break
+				return
 			}
 
 			if skipping {
@@ -89,7 +94,7 @@ func (tsd *tsDemuxer) Go() <-chan bool {
 				}
 			} else {
 				if !takeWhile(p) {
-					break
+					return
 				}
 			}
 
@@ -98,14 +103,7 @@ func (tsd *tsDemuxer) Go() <-chan bool {
 					item.channel <- p
 				}
 			}
-
 		}
-
-		for _, item := range tsd.registeredChannels {
-			close(item.channel)
-		}
-
-		done <- true
 	}()
 
 	return done

@@ -12,6 +12,8 @@ func TsDecoder(input ts.PacketChannel) PacketChannel {
 	reader := bitreader.NewReader32(buffer)
 
 	go func() {
+		defer close(output)
+
 		for tsPacket := range input {
 
 			if tsPacket.PayloadUnitStartIndicator && buffer.Len() > 0 {
@@ -20,7 +22,6 @@ func TsDecoder(input ts.PacketChannel) PacketChannel {
 				pesPacket, err := ReadPacket(reader, buffer.Len())
 				if err != nil {
 					log.Println(err)
-					close(output)
 					return
 				}
 				output <- pesPacket
@@ -29,8 +30,6 @@ func TsDecoder(input ts.PacketChannel) PacketChannel {
 			// Fill
 			buffer.Write(tsPacket.Payload)
 		}
-
-		close(output)
 	}()
 
 	return output
