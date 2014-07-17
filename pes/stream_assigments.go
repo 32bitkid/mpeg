@@ -3,7 +3,7 @@ package pes
 const (
 	program_stream_map                  uint32 = 0274
 	private_stream_1                    uint32 = 0275
-	padding_stream                      uint32 = 0277
+	padding_stream                      uint32 = 0276
 	private_stream_2                    uint32 = 0277
 	ecm_stream                          uint32 = 0360
 	emm_stream                          uint32 = 0361
