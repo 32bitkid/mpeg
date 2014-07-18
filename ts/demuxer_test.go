@@ -3,7 +3,7 @@ package ts_test
 import "testing"
 import "io"
 import "github.com/32bitkid/bitreader"
-import "github.com/32bitkid/mpeg_go/ts"
+import "github.com/32bitkid/mpeg/ts"
 
 func TestDemuxingASinglePacket(t *testing.T) {
 

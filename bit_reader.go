@@ -1,4 +1,4 @@
-package mpeg_go
+package mpeg
 
 import "io"
 

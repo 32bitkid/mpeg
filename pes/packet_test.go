@@ -4,7 +4,7 @@ import "testing"
 import "os"
 import "bytes"
 import "github.com/32bitkid/bitreader"
-import "github.com/32bitkid/mpeg_go/pes"
+import "github.com/32bitkid/mpeg/pes"
 
 func TestBasicPacketParsing(t *testing.T) {
 

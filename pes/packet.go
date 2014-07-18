@@ -2,7 +2,7 @@ package pes
 
 import "errors"
 import "io"
-import . "github.com/32bitkid/mpeg_go"
+import . "github.com/32bitkid/mpeg"
 
 var (
 	ErrStartCodePrefixNotFound = errors.New("start code prefix not found")

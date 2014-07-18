@@ -1,6 +1,6 @@
 package ts
 
-import . "github.com/32bitkid/mpeg_go"
+import . "github.com/32bitkid/mpeg"
 
 func alwaysTrue(p *Packet) bool { return true }
 

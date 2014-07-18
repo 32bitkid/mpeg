@@ -1,7 +1,7 @@
 package pes
 
 import "bytes"
-import "github.com/32bitkid/mpeg_go/ts"
+import "github.com/32bitkid/mpeg/ts"
 import "github.com/32bitkid/bitreader"
 
 type Decoder interface {

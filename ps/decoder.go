@@ -1,6 +1,6 @@
 package ps
 
-import . "github.com/32bitkid/mpeg_go"
+import . "github.com/32bitkid/mpeg"
 
 type Decoder interface {
 	Packs() <-chan *Pack

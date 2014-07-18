@@ -1,6 +1,6 @@
 package pes
 
-import . "github.com/32bitkid/mpeg_go"
+import . "github.com/32bitkid/mpeg"
 
 const (
 	MinimumHeaderSize uint32 = 3
