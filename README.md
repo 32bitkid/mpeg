@@ -31,7 +31,7 @@ go get github.com/32bitkid/mpeg-go
 
 ```go
 import "github.com/32bitkid/mpeg-go/ts"
-import "io"
+import "os"
 
 func main() {
 	file, _ := os.Open("source.ts")
@@ -49,7 +49,7 @@ func main() {
 
 ```go
 import "github.com/32bitkid/mpeg-go/ts"
-import "io"
+import "os"
 
 func main() {
 	file, _ := os.Open("source.ts")
@@ -78,7 +78,7 @@ func main() {
 ```go
 import "github.com/32bitkid/mpeg-go/ts"
 import "github.com/32bitkid/mpeg-go/pes"
-import "io"
+import "os"
 
 func main() {
 	file, _ := os.Open("source.ts")
