@@ -1,6 +1,6 @@
 package ps
 
-import "github.com/32bitkid/bitreader"
+import . "github.com/32bitkid/mpeg_go"
 
 type PackHeader struct {
 	SystemClockReferenceBase      uint32
@@ -9,7 +9,7 @@ type PackHeader struct {
 	*SystemHeader
 }
 
-func readPackHeader(r bitreader.Reader32) (*PackHeader, error) {
+func readPackHeader(r BitReader) (*PackHeader, error) {
 	var (
 		v   uint32
 		err error

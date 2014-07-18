@@ -63,7 +63,7 @@ func (tsd *tsDemuxer) TakeWhile(takeWhile PacketTester) {
 
 func (tsd *tsDemuxer) Go() <-chan bool {
 
-	done := make(chan bool)
+	done := make(chan bool, 1)
 	var skipping = true
 	var skipUntil = tsd.skipUntil
 	var takeWhile = tsd.takeWhile

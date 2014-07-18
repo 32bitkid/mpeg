@@ -31,12 +31,16 @@ go get github.com/32bitkid/mpeg_go
 
 ```go
 import "github.com/32bitkid/mpeg_go/ts"
+
+// Implementation of `mpeg_go.BitReader`
+import br "github.com/32bitkid/bitreader"
+
 import "os"
 
 func main() {
 	file, _ := os.Open("source.ts")
   
-	demux := ts.NewDemuxer(file)
+	demux := ts.NewDemuxer(br.NewReader32(file))
 	packets := demux.Where(ts.IsPID(0x21))
 	demux.Go()
 	for packet := range packets {
@@ -49,12 +53,17 @@ func main() {
 
 ```go
 import "github.com/32bitkid/mpeg_go/ts"
+
+
+// Implementation of `mpeg_go.BitReader`
+import br "github.com/32bitkid/bitreader"
+
 import "os"
 
 func main() {
 	file, _ := os.Open("source.ts")
   
-	demux := ts.NewDemuxer(file)
+	demux := ts.NewDemuxer(br.NewReader32(file))
 	hd := demux.Where(ts.IsPID(0x21))
 	sd := demux.Where(ts.IsPID(0x31))
 	demux.Go()
@@ -78,6 +87,10 @@ func main() {
 ```go
 import "github.com/32bitkid/mpeg_go/ts"
 import "github.com/32bitkid/mpeg_go/pes"
+
+// Implementation of `mpeg_go.BitReader`
+import br "github.com/32bitkid/bitreader"
+
 import "os"
 
 func main() {
@@ -85,21 +98,16 @@ func main() {
 	
 	pid := ts.IsPID(0x21)
 	
-	demux := ts.NewDemuxer(file)
+	demux := ts.NewDemuxer(br.NewReader32(file))
 	demux.SkipUntil(pid.And(ts.IsPayloadUnitStart))
 	
+	pesDecoder := pes.NewDecoder()
+
 	// file -> TS packets -> filtered to pid -> PES packets -> ES data
-	pesPayload := pes.TsDecoder(demux.Where(pid)).PayloadOnly()
+	pesPayload := pesDecoder.TS(demux.Where(pid)).PayloadOnly()
 	
-	stop := demux.Go()
-	var done = false
-	for done == false {
-		select {
-		case es := <-hdVideo:
-			// es is a []byte
-		case <-stop:
-			log.Println("End of stream")
-			done = true
+	for es := range pesPayload {
+	  // do work with Elementary Stream data
 	}
 }
 ```

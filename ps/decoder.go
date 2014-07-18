@@ -1,7 +1,6 @@
 package ps
 
-import "io"
-import "github.com/32bitkid/bitreader"
+import . "github.com/32bitkid/mpeg_go"
 
 type Decoder interface {
 	Packs() <-chan *Pack
@@ -10,7 +9,7 @@ type Decoder interface {
 }
 
 type decoder struct {
-	r     bitreader.Reader32
+	r     BitReader
 	packs chan *Pack
 	err   error
 }
@@ -37,13 +36,13 @@ func (d *decoder) Go() <-chan bool {
 			}
 
 			d.packs <- pack
-			
+
 			<-packComplete
 
 			v, err = d.r.Peek32(32)
 			if err != nil {
-			  d.err = err
-			  return
+				d.err = err
+				return
 			}
 			if v != PackStartCode {
 				break
@@ -68,9 +67,9 @@ func (d *decoder) Err() error {
 	return d.err
 }
 
-func NewDecoder(r io.Reader) Decoder {
+func NewDecoder(r BitReader) Decoder {
 	return &decoder{
-		r:     bitreader.NewReader32(r),
+		r:     r,
 		packs: make(chan *Pack),
 		err:   nil,
 	}

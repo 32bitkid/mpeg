@@ -1,11 +1,27 @@
 package pes
 
-import "log"
 import "bytes"
 import "github.com/32bitkid/mpeg_go/ts"
 import "github.com/32bitkid/bitreader"
 
-func TsDecoder(input ts.PacketChannel) PacketChannel {
+type Decoder interface {
+	TS(ts.PacketChannel) PacketChannel
+	Err() error
+}
+
+func NewDecoder() Decoder {
+	return &decoder{}
+}
+
+type decoder struct {
+	err error
+}
+
+func (d *decoder) Err() error {
+	return d.err
+}
+
+func (d *decoder) TS(input ts.PacketChannel) PacketChannel {
 	output := make(chan *Packet)
 
 	buffer := &bytes.Buffer{}
@@ -17,11 +33,10 @@ func TsDecoder(input ts.PacketChannel) PacketChannel {
 		for tsPacket := range input {
 
 			if tsPacket.PayloadUnitStartIndicator && buffer.Len() > 0 {
-
 				// Drain
 				pesPacket, err := ReadPacket(reader, buffer.Len())
 				if err != nil {
-					log.Println(err)
+					d.err = err
 					return
 				}
 				output <- pesPacket
@@ -29,35 +44,6 @@ func TsDecoder(input ts.PacketChannel) PacketChannel {
 
 			// Fill
 			buffer.Write(tsPacket.Payload)
-		}
-	}()
-
-	return output
-}
-
-func PayloadDecoder(input <-chan []byte) PacketChannel {
-	output := make(chan *Packet)
-	reader := bitreader.NewBufferedBitreader()
-	closed := false
-
-	// Fill
-	go func() {
-		for payload := range input {
-			reader.Write(payload)
-		}
-		closed = true
-	}()
-
-	// Drain
-	go func() {
-		for !closed {
-			packet, err := ReadPacket(reader, 0)
-			if err != nil {
-				log.Println(err)
-				close(output)
-				return
-			}
-			log.Printf("%b", packet.StreamID)
 		}
 	}()
 

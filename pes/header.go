@@ -1,12 +1,12 @@
 package pes
 
-import "github.com/32bitkid/bitreader"
+import . "github.com/32bitkid/mpeg_go"
 
 const (
 	MinimumHeaderSize uint32 = 3
 )
 
-func ReadHeader(reader bitreader.Reader32) (*Header, uint32, error) {
+func ReadHeader(reader BitReader) (*Header, uint32, error) {
 
 	val, err := reader.Read32(2)
 	if val != 2 || err != nil {
@@ -154,7 +154,7 @@ func ReadHeader(reader bitreader.Reader32) (*Header, uint32, error) {
 	return &header, bytesRead, nil
 }
 
-func readStuffingBytes(reader bitreader.Reader32, length uint32) (uint32, error) {
+func readStuffingBytes(reader BitReader, length uint32) (uint32, error) {
 	for i := uint32(0); i < length; i++ {
 		val, err := reader.Read32(8)
 		if err != nil {
@@ -167,7 +167,7 @@ func readStuffingBytes(reader bitreader.Reader32, length uint32) (uint32, error)
 	return length, nil
 }
 
-func readTimeStamp(marker uint32, reader bitreader.Reader32) (uint32, uint32, error) {
+func readTimeStamp(marker uint32, reader BitReader) (uint32, uint32, error) {
 
 	var (
 		timeStamp uint32

@@ -23,6 +23,7 @@ func TestDemuxingASinglePacket(t *testing.T) {
 			}
 			done = true
 		case <-stop:
+			t.Fatalf("unexpected stop")
 			done = true
 		}
 	}
@@ -43,8 +44,10 @@ func TestDemuxingASingleStream(t *testing.T) {
 	count := 0
 	for done == false {
 		select {
-		case <-nullStream:
-			count++
+		case _, ok := <-nullStream:
+			if ok {
+				count++
+			}
 		case <-stop:
 			done = true
 		}
@@ -72,10 +75,14 @@ func TestDemuxingUsingWheres(t *testing.T) {
 	junkCount := 0
 	for done == false {
 		select {
-		case <-dataStream:
-			dataCount++
-		case <-junkStream:
-			junkCount++
+		case _, ok := <-dataStream:
+			if ok {
+				dataCount++
+			}
+		case _, ok := <-junkStream:
+			if ok {
+				junkCount++
+			}
 		case <-stop:
 			done = true
 		}

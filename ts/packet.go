@@ -7,7 +7,7 @@ import "errors"
 const SyncByte = 0x47
 
 var (
-	ErrNoSyncByte    = errors.New("no sync byte")
+	ErrNoSyncByte = errors.New("no sync byte")
 )
 
 func isFatalErr(err error) bool {
