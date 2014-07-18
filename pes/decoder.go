@@ -2,7 +2,7 @@ package pes
 
 import "log"
 import "bytes"
-import "github.com/32bitkid/mpeg-go/ts"
+import "github.com/32bitkid/mpeg_go/ts"
 import "github.com/32bitkid/bitreader"
 
 func TsDecoder(input ts.PacketChannel) PacketChannel {

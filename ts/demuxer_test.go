@@ -2,7 +2,7 @@ package ts_test
 
 import "testing"
 import "io"
-import "github.com/32bitkid/mpeg-go/ts"
+import "github.com/32bitkid/mpeg_go/ts"
 
 func TestDemuxingASinglePacket(t *testing.T) {
 

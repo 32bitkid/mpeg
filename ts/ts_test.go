@@ -4,7 +4,7 @@ import "testing"
 import "io"
 import "bytes"
 import "github.com/32bitkid/bitreader"
-import "github.com/32bitkid/mpeg-go/ts"
+import "github.com/32bitkid/mpeg_go/ts"
 
 func TestPacketParsing(t *testing.T) {
 	reader := bitreader.NewReader32(nullPacketReader())

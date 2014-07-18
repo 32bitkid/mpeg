@@ -1,4 +1,4 @@
-# Mpeg-Go
+# mpeg_go
 
 A pure golang implementation of an MPEG-2 decoder for
 educational purposes only.
@@ -23,14 +23,14 @@ educational purposes only.
 ### Give it a spin!
 
 ```
-go get github.com/32bitkid/mpeg-go
+go get github.com/32bitkid/mpeg_go
 ```
 
 
 ### Demux a TS for a particular PID (0x21)
 
 ```go
-import "github.com/32bitkid/mpeg-go/ts"
+import "github.com/32bitkid/mpeg_go/ts"
 import "os"
 
 func main() {
@@ -48,7 +48,7 @@ func main() {
 ### Demux a TS with multiple streams
 
 ```go
-import "github.com/32bitkid/mpeg-go/ts"
+import "github.com/32bitkid/mpeg_go/ts"
 import "os"
 
 func main() {
@@ -76,8 +76,8 @@ func main() {
 ### Build decoder pipelines
 
 ```go
-import "github.com/32bitkid/mpeg-go/ts"
-import "github.com/32bitkid/mpeg-go/pes"
+import "github.com/32bitkid/mpeg_go/ts"
+import "github.com/32bitkid/mpeg_go/pes"
 import "os"
 
 func main() {
