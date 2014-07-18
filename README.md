@@ -30,7 +30,7 @@ go get github.com/32bitkid/mpeg-go
 ### Demux a TS for a particular PID (0x21)
 
 ```go
-import "github.com/32bitkid/mpeg-go"
+import "github.com/32bitkid/mpeg-go/ts"
 import "io"
 
 func main() {
@@ -48,7 +48,7 @@ func main() {
 ### Demux a TS with multiple streams
 
 ```go
-import "github.com/32bitkid/mpeg-go"
+import "github.com/32bitkid/mpeg-go/ts"
 import "io"
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 	hd := demux.Where(ts.IsPID(0x21))
 	sd := demux.Where(ts.IsPID(0x31))
 	demux.Go()
-  
+
 	var done = false
  	for done == false {
 		select {
@@ -76,7 +76,8 @@ func main() {
 ### Build decoder pipelines
 
 ```go
-import "github.com/32bitkid/mpeg-go"
+import "github.com/32bitkid/mpeg-go/ts"
+import "github.com/32bitkid/mpeg-go/pes"
 import "io"
 
 func main() {
