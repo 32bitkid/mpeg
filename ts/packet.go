@@ -1,6 +1,6 @@
 package ts
 
-import "github.com/32bitkid/bitreader"
+import . "github.com/32bitkid/mpeg_go"
 import "io"
 import "errors"
 
@@ -8,7 +8,6 @@ const SyncByte = 0x47
 
 var (
 	ErrNoSyncByte    = errors.New("no sync byte")
-	ErrNotEnoughData = errors.New("not enough data")
 )
 
 func isFatalErr(err error) bool {
@@ -27,15 +26,12 @@ type Packet struct {
 	Payload                    []byte
 }
 
-func ReadPacket(tsr bitreader.Reader32) (*Packet, error) {
+func ReadPacket(tsr BitReader) (*Packet, error) {
 
 	var err error
 
 	aligned, err := isAligned(tsr)
 	if err != nil {
-		if err == bitreader.ErrNotAvailable {
-			return nil, ErrNotEnoughData
-		}
 		return nil, err
 	}
 
@@ -114,12 +110,12 @@ func ReadPacket(tsr bitreader.Reader32) (*Packet, error) {
 	return &packet, nil
 }
 
-func isAligned(tsr bitreader.Reader32) (bool, error) {
+func isAligned(tsr BitReader) (bool, error) {
 	val, err := tsr.Peek32(8)
 	return val == SyncByte, err
 }
 
-func realign(tsr bitreader.Reader32) error {
+func realign(tsr BitReader) error {
 	for i := 0; i < 188; i++ {
 		if err := tsr.Trash(8); isFatalErr(err) {
 			return err

@@ -1,6 +1,6 @@
 package ts
 
-import "github.com/32bitkid/bitreader"
+import . "github.com/32bitkid/mpeg_go"
 import "io"
 
 const (
@@ -23,7 +23,7 @@ type AdaptationField struct {
 	Junk []byte
 }
 
-func ReadAdaptationField(tsr bitreader.Reader32) (*AdaptationField, error) {
+func ReadAdaptationField(tsr BitReader) (*AdaptationField, error) {
 	var err error
 
 	adaptationField := AdaptationField{}
