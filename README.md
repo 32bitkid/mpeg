@@ -15,6 +15,7 @@ educational purposes only.
 - [ ] Conditional Access Table support
 - [ ] Program Map Table support
 - [ ] MPEG-2 Program Stream (PS) Support
+  - [x] Basic decoder
 - [ ] MPEG-2 Video (13818-2) Stream support
 
 ## Examples
