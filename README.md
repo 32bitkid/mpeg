@@ -36,11 +36,11 @@ import "io"
 func main() {
 	file, _ := os.Open("source.ts")
   
-  demux := ts.NewDemuxer(file)
-  packets := demux.Where(ts.IsPID(0x21))
+	demux := ts.NewDemuxer(file)
+	packets := demux.Where(ts.IsPID(0x21))
 	demux.Go()
 	for packet := range packets {
-	  // Do work!
+		// Do work!
 	}
 }
 ```
@@ -54,13 +54,13 @@ import "io"
 func main() {
 	file, _ := os.Open("source.ts")
   
-  demux := ts.NewDemuxer(file)
-  hd := demux.Where(ts.IsPID(0x21))
-  sd := demux.Where(ts.IsPID(0x31))
+	demux := ts.NewDemuxer(file)
+	hd := demux.Where(ts.IsPID(0x21))
+	sd := demux.Where(ts.IsPID(0x31))
 	demux.Go()
   
-  var done = false
-	for done == false {
+	var done = false
+ 	for done == false {
 		select {
 		case hdPacket := <-hd:
 			// process an hd packet
@@ -80,7 +80,7 @@ import "github.com/32bitkid/mpeg-go"
 import "io"
 
 func main() {
-  file, _ := os.Open("source.ts")
+	file, _ := os.Open("source.ts")
 	
 	pid := ts.IsPID(0x21)
 	
