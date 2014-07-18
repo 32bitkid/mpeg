@@ -2,6 +2,7 @@ package pes_test
 
 import "testing"
 import "os"
+import "bytes"
 import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/mpeg-go/pes"
 
@@ -29,5 +30,26 @@ func TestBasicPacketParsing(t *testing.T) {
 
 	if packet.Header == nil {
 		t.Fatalf("expected header")
+	}
+}
+
+func TestPacketWithExtensionFlag(t *testing.T) {
+	br := bitreader.NewReader32(bytes.NewReader(packetWithExtensionFlag))
+
+	p, err := pes.ReadPacket(br, -1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if p.Header.Extension == nil {
+		t.Fatal("expected a header extension")
+	}
+
+	val, err := br.Peek32(32)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if val != 0xffffffff {
+		t.Fatal("maker not found")
 	}
 }

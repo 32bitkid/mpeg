@@ -6,7 +6,7 @@ import "github.com/32bitkid/bitreader"
 
 var (
 	ErrStartCodePrefixNotFound = errors.New("start code prefix not found")
-	ErrMissingMarker           = errors.New("missing marker")
+	ErrMarkerNotFound          = errors.New("marker not found")
 	ErrInvalidStuffingByte     = errors.New("invalid stuffing byte")
 )
 
@@ -34,6 +34,8 @@ type Header struct {
 
 	PresentationTimeStamp uint32
 	DecodingTimeStamp     uint32
+
+	Extension *Extension
 }
 
 func ReadPacket(reader bitreader.Reader32, total int) (*Packet, error) {
@@ -64,197 +66,36 @@ func ReadPacket(reader bitreader.Reader32, total int) (*Packet, error) {
 	}
 
 	if hasPESHeader(packet.StreamID) {
-		packet.Header, err = ReadHeader(reader)
+
+		var len uint32
+		packet.Header, len, err = ReadHeader(reader)
 		if err != nil {
 			return nil, err
 		}
-	}
 
-	var payloadLen = total - int(packet.Header.HeaderDataLength) - 3 - 6
-	packet.Payload = make([]byte, payloadLen)
+		var payloadLen int
 
-	_, err = io.ReadAtLeast(reader, packet.Payload, payloadLen)
-	if err != nil {
-		return nil, err
+		if total > 0 {
+			payloadLen = total - int(packet.Header.HeaderDataLength) - 3 - 6
+		} else {
+			payloadLen = int(packet.PacketLength - len)
+		}
+
+		packet.Payload = make([]byte, payloadLen)
+
+		_, err = io.ReadAtLeast(reader, packet.Payload, payloadLen)
+		if err != nil {
+			return nil, err
+		}
+
+	} else if packet.StreamID == padding_stream {
+		payloadLen := int(packet.PacketLength)
+		junk := make([]byte, payloadLen)
+		_, err = io.ReadAtLeast(reader, junk, payloadLen)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &packet, nil
-}
-
-func ReadHeader(reader bitreader.Reader32) (*Header, error) {
-	val, err := reader.Read32(2)
-	if val != 2 || err != nil {
-		return nil, ErrMissingMarker
-	}
-
-	header := Header{}
-
-	header.ScramblingControl, err = reader.Read32(2)
-	if err != nil {
-		return nil, err
-	}
-
-	header.Priority, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.DataAlignmentIndicator, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.Copyright, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.OrignalOrCopy, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.PtsDtsFlags, err = reader.Read32(2)
-	if err != nil {
-		return nil, err
-	}
-
-	header.EscrFlag, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.EsRateFlag, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.DsmTrickModeFlag, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.AdditionalCopyInfoFlag, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.CrcFlag, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.ExtensionFlag, err = reader.ReadBit()
-	if err != nil {
-		return nil, err
-	}
-
-	header.HeaderDataLength, err = reader.Read32(8)
-	if err != nil {
-		return nil, err
-	}
-
-	var headerBytesLeft uint32 = header.HeaderDataLength
-
-	if header.PtsDtsFlags == 2 {
-		header.PresentationTimeStamp, err = ReadTimeStamp(2, reader)
-
-		if err != nil {
-			return nil, err
-		}
-
-		headerBytesLeft -= 5
-	}
-
-	if header.PtsDtsFlags == 3 {
-		header.PresentationTimeStamp, err = ReadTimeStamp(3, reader)
-
-		if err != nil {
-			return nil, err
-		}
-
-		headerBytesLeft -= 5
-
-		header.DecodingTimeStamp, err = ReadTimeStamp(1, reader)
-
-		if err != nil {
-			return nil, err
-		}
-
-		headerBytesLeft -= 5
-	}
-
-	err = ReadStuffingBytes(reader, headerBytesLeft)
-	if err != nil {
-		return nil, err
-	}
-
-	return &header, nil
-}
-
-func ReadStuffingBytes(reader bitreader.Reader32, headerBytesLeft uint32) error {
-	for headerBytesLeft > 0 {
-
-		val, err := reader.Read32(8)
-		headerBytesLeft--
-		if err != nil {
-			return err
-		}
-		if val != 255 {
-			return ErrInvalidStuffingByte
-		}
-	}
-	return nil
-}
-
-func ReadTimeStamp(marker uint32, reader bitreader.Reader32) (uint32, error) {
-
-	var (
-		timeStamp uint32
-		err       error
-		val       uint32
-	)
-
-	val, err = reader.Read32(4)
-	if val != marker || err != nil {
-		return 0, ErrMissingMarker
-	}
-
-	val, err = reader.Read32(3)
-	if err != nil {
-		return 0, err
-	}
-
-	timeStamp = timeStamp | (val << 30)
-
-	val, err = reader.Read32(1)
-	if val != 1 || err != nil {
-		return 0, ErrMissingMarker
-	}
-
-	val, err = reader.Read32(15)
-	if err != nil {
-		return 0, err
-	}
-
-	timeStamp = timeStamp | (val << 15)
-
-	val, err = reader.Read32(1)
-	if val != 1 || err != nil {
-		return 0, ErrMissingMarker
-	}
-
-	val, err = reader.Read32(15)
-	if err != nil {
-		return 0, err
-	}
-
-	timeStamp = timeStamp | val
-
-	val, err = reader.Read32(1)
-	if val != 1 || err != nil {
-		return 0, ErrMissingMarker
-	}
-
-	return timeStamp, nil
 }
