@@ -15,8 +15,8 @@ type Demuxer interface {
 	Go() <-chan bool
 	Err() error
 
-	SkipUntil(PacketTester)
-	TakeWhile(PacketTester)
+	SkipUntil(PacketTester) Demuxer
+	TakeWhile(PacketTester) Demuxer
 }
 
 type conditionalChannel struct {
@@ -38,12 +38,14 @@ func (tsd *tsDemuxer) Where(test PacketTester) PacketChannel {
 	return channel
 }
 
-func (tsd *tsDemuxer) SkipUntil(skipUntil PacketTester) {
+func (tsd *tsDemuxer) SkipUntil(skipUntil PacketTester) Demuxer {
 	tsd.skipUntil = skipUntil
+	return tsd
 }
 
-func (tsd *tsDemuxer) TakeWhile(takeWhile PacketTester) {
+func (tsd *tsDemuxer) TakeWhile(takeWhile PacketTester) Demuxer {
 	tsd.takeWhile = takeWhile
+	return tsd
 }
 
 func (tsd *tsDemuxer) Go() <-chan bool {
