@@ -10,12 +10,14 @@ type Decoder interface {
 }
 
 type decoder struct {
-	output chan *Packet
-	err    error
+	outputs []chan *Packet
+	err     error
 }
 
 func (d *decoder) Output() PacketChannel {
-	return d.output
+	newOutput := make(chan *Packet)
+	d.outputs = append(d.outputs, newOutput)
+	return newOutput
 }
 
 func (d *decoder) Err() error {
@@ -23,15 +25,17 @@ func (d *decoder) Err() error {
 }
 
 func NewTsDecoder(newFn bitreader.NewReader32Fn, input ts.PacketChannel) Decoder {
-	d := decoder{
-		output: make(chan *Packet),
-	}
+	d := decoder{}
 
 	buffer := &bytes.Buffer{}
 	reader := newFn(buffer)
 
 	go func() {
-		defer close(d.output)
+		defer func() {
+			for _, output := range d.outputs {
+				close(output)
+			}
+		}()
 
 		for tsPacket := range input {
 
@@ -42,7 +46,9 @@ func NewTsDecoder(newFn bitreader.NewReader32Fn, input ts.PacketChannel) Decoder
 					d.err = err
 					return
 				}
-				d.output <- pesPacket
+				for _, output := range d.outputs {
+					output <- pesPacket
+				}
 			}
 
 			// Fill
