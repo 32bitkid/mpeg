@@ -2,26 +2,11 @@ package ts
 
 import br "github.com/32bitkid/bitreader"
 
-func alwaysTrue(p *Packet) bool { return true }
-
-type PacketChannel <-chan *Packet
-
-func (input PacketChannel) PayloadOnly() <-chan []byte {
-	output := make(chan []byte)
-	go func() {
-		defer close(output)
-		for packet := range input {
-			output <- packet.Payload
-		}
-	}()
-	return output
-}
-
 func NewDemuxer(reader br.Reader32) Demuxer {
 	return &tsDemuxer{
 		reader:    reader,
-		skipUntil: alwaysTrue,
-		takeWhile: alwaysTrue,
+		skipUntil: alwaysTrueTester,
+		takeWhile: alwaysTrueTester,
 	}
 }
 
