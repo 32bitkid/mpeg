@@ -5,30 +5,33 @@ import "github.com/32bitkid/mpeg/ts"
 import "github.com/32bitkid/bitreader"
 
 type Decoder interface {
-	TS(ts.PacketChannel) PacketChannel
+	Output() PacketChannel
 	Err() error
 }
 
-func NewDecoder() Decoder {
-	return &decoder{}
+type decoder struct {
+	output chan *Packet
+	err    error
 }
 
-type decoder struct {
-	err error
+func (d *decoder) Output() PacketChannel {
+	return d.output
 }
 
 func (d *decoder) Err() error {
 	return d.err
 }
 
-func (d *decoder) TS(input ts.PacketChannel) PacketChannel {
-	output := make(chan *Packet)
+func NewTsDecoder(newFn bitreader.NewReader32Fn, input ts.PacketChannel) Decoder {
+	d := decoder{
+		output: make(chan *Packet),
+	}
 
 	buffer := &bytes.Buffer{}
-	reader := bitreader.NewReader32(buffer)
+	reader := newFn(buffer)
 
 	go func() {
-		defer close(output)
+		defer close(d.output)
 
 		for tsPacket := range input {
 
@@ -39,7 +42,7 @@ func (d *decoder) TS(input ts.PacketChannel) PacketChannel {
 					d.err = err
 					return
 				}
-				output <- pesPacket
+				d.output <- pesPacket
 			}
 
 			// Fill
@@ -47,5 +50,5 @@ func (d *decoder) TS(input ts.PacketChannel) PacketChannel {
 		}
 	}()
 
-	return output
+	return &d
 }

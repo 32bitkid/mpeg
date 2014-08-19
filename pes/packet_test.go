@@ -12,7 +12,7 @@ func TestBasicPacketParsing(t *testing.T) {
 	fi, _ := os.Stat(datafile)
 	data, _ := os.Open(datafile)
 
-	br := bitreader.NewReader32(data)
+	br := bitreader.NewSimpleReader32(data)
 	packet, err := pes.ReadPacket(br, int(fi.Size()))
 
 	if err != nil {
@@ -34,7 +34,7 @@ func TestBasicPacketParsing(t *testing.T) {
 }
 
 func TestPacketWithExtensionFlag(t *testing.T) {
-	br := bitreader.NewReader32(bytes.NewReader(packetWithExtensionFlag))
+	br := bitreader.NewSimpleReader32(bytes.NewReader(packetWithExtensionFlag))
 
 	p, err := pes.ReadPacket(br, -1)
 	if err != nil {

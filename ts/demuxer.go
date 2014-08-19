@@ -1,6 +1,6 @@
 package ts
 
-import . "github.com/32bitkid/mpeg"
+import br "github.com/32bitkid/bitreader"
 
 func alwaysTrue(p *Packet) bool { return true }
 
@@ -17,7 +17,7 @@ func (input PacketChannel) PayloadOnly() <-chan []byte {
 	return output
 }
 
-func NewDemuxer(reader BitReader) Demuxer {
+func NewDemuxer(reader br.Reader32) Demuxer {
 	return &tsDemuxer{
 		reader:    reader,
 		skipUntil: alwaysTrue,
@@ -40,7 +40,7 @@ type conditionalChannel struct {
 }
 
 type tsDemuxer struct {
-	reader             BitReader
+	reader             br.Reader32
 	registeredChannels []conditionalChannel
 	lastErr            error
 	skipUntil          PacketTester

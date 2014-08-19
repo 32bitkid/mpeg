@@ -1,6 +1,6 @@
 package ps
 
-import . "github.com/32bitkid/mpeg"
+import br "github.com/32bitkid/bitreader"
 
 type SystemHeader struct {
 	HeaderLength          uint32
@@ -21,7 +21,7 @@ type SystemHeaderStream struct {
 	P_STD_BufferSizeBound  uint32
 }
 
-func readSystemHeader(r BitReader) (*SystemHeader, error) {
+func readSystemHeader(r br.Reader32) (*SystemHeader, error) {
 	var (
 		v   uint32
 		err error

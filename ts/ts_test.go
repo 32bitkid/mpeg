@@ -7,7 +7,7 @@ import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/mpeg/ts"
 
 func TestPacketParsing(t *testing.T) {
-	reader := bitreader.NewReader32(nullPacketReader())
+	reader := bitreader.NewSimpleReader32(nullPacketReader())
 
 	p, err := ts.ReadPacket(reader)
 	if err != nil {
@@ -19,7 +19,7 @@ func TestPacketParsing(t *testing.T) {
 }
 
 func TestIncompletePacket(t *testing.T) {
-	reader := bitreader.NewReader32(io.LimitReader(nullPacketReader(), 100))
+	reader := bitreader.NewSimpleReader32(io.LimitReader(nullPacketReader(), 100))
 
 	_, err := ts.ReadPacket(reader)
 	if err != io.ErrUnexpectedEOF {
@@ -28,7 +28,7 @@ func TestIncompletePacket(t *testing.T) {
 }
 
 func TestAdaptationField(t *testing.T) {
-	reader := bitreader.NewReader32(bytes.NewReader(adaptationFieldData))
+	reader := bitreader.NewSimpleReader32(bytes.NewReader(adaptationFieldData))
 	packet, err := ts.ReadPacket(reader)
 
 	if err != nil {

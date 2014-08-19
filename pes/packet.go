@@ -2,7 +2,7 @@ package pes
 
 import "errors"
 import "io"
-import . "github.com/32bitkid/mpeg"
+import br "github.com/32bitkid/bitreader"
 
 var (
 	ErrStartCodePrefixNotFound = errors.New("start code prefix not found")
@@ -38,7 +38,7 @@ type Header struct {
 	Extension *Extension
 }
 
-func ReadPacket(reader BitReader, total int) (*Packet, error) {
+func ReadPacket(reader br.Reader32, total int) (*Packet, error) {
 
 	var (
 		val uint32

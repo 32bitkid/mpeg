@@ -1,6 +1,6 @@
 package ts
 
-import . "github.com/32bitkid/mpeg"
+import br "github.com/32bitkid/bitreader"
 import "io"
 import "errors"
 
@@ -26,7 +26,7 @@ type Packet struct {
 	Payload                    []byte
 }
 
-func ReadPacket(tsr BitReader) (*Packet, error) {
+func ReadPacket(tsr br.Reader32) (*Packet, error) {
 
 	var err error
 
@@ -110,12 +110,12 @@ func ReadPacket(tsr BitReader) (*Packet, error) {
 	return &packet, nil
 }
 
-func isAligned(tsr BitReader) (bool, error) {
+func isAligned(tsr br.Reader32) (bool, error) {
 	val, err := tsr.Peek32(8)
 	return val == SyncByte, err
 }
 
-func realign(tsr BitReader) error {
+func realign(tsr br.Reader32) error {
 	for i := 0; i < 188; i++ {
 		if err := tsr.Trash(8); isFatalErr(err) {
 			return err

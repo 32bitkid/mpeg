@@ -1,6 +1,6 @@
 package ps
 
-import . "github.com/32bitkid/mpeg"
+import br "github.com/32bitkid/bitreader"
 
 type Decoder interface {
 	Packs() <-chan *Pack
@@ -9,7 +9,7 @@ type Decoder interface {
 }
 
 type decoder struct {
-	r     BitReader
+	r     br.Reader32
 	packs chan *Pack
 	err   error
 }
@@ -67,7 +67,7 @@ func (d *decoder) Err() error {
 	return d.err
 }
 
-func NewDecoder(r BitReader) Decoder {
+func NewDecoder(r br.Reader32) Decoder {
 	return &decoder{
 		r:     r,
 		packs: make(chan *Pack),
