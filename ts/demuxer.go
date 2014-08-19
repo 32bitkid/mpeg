@@ -58,9 +58,11 @@ func (tsd *tsDemuxer) Go() <-chan bool {
 	go func() {
 
 		defer func() { done <- true }()
-		for _, item := range tsd.registeredChannels {
-			defer close(item.channel)
-		}
+		defer func() {
+			for _, item := range tsd.registeredChannels {
+				close(item.channel)
+			}
+		}()
 
 		for true {
 			p, err := ReadPacket(tsd.reader)
