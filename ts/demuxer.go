@@ -2,6 +2,7 @@ package ts
 
 import br "github.com/32bitkid/bitreader"
 
+// Creates a new MPEG-2 Transport Stream Demultiplexer
 func NewDemuxer(reader br.Reader32) Demuxer {
 	return &tsDemuxer{
 		reader:    reader,
@@ -10,6 +11,8 @@ func NewDemuxer(reader br.Reader32) Demuxer {
 	}
 }
 
+// Demuxer is the interface to control and extract
+// streams out of a Multiplexed Transport Stream.
 type Demuxer interface {
 	Where(PacketTester) PacketChannel
 	Go() <-chan bool
@@ -19,6 +22,9 @@ type Demuxer interface {
 	TakeWhile(PacketTester) Demuxer
 }
 
+// Wraps a condition and a channel. Any packets
+// that match the PacketTester should be delivered
+// to the channel
 type conditionalChannel struct {
 	test    PacketTester
 	channel chan<- *Packet
@@ -32,22 +38,29 @@ type tsDemuxer struct {
 	takeWhile          PacketTester
 }
 
+// Create a Packet Channel that will only include Transport Stream
+// packets that match the PacketTester
 func (tsd *tsDemuxer) Where(test PacketTester) PacketChannel {
 	channel := make(chan *Packet)
 	tsd.registeredChannels = append(tsd.registeredChannels, conditionalChannel{test, channel})
 	return channel
 }
 
+// Skip any packets from the input stream until the PacketTester
+// returns true
 func (tsd *tsDemuxer) SkipUntil(skipUntil PacketTester) Demuxer {
 	tsd.skipUntil = skipUntil
 	return tsd
 }
 
+// Only return packets from the stream while the PacketTester
+// returns true
 func (tsd *tsDemuxer) TakeWhile(takeWhile PacketTester) Demuxer {
 	tsd.takeWhile = takeWhile
 	return tsd
 }
 
+// Create a goroutine to begin parsing the input stream
 func (tsd *tsDemuxer) Go() <-chan bool {
 
 	done := make(chan bool, 1)
@@ -96,6 +109,7 @@ func (tsd *tsDemuxer) Go() <-chan bool {
 	return done
 }
 
+// Retrieve the last error from the demuxer
 func (tsd *tsDemuxer) Err() error {
 	return tsd.lastErr
 }
