@@ -23,7 +23,7 @@ educational purposes only.
 ### Give it a spin!
 
 ```
-go get github.com/32bitkid/mpeg
+go get -d github.com/32bitkid/mpeg
 ```
 
 
