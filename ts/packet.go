@@ -1,18 +1,17 @@
 package ts
 
-import br "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/mpeg/util"
 import "io"
 import "errors"
 
-const SyncByte = 0x47
+const (
+	SyncByte       = 0x47
+	MaxPayloadSize = 184
+)
 
 var (
 	ErrNoSyncByte = errors.New("no sync byte")
 )
-
-func isFatalErr(err error) bool {
-	return err != nil && err != io.EOF
-}
 
 type Packet struct {
 	TransportErrorIndicator    bool
@@ -24,108 +23,109 @@ type Packet struct {
 	ContinuityCounter          uint32
 	AdaptationField            *AdaptationField
 	Payload                    []byte
+
+	payloadBuffer [MaxPayloadSize]byte
 }
 
-func ReadPacket(tsr br.Reader32) (*Packet, error) {
-
-	var err error
+func ReadPacket(tsr util.BitReader32, packet *Packet) (err error) {
 
 	aligned, err := isAligned(tsr)
 	if err != nil {
-		return nil, err
+		return
 	}
 
 	if !aligned {
-		err = realign(tsr)
-		if err != nil {
-			return nil, ErrNoSyncByte
+		if err = realign(tsr); err != nil {
+			return
 		}
 	}
 
-	err = tsr.Trash(8)
-	if isFatalErr(err) {
-		return nil, err
+	if err = tsr.Trash(8); err != nil {
+		return
 	}
 
-	packet := Packet{}
-
 	packet.TransportErrorIndicator, err = tsr.ReadBit()
-	if isFatalErr(err) {
-		return nil, err
+	if err != nil {
+		return
 	}
 
 	packet.PayloadUnitStartIndicator, err = tsr.ReadBit()
-	if isFatalErr(err) {
-		return nil, err
+	if err != nil {
+		return
 	}
 
 	packet.TransportPriority, err = tsr.ReadBit()
-	if isFatalErr(err) {
-		return nil, err
+	if err != nil {
+		return
 	}
 
 	packet.PID, err = tsr.Read32(13)
-	if isFatalErr(err) {
-		return nil, err
+	if err != nil {
+		return
 	}
 
 	packet.TransportScramblingControl, err = tsr.Read32(2)
-	if isFatalErr(err) {
-		return nil, err
+	if err != nil {
+		return
 	}
 
 	packet.AdaptationFieldControl, err = tsr.Read32(2)
-	if isFatalErr(err) {
-		return nil, err
+	if err != nil {
+		return
 	}
 
 	packet.ContinuityCounter, err = tsr.Read32(4)
-	if isFatalErr(err) {
-		return nil, err
+	if err != nil {
+		return
 	}
 
-	var (
-		payloadSize uint32 = 184
-	)
+	var payloadSize uint32 = MaxPayloadSize
 
 	if packet.AdaptationFieldControl == FieldOnly || packet.AdaptationFieldControl == FieldThenPayload {
 		packet.AdaptationField, err = ReadAdaptationField(tsr)
 
-		if isFatalErr(err) {
-			return nil, err
+		if err != nil {
+			return
 		}
 		payloadSize -= packet.AdaptationField.Length + 1
 	}
 
 	if packet.AdaptationFieldControl == PayloadOnly || packet.AdaptationFieldControl == FieldThenPayload {
-		packet.Payload = make([]byte, payloadSize)
+		packet.Payload = packet.payloadBuffer[0:payloadSize]
 
 		// TODO replace with reader
 		_, err = io.ReadAtLeast(tsr, packet.Payload, int(payloadSize))
-		if isFatalErr(err) {
-			return nil, err
+		if err != nil {
+			return
 		}
 	}
 
-	return &packet, nil
+	return nil
 }
 
-func isAligned(tsr br.Reader32) (bool, error) {
+func isAligned(tsr util.BitReader32) (bool, error) {
+	if !tsr.IsByteAligned() {
+		return false, nil
+	}
 	val, err := tsr.Peek32(8)
 	return val == SyncByte, err
 }
 
-func realign(tsr br.Reader32) error {
+func realign(tsr util.BitReader32) error {
+	if !tsr.IsByteAligned() {
+		tsr.ByteAlign()
+	}
+
 	for i := 0; i < 188; i++ {
-		if err := tsr.Trash(8); isFatalErr(err) {
-			return err
-		}
 		isAligned, err := isAligned(tsr)
-		if isFatalErr(err) {
+		if err != nil {
 			return err
 		}
 		if isAligned {
 			return nil
+		}
+		if err := tsr.Trash(8); err != nil {
+			return err
 		}
 	}
 	return ErrNoSyncByte

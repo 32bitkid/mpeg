@@ -2,13 +2,13 @@ package ts_test
 
 import "testing"
 import "io"
-import "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/mpeg/util"
 import "github.com/32bitkid/mpeg/ts"
 
 func TestDemuxingASinglePacket(t *testing.T) {
 
 	source := io.MultiReader(nullPacketReader(), nullPacketReader())
-	demux := ts.NewDemuxer(bitreader.NewSimpleReader32(source))
+	demux := ts.NewDemuxer(source)
 
 	nullStream := demux.Where(ts.IsPID(nullPacketPID))
 
@@ -35,7 +35,7 @@ func TestDemuxingASinglePacket(t *testing.T) {
 
 func TestDemuxingASingleStream(t *testing.T) {
 	source := io.MultiReader(nullPacketReader(), nullPacketReader(), nullPacketReader(), nullPacketReader())
-	demux := ts.NewDemuxer(bitreader.NewSimpleReader32(source))
+	demux := ts.NewDemuxer(source)
 
 	nullStream := demux.Where(ts.IsPID(nullPacketPID))
 	stop := demux.Go()
@@ -53,7 +53,7 @@ func TestDemuxingASingleStream(t *testing.T) {
 		}
 	}
 
-	if demux.Err() != bitreader.ErrNotAvailable {
+	if demux.Err() != util.ErrNotAvailable {
 		t.Fatalf("Unxpected error: %s", demux.Err())
 	}
 
@@ -64,7 +64,7 @@ func TestDemuxingASingleStream(t *testing.T) {
 
 func TestDemuxingUsingWheres(t *testing.T) {
 	source := io.MultiReader(nullPacketReader(), dataPacketReader(), nullPacketReader(), dataPacketReader(), nullPacketReader())
-	demux := ts.NewDemuxer(bitreader.NewSimpleReader32(source))
+	demux := ts.NewDemuxer(source)
 	dataStream := demux.Where(ts.IsPID(dataPacketPID))
 	junkStream := demux.Where(ts.IsPID(dataPacketPID).Not())
 
@@ -88,7 +88,7 @@ func TestDemuxingUsingWheres(t *testing.T) {
 		}
 	}
 
-	if demux.Err() != bitreader.ErrNotAvailable {
+	if demux.Err() != util.ErrNotAvailable {
 		t.Fatalf("Unxpected error: %s", demux.Err())
 	}
 
@@ -103,7 +103,7 @@ func TestDemuxingUsingWheres(t *testing.T) {
 
 func TestDemuxingRange(t *testing.T) {
 	source := io.MultiReader(fivePacketReader())
-	demux := ts.NewDemuxer(bitreader.NewSimpleReader32(source))
+	demux := ts.NewDemuxer(source)
 	allStream := demux.Where(func(p *ts.Packet) bool { return true })
 
 	count := 0

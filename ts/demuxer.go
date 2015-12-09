@@ -1,11 +1,12 @@
 package ts
 
-import br "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/mpeg/util"
+import "io"
 
 // Creates a new MPEG-2 Transport Stream Demultiplexer
-func NewDemuxer(reader br.Reader32) Demuxer {
+func NewDemuxer(reader io.Reader) Demuxer {
 	return &tsDemuxer{
-		reader:    reader,
+		reader:    util.NewSimpleBitReader(reader),
 		skipUntil: alwaysTrueTester,
 		takeWhile: alwaysTrueTester,
 	}
@@ -26,23 +27,23 @@ type Demuxer interface {
 // that match the PacketTester should be delivered
 // to the channel
 type conditionalChannel struct {
-	test    PacketTester
+	tester  PacketTester
 	channel chan<- *Packet
 }
 
 type tsDemuxer struct {
-	reader             br.Reader32
+	reader             util.BitReader32
 	registeredChannels []conditionalChannel
 	lastErr            error
 	skipUntil          PacketTester
 	takeWhile          PacketTester
 }
 
-// Create a Packet Channel that will only include Transport Stream
-// packets that match the PacketTester
-func (tsd *tsDemuxer) Where(test PacketTester) PacketChannel {
+// Create a Packet Channel that will only include packets
+// that match the PacketTester
+func (tsd *tsDemuxer) Where(tester PacketTester) PacketChannel {
 	channel := make(chan *Packet)
-	tsd.registeredChannels = append(tsd.registeredChannels, conditionalChannel{test, channel})
+	tsd.registeredChannels = append(tsd.registeredChannels, conditionalChannel{tester, channel})
 	return channel
 }
 
@@ -63,26 +64,26 @@ func (tsd *tsDemuxer) TakeWhile(takeWhile PacketTester) Demuxer {
 // Create a goroutine to begin parsing the input stream
 func (tsd *tsDemuxer) Go() <-chan bool {
 
-	done := make(chan bool, 1)
+	done := make(chan bool)
 	var skipping = true
 	var skipUntil = tsd.skipUntil
 	var takeWhile = tsd.takeWhile
+	var p = &Packet{}
 
 	go func() {
 
-		defer func() { done <- true }()
 		defer func() {
 			for _, item := range tsd.registeredChannels {
 				close(item.channel)
 			}
+			done <- true
 		}()
 
-		for true {
-			p, err := ReadPacket(tsd.reader)
+		for {
+			err := ReadPacket(tsd.reader, p)
 
 			if err != nil {
 				tsd.lastErr = err
-				done <- true
 				return
 			}
 
@@ -99,7 +100,7 @@ func (tsd *tsDemuxer) Go() <-chan bool {
 			}
 
 			for _, item := range tsd.registeredChannels {
-				if item.test(p) {
+				if item.tester(p) {
 					item.channel <- p
 				}
 			}

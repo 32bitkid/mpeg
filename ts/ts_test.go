@@ -3,33 +3,37 @@ package ts_test
 import "testing"
 import "io"
 import "bytes"
-import "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/mpeg/util"
 import "github.com/32bitkid/mpeg/ts"
 
 func TestPacketParsing(t *testing.T) {
-	reader := bitreader.NewSimpleReader32(nullPacketReader())
+	reader := util.NewSimpleBitReader(nullPacketReader())
+	packet := &ts.Packet{}
 
-	p, err := ts.ReadPacket(reader)
+	err := ts.ReadPacket(reader, packet)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if p.PID != nullPacketPID {
-		t.Fatalf("unexpected PID. expected %x, got %x", nullPacketPID, p.PID)
+	if packet.PID != nullPacketPID {
+		t.Fatalf("unexpected PID. expected %x, got %x", nullPacketPID, packet.PID)
 	}
 }
 
 func TestIncompletePacket(t *testing.T) {
-	reader := bitreader.NewSimpleReader32(io.LimitReader(nullPacketReader(), 100))
+	reader := util.NewSimpleBitReader(io.LimitReader(nullPacketReader(), 100))
+	packet := &ts.Packet{}
 
-	_, err := ts.ReadPacket(reader)
+	err := ts.ReadPacket(reader, packet)
 	if err != io.ErrUnexpectedEOF {
 		t.Fatalf("unexpected error. expected %v, got %v", io.ErrUnexpectedEOF, err)
 	}
 }
 
 func TestAdaptationField(t *testing.T) {
-	reader := bitreader.NewSimpleReader32(bytes.NewReader(adaptationFieldData))
-	packet, err := ts.ReadPacket(reader)
+	reader := util.NewSimpleBitReader(bytes.NewReader(adaptationFieldData))
+	packet := &ts.Packet{}
+
+	err := ts.ReadPacket(reader, packet)
 
 	if err != nil {
 		t.Fatal(err)

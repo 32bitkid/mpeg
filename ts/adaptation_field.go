@@ -1,6 +1,6 @@
 package ts
 
-import br "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/mpeg/util"
 import "io"
 
 const (
@@ -23,7 +23,7 @@ type AdaptationField struct {
 	Junk []byte
 }
 
-func ReadAdaptationField(tsr br.Reader32) (*AdaptationField, error) {
+func ReadAdaptationField(tsr util.BitReader32) (*AdaptationField, error) {
 	var err error
 
 	adaptationField := AdaptationField{}
@@ -35,7 +35,7 @@ func ReadAdaptationField(tsr br.Reader32) (*AdaptationField, error) {
 	adaptationField.Junk = make([]byte, adaptationField.Length)
 	_, err = io.ReadAtLeast(tsr, adaptationField.Junk, int(adaptationField.Length))
 
-	if isFatalErr(err) {
+	if err != nil {
 		return nil, err
 	}
 
