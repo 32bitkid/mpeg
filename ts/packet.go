@@ -108,7 +108,12 @@ func isAligned(tsr util.BitReader32) (bool, error) {
 		return false, nil
 	}
 	val, err := tsr.Peek32(8)
-	return val == SyncByte, err
+	if err == io.ErrUnexpectedEOF {
+		return false, io.EOF
+	} else if err != err {
+		return false, err
+	}
+	return val == SyncByte, nil
 }
 
 func realign(tsr util.BitReader32) error {

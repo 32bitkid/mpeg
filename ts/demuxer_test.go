@@ -2,7 +2,6 @@ package ts_test
 
 import "testing"
 import "io"
-import "github.com/32bitkid/mpeg/util"
 import "github.com/32bitkid/mpeg/ts"
 
 func TestDemuxingASinglePacket(t *testing.T) {
@@ -53,7 +52,7 @@ func TestDemuxingASingleStream(t *testing.T) {
 		}
 	}
 
-	if demux.Err() != util.ErrNotAvailable {
+	if demux.Err() != nil && demux.Err() != io.EOF {
 		t.Fatalf("Unxpected error: %s", demux.Err())
 	}
 
@@ -88,7 +87,7 @@ func TestDemuxingUsingWheres(t *testing.T) {
 		}
 	}
 
-	if demux.Err() != util.ErrNotAvailable {
+	if demux.Err() != nil && demux.Err() != io.EOF {
 		t.Fatalf("Unxpected error: %s", demux.Err())
 	}
 

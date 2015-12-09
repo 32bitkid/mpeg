@@ -1,7 +1,6 @@
 package util
 
 import "io"
-import "errors"
 
 type BitReader interface {
 	io.Reader
@@ -17,5 +16,3 @@ type BitReader32 interface {
 	Read32(uint) (uint32, error)
 	Peek32(uint) (uint32, error)
 }
-
-var ErrNotAvailable = errors.New("not available")
