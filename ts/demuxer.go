@@ -80,7 +80,7 @@ func (tsd *tsDemuxer) Go() <-chan bool {
 		}()
 
 		for {
-			err := ReadPacket(tsd.reader, p)
+			err := p.ReadFrom(tsd.reader)
 
 			if err != nil {
 				tsd.lastErr = err

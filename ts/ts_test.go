@@ -10,7 +10,7 @@ func TestPacketParsing(t *testing.T) {
 	reader := util.NewSimpleBitReader(nullPacketReader())
 	packet := &ts.Packet{}
 
-	err := ts.ReadPacket(reader, packet)
+	err := packet.ReadFrom(reader)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -23,7 +23,7 @@ func TestIncompletePacket(t *testing.T) {
 	reader := util.NewSimpleBitReader(io.LimitReader(nullPacketReader(), 100))
 	packet := &ts.Packet{}
 
-	err := ts.ReadPacket(reader, packet)
+	err := packet.ReadFrom(reader)
 	if err != io.ErrUnexpectedEOF {
 		t.Fatalf("unexpected error. expected %v, got %v", io.ErrUnexpectedEOF, err)
 	}
@@ -33,7 +33,7 @@ func TestAdaptationField(t *testing.T) {
 	reader := util.NewSimpleBitReader(bytes.NewReader(adaptationFieldData))
 	packet := &ts.Packet{}
 
-	err := ts.ReadPacket(reader, packet)
+	err := packet.ReadFrom(reader)
 
 	if err != nil {
 		t.Fatal(err)

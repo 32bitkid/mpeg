@@ -27,7 +27,7 @@ type Packet struct {
 	payloadBuffer [MaxPayloadSize]byte
 }
 
-func ReadPacket(tsr util.BitReader32, packet *Packet) (err error) {
+func (packet *Packet) ReadFrom(tsr util.BitReader32) (err error) {
 
 	aligned, err := isAligned(tsr)
 	if err != nil {
