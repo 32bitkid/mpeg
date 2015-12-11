@@ -110,27 +110,29 @@ func (packet *Packet) ReadFrom(tsr util.BitReader32) (err error) {
 }
 
 func isAligned(tsr util.BitReader32) (bool, error) {
-	if !tsr.IsByteAligned() {
+	if tsr.IsByteAligned() == false {
 		return false, nil
 	}
+
 	val, err := tsr.Peek32(8)
 	if err != nil {
 		return false, err
 	}
+
 	return val == SyncByte, nil
 }
 
 func realign(tsr util.BitReader32) error {
-	if !tsr.IsByteAligned() {
+	if tsr.IsByteAligned() == false {
 		tsr.ByteAlign()
 	}
 
 	for i := 0; i < 188; i++ {
-		isAligned, err := isAligned(tsr)
+		val, err := tsr.Peek32(8)
 		if err != nil {
 			return err
 		}
-		if isAligned {
+		if val == SyncByte {
 			return nil
 		}
 		if err := tsr.Trash(8); err != nil {
