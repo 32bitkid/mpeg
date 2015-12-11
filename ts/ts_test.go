@@ -8,14 +8,22 @@ import "github.com/32bitkid/mpeg/ts"
 
 func TestPacketParsing(t *testing.T) {
 	reader := util.NewSimpleBitReader(nullPacketReader())
-	packet := &ts.Packet{}
-
-	err := packet.ReadFrom(reader)
+	packet, err := ts.NewPacket(reader)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if packet.PID != nullPacketPID {
 		t.Fatalf("unexpected PID. expected %x, got %x", nullPacketPID, packet.PID)
+	}
+}
+
+func TestEOFAfterPacket(t *testing.T) {
+	var err error
+	reader := util.NewSimpleBitReader(nullPacketReader())
+	_, err = ts.NewPacket(reader)
+	_, err = ts.NewPacket(reader)
+	if err != io.EOF {
+		t.Fatal(err)
 	}
 }
 
