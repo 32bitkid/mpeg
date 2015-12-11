@@ -1,24 +1,24 @@
 package pes
 
 const (
-	program_stream_map                  uint32 = 0274
-	private_stream_1                    uint32 = 0275
-	padding_stream                      uint32 = 0276
-	private_stream_2                    uint32 = 0277
-	ecm_stream                          uint32 = 0360
-	emm_stream                          uint32 = 0361
-	itu_t_rec_h_222_0                   uint32 = 0362
-	dsmcc_stream                        uint32 = 0362
-	iso_iec_13522_stream                uint32 = 0363
-	itu_t_rec_h_222_1_type_a            uint32 = 0364
-	itu_t_rec_h_222_1_type_b            uint32 = 0365
-	itu_t_rec_h_222_1_type_c            uint32 = 0366
-	itu_t_rec_h_222_1_type_d            uint32 = 0367
-	itu_t_rec_h_222_1_type_e            uint32 = 0370
-	ancillary_stream                    uint32 = 0371
-	iso_iec14496_1_sl_packetized_stream uint32 = 0372
-	iso_iec14496_1_flexmux_stream       uint32 = 0373
-	program_stream_directory            uint32 = 0377
+	program_stream_map                  = 0xbc // program_stream_map
+	private_stream_1                    = 0xbd // private_stream_1
+	padding_stream                      = 0xbe // padding_stream
+	private_stream_2                    = 0xbf // private_stream_2
+	ecm_stream                          = 0xf0 // ECM_stream © ISO/IEC ISO/IEC 13818-1: 1994(E) ITU-T Rec. H.222.0 (1995 E) 37
+	emm_stream                          = 0xf1 // EMM_stream
+	itu_t_rec_h_222_0                   = 0xf2 // ITU-T Rec. H.222.0 | ISO/IEC 13818-1 Annex A
+	dsmcc_stream                        = 0xf2 // ISO/IEC 13818-6_DSMCC_stream
+	iso_iec_13522_stream                = 0xf3 // ISO/IEC_13522_stream
+	itu_t_rec_h_222_1_type_a            = 0xf4 // ITU-T Rec. H.222.1 type A
+	itu_t_rec_h_222_1_type_b            = 0xf5 // ITU-T Rec. H.222.1 type B
+	itu_t_rec_h_222_1_type_c            = 0xf6 // ITU-T Rec. H.222.1 type C
+	itu_t_rec_h_222_1_type_d            = 0xf7 // ITU-T Rec. H.222.1 type D
+	itu_t_rec_h_222_1_type_e            = 0xf8 // ITU-T Rec. H.222.1 type E
+	ancillary_stream                    = 0xf9 // ancillary_stream
+	iso_iec14496_1_sl_packetized_stream = 0xfa
+	iso_iec14496_1_flexmux_stream       = 0xfb
+	program_stream_directory            = 0xff // program_stream_directory
 )
 
 func hasPESHeader(streamID uint32) bool {
