@@ -20,10 +20,8 @@ func TestPacketParsing(t *testing.T) {
 }
 
 func TestIncompletePacket(t *testing.T) {
-	reader := util.NewSimpleBitReader(io.LimitReader(nullPacketReader(), 100))
-	packet := &ts.Packet{}
-
-	err := packet.ReadFrom(reader)
+	reader := util.NewSimpleBitReader(io.LimitReader(nullPacketReader(), 4))
+	_, err := ts.NewPacket(reader)
 	if err != io.ErrUnexpectedEOF {
 		t.Fatalf("unexpected error. expected %v, got %v", io.ErrUnexpectedEOF, err)
 	}
