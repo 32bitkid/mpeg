@@ -15,7 +15,7 @@ type simpleReader32 struct {
 
 func (b *simpleReader32) Peek32(len uint) (uint32, error) {
 	err := b.check(len)
-	if err != nil && err != io.EOF {
+	if err != nil {
 		return 0, err
 	}
 
@@ -26,7 +26,9 @@ func (b *simpleReader32) Peek32(len uint) (uint32, error) {
 
 func (b *simpleReader32) Trash(len uint) error {
 	err := b.check(len)
-	if err != nil && err != io.EOF {
+	if err == io.EOF {
+		return io.ErrUnexpectedEOF
+	} else if err != nil {
 		return err
 	}
 	b.buffer <<= len
@@ -36,7 +38,9 @@ func (b *simpleReader32) Trash(len uint) error {
 
 func (b *simpleReader32) Read32(len uint) (uint32, error) {
 	val, err := b.Peek32(len)
-	if err != nil && err != io.EOF {
+	if err == io.EOF {
+		return 0, io.ErrUnexpectedEOF
+	} else if err != nil {
 		return 0, err
 	}
 	err = b.Trash(len)
@@ -50,8 +54,10 @@ func (b *simpleReader32) PeekBit() (bool, error) {
 
 func (b *simpleReader32) ReadBit() (bool, error) {
 	val, err := b.PeekBit()
-	if err != nil && err != io.EOF {
-		return val, err
+	if err == io.EOF {
+		return false, io.ErrUnexpectedEOF
+	} else if err != nil {
+		return false, err
 	}
 	err = b.Trash(1)
 	return val, err
@@ -68,12 +74,8 @@ func (b *simpleReader32) fill(needed uint) error {
 	neededBytes := int((needed - b.bitsLeft + 7) >> 3)
 	len, err := io.ReadAtLeast(b.source, b.readBuffer, neededBytes)
 
-	if err != nil && err != io.EOF {
+	if err != nil {
 		return err
-	}
-
-	if uint(len*8)+b.bitsLeft < needed {
-		return io.ErrUnexpectedEOF
 	}
 
 	for i := 0; i < len; i++ {
