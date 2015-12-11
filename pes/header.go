@@ -6,6 +6,27 @@ const (
 	MinimumHeaderSize uint32 = 3
 )
 
+type Header struct {
+	ScramblingControl      uint32
+	Priority               bool
+	DataAlignmentIndicator bool
+	Copyright              bool
+	OrignalOrCopy          bool
+	PtsDtsFlags            uint32
+	EscrFlag               bool
+	EsRateFlag             bool
+	DsmTrickModeFlag       bool
+	AdditionalCopyInfoFlag bool
+	CrcFlag                bool
+	ExtensionFlag          bool
+	HeaderDataLength       uint32
+
+	PresentationTimeStamp uint32
+	DecodingTimeStamp     uint32
+
+	Extension *Extension
+}
+
 func ReadHeader(reader br.Reader32) (*Header, uint32, error) {
 
 	val, err := reader.Read32(2)

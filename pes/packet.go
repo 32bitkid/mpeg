@@ -17,27 +17,6 @@ type Packet struct {
 	Payload []byte
 }
 
-type Header struct {
-	ScramblingControl      uint32
-	Priority               bool
-	DataAlignmentIndicator bool
-	Copyright              bool
-	OrignalOrCopy          bool
-	PtsDtsFlags            uint32
-	EscrFlag               bool
-	EsRateFlag             bool
-	DsmTrickModeFlag       bool
-	AdditionalCopyInfoFlag bool
-	CrcFlag                bool
-	ExtensionFlag          bool
-	HeaderDataLength       uint32
-
-	PresentationTimeStamp uint32
-	DecodingTimeStamp     uint32
-
-	Extension *Extension
-}
-
 func ReadPacket(reader br.Reader32, total int) (*Packet, error) {
 
 	var (
