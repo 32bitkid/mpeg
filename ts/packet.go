@@ -108,9 +108,7 @@ func isAligned(tsr util.BitReader32) (bool, error) {
 		return false, nil
 	}
 	val, err := tsr.Peek32(8)
-	if err == io.ErrUnexpectedEOF {
-		return false, io.EOF
-	} else if err != err {
+	if err != nil {
 		return false, err
 	}
 	return val == SyncByte, nil
