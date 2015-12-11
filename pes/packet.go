@@ -2,7 +2,12 @@ package pes
 
 import "errors"
 import "io"
-import br "github.com/32bitkid/bitreader"
+import "io/ioutil"
+import "github.com/32bitkid/mpeg/util"
+
+const (
+	StartCodePrefix = 0x000001
+)
 
 var (
 	ErrStartCodePrefixNotFound = errors.New("start code prefix not found")
@@ -17,7 +22,13 @@ type Packet struct {
 	Payload []byte
 }
 
-func ReadPacket(reader br.Reader32, total int) (*Packet, error) {
+func ParsePacket(br util.BitReader32) (packet *Packet, err error) {
+	packet = new(Packet)
+	err = packet.ReadFrom(br)
+	return packet, err
+}
+
+func (packet *Packet) ReadFrom(reader util.BitReader32) error {
 
 	var (
 		val uint32
@@ -26,55 +37,52 @@ func ReadPacket(reader br.Reader32, total int) (*Packet, error) {
 
 	val, err = reader.Peek32(24)
 
-	if val != 0x0001 || err != nil {
-		return nil, ErrStartCodePrefixNotFound
+	if val != StartCodePrefix || err != nil {
+		return ErrStartCodePrefixNotFound
 	}
 
 	reader.Trash(24)
 
-	packet := Packet{}
-
 	packet.StreamID, err = reader.Read32(8)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	packet.PacketLength, err = reader.Read32(16)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	if hasPESHeader(packet.StreamID) {
-
-		var len uint32
-		packet.Header, len, err = ReadHeader(reader)
+	switch {
+	case hasPESHeader(packet.StreamID):
+		var headerLen uint32
+		packet.Header, headerLen, err = ReadHeader(reader)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		var payloadLen int
-
-		if total > 0 {
-			payloadLen = total - int(packet.Header.HeaderDataLength) - 3 - 6
+		if packet.PacketLength > 0 {
+			var payloadLen = int(packet.PacketLength - headerLen)
+			packet.Payload = make([]byte, payloadLen)
+			_, err = io.ReadAtLeast(reader, packet.Payload, payloadLen)
+			if err != nil {
+				return err
+			}
 		} else {
-			payloadLen = int(packet.PacketLength - len)
+			// Read until end of buffer
+			packet.Payload, err = ioutil.ReadAll(reader)
+			if err != nil {
+				return err
+			}
 		}
-
-		packet.Payload = make([]byte, payloadLen)
-
-		_, err = io.ReadAtLeast(reader, packet.Payload, payloadLen)
-		if err != nil {
-			return nil, err
-		}
-
-	} else if packet.StreamID == padding_stream {
+	case packet.StreamID == padding_stream:
 		payloadLen := int(packet.PacketLength)
 		junk := make([]byte, payloadLen)
 		_, err = io.ReadAtLeast(reader, junk, payloadLen)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return &packet, nil
+	return nil
 }
