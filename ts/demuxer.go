@@ -12,6 +12,11 @@ func NewDemuxer(reader io.Reader) Demuxer {
 	}
 }
 
+type TransportStreamControl interface {
+	SkipUntil(skipUntil PacketTester)
+	TakeWhile(takeWhile PacketTester)
+}
+
 // Demuxer is the interface to control and extract
 // streams out of a Multiplexed Transport Stream.
 type Demuxer interface {
@@ -19,8 +24,7 @@ type Demuxer interface {
 	Go() <-chan bool
 	Err() error
 
-	SkipUntil(PacketTester) Demuxer
-	TakeWhile(PacketTester) Demuxer
+	TransportStreamControl
 }
 
 // Wraps a condition and a channel. Any packets
@@ -49,16 +53,14 @@ func (tsd *tsDemuxer) Where(tester PacketTester) PacketChannel {
 
 // Skip any packets from the input stream until the PacketTester
 // returns true
-func (tsd *tsDemuxer) SkipUntil(skipUntil PacketTester) Demuxer {
+func (tsd *tsDemuxer) SkipUntil(skipUntil PacketTester) {
 	tsd.skipUntil = skipUntil
-	return tsd
 }
 
 // Only return packets from the stream while the PacketTester
 // returns true
-func (tsd *tsDemuxer) TakeWhile(takeWhile PacketTester) Demuxer {
+func (tsd *tsDemuxer) TakeWhile(takeWhile PacketTester) {
 	tsd.takeWhile = takeWhile
-	return tsd
 }
 
 // Create a goroutine to begin parsing the input stream

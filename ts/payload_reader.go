@@ -6,48 +6,52 @@ import "github.com/32bitkid/mpeg/util"
 
 type PayloadReader interface {
 	io.Reader
-	SkipUntil(PacketTester) error
+	TransportStreamControl
 }
 
-func NewPayloadReader(source io.Reader, tester PacketTester) PayloadReader {
+func NewPayloadReader(source io.Reader, where PacketTester) PayloadReader {
 	return &payloadReader{
-		currentPacket: nil,
-		tsr:           util.NewSimpleBitReader(source),
-		tester:        tester,
+		currentPacket: new(Packet),
+		br:            util.NewSimpleBitReader(source),
+		where:         where,
+		closed:        false,
+		isAligned:     false,
+		skipUntil:     alwaysTrueTester,
+		takeWhile:     alwaysTrueTester,
 	}
 }
 
 type payloadReader struct {
 	currentPacket *Packet
-	tsr           util.BitReader32
-	tester        PacketTester
+	br            util.BitReader32
+	where         PacketTester
+	skipUntil     PacketTester
+	takeWhile     PacketTester
 	remainder     bytes.Buffer
+	closed        bool
+	isAligned     bool
 }
 
-func (r *payloadReader) Next() error {
-	if r.currentPacket == nil {
-		r.currentPacket = new(Packet)
-	}
-	return r.currentPacket.ReadFrom(r.tsr)
+func (r *payloadReader) SkipUntil(skipUntil PacketTester) {
+	r.skipUntil = r.where.And(skipUntil)
 }
 
-func (r *payloadReader) SkipUntil(begin PacketTester) (err error) {
-	r.remainder.Reset()
-	t := r.tester.And(begin)
-	for {
-		r.Next()
-		if err != nil {
-			return err
-		}
-		if t(r.currentPacket) {
-			r.remainder.Write(r.currentPacket.Payload)
-			return nil
-		}
-	}
-	return io.EOF
+func (r *payloadReader) TakeWhile(takeWhile PacketTester) {
+	r.takeWhile = r.where.And(takeWhile)
 }
 
 func (r *payloadReader) Read(p []byte) (n int, err error) {
+
+	if r.closed == true {
+		return 0, io.EOF
+	}
+
+	if r.isAligned == false {
+		err = r.realign()
+		if err != nil {
+			return
+		}
+	}
 
 	var remainder []byte
 
@@ -61,15 +65,23 @@ func (r *payloadReader) Read(p []byte) (n int, err error) {
 	}
 
 	for len(p) > 0 {
-		err = r.Next()
+		err = r.next()
 		if err != nil {
 			return
 		}
 
-		copied := copy(p, r.currentPacket.Payload)
-		n = n + copied
-		p = p[copied:]
-		remainder = r.currentPacket.Payload[copied:]
+		if r.where(r.currentPacket) {
+			copied := copy(p, r.currentPacket.Payload)
+			n = n + copied
+			p = p[copied:]
+			remainder = r.currentPacket.Payload[copied:]
+		}
+
+		cont := r.takeWhile(r.currentPacket)
+		if cont == false {
+			r.closed = true
+			return n, io.EOF
+		}
 	}
 
 	_, err = r.remainder.Write(remainder)
@@ -79,4 +91,24 @@ func (r *payloadReader) Read(p []byte) (n int, err error) {
 	}
 
 	return
+}
+
+func (r *payloadReader) next() error {
+	return r.currentPacket.ReadFrom(r.br)
+}
+
+func (r *payloadReader) realign() (err error) {
+	for {
+		r.next()
+		if err != nil {
+			return err
+		}
+		done := r.skipUntil(r.currentPacket)
+		if done {
+			r.isAligned = true
+			r.remainder.Write(r.currentPacket.Payload)
+			return nil
+		}
+	}
+	return io.EOF
 }
