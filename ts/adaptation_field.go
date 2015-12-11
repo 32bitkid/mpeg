@@ -33,9 +33,10 @@ func ReadAdaptationField(tsr util.BitReader32) (*AdaptationField, error) {
 	}
 
 	adaptationField.Junk = make([]byte, adaptationField.Length)
-	_, err = io.ReadAtLeast(tsr, adaptationField.Junk, int(adaptationField.Length))
-
-	if err != nil {
+	_, err = io.ReadFull(tsr, adaptationField.Junk)
+	if err == io.EOF {
+		return nil, io.ErrUnexpectedEOF
+	} else if err != nil {
 		return nil, err
 	}
 

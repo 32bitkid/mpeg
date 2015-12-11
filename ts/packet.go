@@ -100,8 +100,10 @@ func (packet *Packet) ReadFrom(tsr util.BitReader32) (err error) {
 		packet.Payload = packet.payloadBuffer[0:payloadSize]
 
 		// TODO replace with reader
-		_, err = io.ReadAtLeast(tsr, packet.Payload, int(payloadSize))
-		if err != nil {
+		_, err = io.ReadFull(tsr, packet.Payload)
+		if err == io.EOF {
+			return io.ErrUnexpectedEOF
+		} else if err != nil {
 			return
 		}
 	}
