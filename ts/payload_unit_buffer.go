@@ -52,7 +52,6 @@ func (stream *payloadUnitBuffer) Fill() (n int, err error) {
 			if err != nil {
 				break
 			}
-		} else {
 		}
 
 		err = stream.advance()
