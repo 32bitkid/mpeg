@@ -55,13 +55,16 @@ func (r *payloadReader) Read(p []byte) (n int, err error) {
 
 	var remainder []byte
 
-	if r.remainder.Len() > 0 {
-		copied, err := r.remainder.Read(p)
-		if err != nil {
-			return copied, err
+	// Drain remainder
+	for len(p) > 0 {
+		cn, err := r.remainder.Read(p)
+		n = n + cn
+		p = p[cn:]
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return n, err
 		}
-		n = n + copied
-		p = p[copied:]
 	}
 
 	for len(p) > 0 {
