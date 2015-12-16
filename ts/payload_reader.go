@@ -88,11 +88,6 @@ func (r *payloadReader) Read(p []byte) (n int, err error) {
 	}
 
 	_, err = r.remainder.Write(remainder)
-
-	if err != nil {
-		return
-	}
-
 	return
 }
 
