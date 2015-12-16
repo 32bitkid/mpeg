@@ -13,37 +13,37 @@ type simpleReader32 struct {
 	bitsLeft   uint
 }
 
-func (b *simpleReader32) Peek32(len uint) (uint32, error) {
-	err := b.check(len)
+func (b *simpleReader32) Peek32(bits uint) (uint32, error) {
+	err := b.check(bits)
 	if err != nil {
 		return 0, err
 	}
 
-	shift := (64 - len)
-	var mask uint64 = (1 << (len + 1)) - 1
+	shift := (64 - bits)
+	var mask uint64 = (1 << (bits + 1)) - 1
 	return uint32(b.buffer & (mask << shift) >> shift), err
 }
 
-func (b *simpleReader32) Trash(len uint) error {
-	err := b.check(len)
+func (b *simpleReader32) Trash(bits uint) error {
+	err := b.check(bits)
 	if err == io.EOF {
 		return io.ErrUnexpectedEOF
 	} else if err != nil {
 		return err
 	}
-	b.buffer <<= len
-	b.bitsLeft -= len
+	b.buffer <<= bits
+	b.bitsLeft -= bits
 	return err
 }
 
-func (b *simpleReader32) Read32(len uint) (uint32, error) {
-	val, err := b.Peek32(len)
+func (b *simpleReader32) Read32(bits uint) (uint32, error) {
+	val, err := b.Peek32(bits)
 	if err == io.EOF {
 		return 0, io.ErrUnexpectedEOF
 	} else if err != nil {
 		return 0, err
 	}
-	err = b.Trash(len)
+	err = b.Trash(bits)
 	return val, err
 }
 
@@ -63,22 +63,22 @@ func (b *simpleReader32) ReadBit() (bool, error) {
 	return val, err
 }
 
-func (b *simpleReader32) check(len uint) error {
-	if b.bitsLeft < len {
-		return b.fill(len)
+func (b *simpleReader32) check(bits uint) error {
+	if b.bitsLeft < bits {
+		return b.fill(bits)
 	}
 	return nil
 }
 
 func (b *simpleReader32) fill(needed uint) error {
 	neededBytes := int((needed - b.bitsLeft + 7) >> 3)
-	len, err := io.ReadAtLeast(b.source, b.readBuffer, neededBytes)
+	n, err := io.ReadAtLeast(b.source, b.readBuffer, neededBytes)
 
 	if err != nil {
 		return err
 	}
 
-	for i := 0; i < len; i++ {
+	for i := 0; i < n; i++ {
 		b.buffer = b.buffer | uint64(b.readBuffer[i])<<(64-8-b.bitsLeft)
 		b.bitsLeft += 8
 	}
