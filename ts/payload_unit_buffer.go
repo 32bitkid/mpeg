@@ -18,7 +18,7 @@ const (
 	refill
 )
 
-func NewPayloadUnitBuffer(source io.Reader, where PacketTester) io.Reader {
+func NewPayloadUnitReader(source io.Reader, where PacketTester) io.Reader {
 	return &payloadUnitBuffer{
 		br:             util.NewBitReader(source),
 		where:          where,
