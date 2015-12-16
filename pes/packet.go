@@ -75,6 +75,7 @@ func (packet *Packet) readFrom(reader util.BitReader32) error {
 			}
 		} else {
 			// Read until end of buffer
+			// TODO dont create a new slice but read into a shared sized buffer
 			packet.Payload, err = ioutil.ReadAll(reader)
 			if err != nil && err != ts.EOP {
 				return err
