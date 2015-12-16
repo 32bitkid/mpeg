@@ -38,7 +38,11 @@ func (packet *Packet) readFrom(reader util.BitReader32) error {
 
 	val, err = reader.Peek32(24)
 
-	if val != StartCodePrefix || err != nil {
+	if err != nil {
+		return err
+	}
+
+	if val != StartCodePrefix  {
 		return ErrStartCodePrefixNotFound
 	}
 
