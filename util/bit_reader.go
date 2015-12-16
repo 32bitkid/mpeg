@@ -16,3 +16,5 @@ type BitReader32 interface {
 	Read32(uint) (uint32, error)
 	Peek32(uint) (uint32, error)
 }
+
+var NewBitReader func(io.Reader) BitReader32 = NewSimpleBitReader

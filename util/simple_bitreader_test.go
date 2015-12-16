@@ -8,7 +8,7 @@ import "github.com/32bitkid/mpeg/util"
 type read32 func(uint) (uint32, error)
 
 func createReader(b ...byte) util.BitReader32 {
-	return util.NewSimpleBitReader(bytes.NewReader(b))
+	return util.NewBitReader(bytes.NewReader(b))
 }
 
 func check32(t *testing.T, fn read32, len uint, expected uint32) {
