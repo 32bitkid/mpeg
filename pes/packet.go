@@ -4,6 +4,7 @@ import "errors"
 import "io"
 import "io/ioutil"
 import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/mpeg/ts"
 
 const (
 	StartCodePrefix = 0x000001
@@ -22,13 +23,13 @@ type Packet struct {
 	Payload []byte
 }
 
-func ParsePacket(br util.BitReader32) (packet *Packet, err error) {
+func ReadPacketFrom(br util.BitReader32) (packet *Packet, err error) {
 	packet = new(Packet)
-	err = packet.ReadFrom(br)
+	err = packet.readFrom(br)
 	return packet, err
 }
 
-func (packet *Packet) ReadFrom(reader util.BitReader32) error {
+func (packet *Packet) readFrom(reader util.BitReader32) error {
 
 	var (
 		val uint32

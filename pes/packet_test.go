@@ -8,7 +8,7 @@ import "github.com/32bitkid/mpeg/util"
 func TestPacketWithExtensionFlag(t *testing.T) {
 	br := util.NewSimpleBitReader(bytes.NewReader(packetWithExtensionFlag))
 
-	p, err := pes.NewPacketFrom(br)
+	p, err := pes.ReadPacketFrom(br)
 	if err != nil {
 		t.Fatal(err)
 	}
