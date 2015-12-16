@@ -36,7 +36,7 @@ func TestReadingTwoPackets(t *testing.T) {
 
 	for _, val := range data {
 		if expected, actual := byte(255), val; expected != actual {
-			t.Fatal("Unexpected value read. Expected %d, got %d", expected, actual)
+			t.Fatalf("Unexpected value read. Expected %d, got %d", expected, actual)
 		}
 	}
 }

@@ -110,5 +110,4 @@ func (r *payloadReader) realign() (err error) {
 			return nil
 		}
 	}
-	return io.EOF
 }

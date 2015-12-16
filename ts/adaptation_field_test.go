@@ -23,7 +23,7 @@ func TestAdaptationField(t *testing.T) {
 	}
 
 	if packet.AdaptationField.Length != uint32(adapationFieldPacket[4]) {
-		t.Fatal("unexpected Length. expected %d, got %d", adapationFieldPacket[4], packet.AdaptationField.Length)
+		t.Fatalf("unexpected Length. expected %d, got %d", adapationFieldPacket[4], packet.AdaptationField.Length)
 	}
 
 	if len(packet.Payload) != 184-int(adapationFieldPacket[4])-1 {
