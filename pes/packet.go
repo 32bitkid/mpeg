@@ -71,7 +71,7 @@ func (packet *Packet) ReadFrom(reader util.BitReader32) error {
 		} else {
 			// Read until end of buffer
 			packet.Payload, err = ioutil.ReadAll(reader)
-			if err != nil {
+			if err != nil && err != ts.EOP {
 				return err
 			}
 		}
