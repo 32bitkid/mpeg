@@ -42,7 +42,7 @@ func (packet *Packet) readFrom(reader util.BitReader32) error {
 		return err
 	}
 
-	if val != StartCodePrefix  {
+	if val != StartCodePrefix {
 		return ErrStartCodePrefixNotFound
 	}
 
