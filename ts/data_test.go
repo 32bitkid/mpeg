@@ -278,7 +278,7 @@ var fivePackets = []byte{
 	0xAA, 0x9F, 0xD1, 0x22,
 	0x44, 0x8A, 0xD0, 0x08}
 
-var adaptationFieldData = []byte{
+var adapationFieldPacket = []byte{
 	0x47, 0x00, 0x21, 0x36, 0x67, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -297,14 +297,11 @@ var adaptationFieldData = []byte{
 	0xEE, 0xEE, 0xB6, 0x86, 0x39, 0xF7, 0x00, 0x00,
 }
 
-func nullPacketReader() io.Reader {
-	return bytes.NewReader(nullPacket)
+func createReader(p []byte) func() io.Reader {
+	return func() io.Reader { return bytes.NewReader(p) }
 }
 
-func dataPacketReader() io.Reader {
-	return bytes.NewReader(dataPacket)
-}
-
-func fivePacketReader() io.Reader {
-	return bytes.NewReader(fivePackets)
-}
+var nullPacketReader = createReader(nullPacket)
+var dataPacketReader = createReader(dataPacket)
+var fivePacketReader = createReader(fivePackets)
+var adaptationFieldReader = createReader(adapationFieldPacket)
