@@ -11,13 +11,11 @@ type PayloadReader interface {
 
 func NewPayloadReader(source io.Reader, where PacketTester) PayloadReader {
 	return &payloadReader{
-		currentPacket: new(Packet),
-		br:            util.NewBitReader(source),
-		where:         where,
-		closed:        false,
-		isAligned:     false,
-		skipUntil:     alwaysTrueTester,
-		takeWhile:     alwaysTrueTester,
+		br:        util.NewBitReader(source),
+		where:     where,
+		closed:    false,
+		skipUntil: nil,
+		takeWhile: alwaysTrueTester,
 	}
 }
 
@@ -29,15 +27,14 @@ type payloadReader struct {
 	takeWhile     PacketTester
 	remainder     bytes.Buffer
 	closed        bool
-	isAligned     bool
 }
 
 func (r *payloadReader) SkipUntil(skipUntil PacketTester) {
-	r.skipUntil = r.where.And(skipUntil)
+	r.skipUntil = skipUntil
 }
 
 func (r *payloadReader) TakeWhile(takeWhile PacketTester) {
-	r.takeWhile = r.where.And(takeWhile)
+	r.takeWhile = takeWhile
 }
 
 func (r *payloadReader) Read(p []byte) (n int, err error) {
@@ -46,10 +43,14 @@ func (r *payloadReader) Read(p []byte) (n int, err error) {
 		return 0, io.EOF
 	}
 
-	if r.isAligned == false {
-		err = r.realign()
-		if err != nil {
-			return
+	if r.currentPacket == nil {
+		r.currentPacket = new(Packet)
+		if r.skipUntil != nil {
+			err = r.realign()
+			if err != nil {
+				return
+			}
+
 		}
 	}
 
@@ -104,7 +105,6 @@ func (r *payloadReader) realign() (err error) {
 		}
 		done := r.skipUntil(r.currentPacket)
 		if done {
-			r.isAligned = true
 			r.remainder.Write(r.currentPacket.Payload)
 			return nil
 		}
