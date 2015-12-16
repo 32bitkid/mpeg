@@ -15,7 +15,6 @@ const (
 	_                 = iota
 	ready streamState = iota
 	drained
-	refill
 )
 
 func NewPayloadUnitReader(source io.Reader, where PacketTester) io.Reader {
@@ -23,7 +22,7 @@ func NewPayloadUnitReader(source io.Reader, where PacketTester) io.Reader {
 		br:             util.NewBitReader(source),
 		where:          where,
 		startIndicator: where.And(IsPayloadUnitStart),
-		state:          refill,
+		state:          drained,
 	}
 }
 
@@ -38,9 +37,6 @@ type payloadUnitBuffer struct {
 
 func (stream *payloadUnitBuffer) Read(p []byte) (n int, err error) {
 	if stream.state == drained {
-		stream.state = refill
-		return 0, EOP
-	} else if stream.state == refill {
 		_, ferr := stream.fill()
 		if ferr != nil {
 			return 0, ferr
@@ -48,11 +44,17 @@ func (stream *payloadUnitBuffer) Read(p []byte) (n int, err error) {
 		stream.state = ready
 	}
 
-	n, err = stream.buffer.Read(p)
+	for len(p) > 0 {
+		rn, rerr := stream.buffer.Read(p)
+		n += rn
+		p = p[rn:]
 
-	if err == io.EOF {
-		stream.state = drained
-		err = nil
+		if rerr == io.EOF {
+			stream.state = drained
+			return n, EOP
+		} else if rerr != nil {
+			return n, rerr
+		}
 	}
 
 	return
@@ -63,22 +65,17 @@ func (stream *payloadUnitBuffer) fill() (n int, err error) {
 	// initialize
 	if stream.currentPacket == nil {
 		stream.currentPacket = new(Packet)
-		err := stream.advance()
-		if err != nil {
-			return 0, err
-		}
-		err = nil
-	}
 
-	// step until first start indicator
-	for {
-		isStart := stream.startIndicator(stream.currentPacket)
-		if isStart {
-			break
-		}
-		err = stream.advance()
-		if err != nil {
-			return
+		// step until first start indicator
+		for {
+			isStart := stream.startIndicator(stream.currentPacket)
+			if isStart {
+				break
+			}
+			err = stream.currentPacket.ReadFrom(stream.br)
+			if err != nil {
+				return
+			}
 		}
 	}
 
@@ -92,7 +89,7 @@ func (stream *payloadUnitBuffer) fill() (n int, err error) {
 			}
 		}
 
-		err = stream.advance()
+		err = stream.currentPacket.ReadFrom(stream.br)
 		if err != nil {
 			break
 		}
@@ -104,8 +101,4 @@ func (stream *payloadUnitBuffer) fill() (n int, err error) {
 
 	return
 
-}
-
-func (stream *payloadUnitBuffer) advance() error {
-	return stream.currentPacket.ReadFrom(stream.br)
 }
