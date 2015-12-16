@@ -67,6 +67,7 @@ func (r *payloadReader) Read(p []byte) (n int, err error) {
 		}
 	}
 
+	// Fill from packet stream
 	for len(p) > 0 {
 		err = r.next()
 		if err != nil {
