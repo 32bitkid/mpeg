@@ -99,7 +99,6 @@ func (packet *Packet) ReadFrom(tsr util.BitReader32) (err error) {
 	if packet.AdaptationFieldControl == PayloadOnly || packet.AdaptationFieldControl == FieldThenPayload {
 		packet.Payload = packet.payloadBuffer[0:payloadSize]
 
-		// TODO replace with reader
 		_, err = io.ReadFull(tsr, packet.Payload)
 		if err == io.EOF {
 			return io.ErrUnexpectedEOF
