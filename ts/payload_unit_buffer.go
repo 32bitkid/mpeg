@@ -64,7 +64,7 @@ func (stream *payloadUnitBuffer) fill() (n int, err error) {
 	if stream.currentPacket == nil {
 		stream.currentPacket = new(Packet)
 		err := stream.advance()
-		if err != nil && err != io.EOF {
+		if err != nil {
 			return 0, err
 		}
 		err = nil
