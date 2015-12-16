@@ -20,7 +20,7 @@ const (
 
 func NewPayloadUnitBuffer(source io.Reader, where PacketTester) io.Reader {
 	return &payloadUnitBuffer{
-		br:             util.NewSimpleBitReader(source),
+		br:             util.NewBitReader(source),
 		where:          where,
 		startIndicator: where.And(IsPayloadUnitStart),
 		state:          refill,

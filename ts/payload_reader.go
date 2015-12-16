@@ -12,7 +12,7 @@ type PayloadReader interface {
 func NewPayloadReader(source io.Reader, where PacketTester) PayloadReader {
 	return &payloadReader{
 		currentPacket: new(Packet),
-		br:            util.NewSimpleBitReader(source),
+		br:            util.NewBitReader(source),
 		where:         where,
 		closed:        false,
 		isAligned:     false,
