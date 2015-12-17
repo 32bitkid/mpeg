@@ -19,7 +19,7 @@ func extension_and_user_data(i int, br util.BitReader32) error {
 		}
 
 		if nextbits == UserDataStartCode {
-			user_data()
+			user_data(br)
 		}
 
 	}
@@ -98,8 +98,4 @@ func picture_display_extension() {
 
 func picture_spatial_scalable_extension() {
 	panic("unsupported: picture_spatial_scalable_extension")
-}
-
-func user_data() {
-	panic("unsupported: user_data")
 }
