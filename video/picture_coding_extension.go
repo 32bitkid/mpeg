@@ -38,19 +38,19 @@ func picture_coding_extension(br util.BitReader32) (*PictureCodingExtension, err
 
 	pce := PictureCodingExtension{}
 
-	pce.f_code[0][0], err = br.Read32(2)
+	pce.f_code[0][0], err = br.Read32(4)
 	if err != nil {
 		return nil, err
 	}
-	pce.f_code[0][1], err = br.Read32(2)
+	pce.f_code[0][1], err = br.Read32(4)
 	if err != nil {
 		return nil, err
 	}
-	pce.f_code[1][0], err = br.Read32(2)
+	pce.f_code[1][0], err = br.Read32(4)
 	if err != nil {
 		return nil, err
 	}
-	pce.f_code[1][1], err = br.Read32(2)
+	pce.f_code[1][1], err = br.Read32(4)
 	if err != nil {
 		return nil, err
 	}
