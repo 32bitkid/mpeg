@@ -1,24 +1,52 @@
 package video
 
-import br "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/mpeg/util"
+import "errors"
 
-func next_start_code(br br.Reader32) error {
+var (
+	ErrUnexpectedNonZeroByte = errors.New("unexpected non-zero byte")
+)
+
+func next_start_code(br util.BitReader32) (err error) {
 	for !br.IsByteAligned() {
-		if err := br.Trash(1); err != nil {
+		err = br.ByteAlign()
+		if err != nil {
 			return err
 		}
 	}
 
-	var err error
+	var val uint32
 
-	for true {
-		if val, err := br.Peek32(24); val == 0x000001 || err != nil {
-			break
+	for {
+		val, err = br.Peek32(24)
+
+		if err != nil {
+			return err
 		}
-		if val, err := br.Read32(8); val != 0 || err != nil {
-			break
+
+		if val == StartCodePrefix {
+			return nil
+		}
+
+		val, err = br.Read32(8)
+
+		if err != nil {
+			return err
+		}
+
+		if val != StuffingByte {
+			return ErrUnexpectedNonZeroByte
 		}
 	}
+}
 
-	return err
+func marker_bit(br util.BitReader32) error {
+	marker, err := br.ReadBit()
+	if err != nil {
+		return err
+	}
+	if marker == false {
+		return ErrMissingMarkerBit
+	}
+	return nil
 }

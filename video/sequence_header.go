@@ -4,8 +4,6 @@ import br "github.com/32bitkid/bitreader"
 import "errors"
 import "io"
 
-const sequence_header_code uint32 = 0x000001B3
-
 var ErrUnexpectedStartCode = errors.New("unexpected start code")
 var ErrMissingMarkerBit = errors.New("missing marker bit")
 
@@ -31,7 +29,7 @@ var DefaultNonIntraQuantiserMatrix = [...]byte{
 	16, 16, 16, 16, 16, 16, 16, 16,
 }
 
-type sequence_header struct {
+type SequenceHeader struct {
 	horizontal_size_value       uint32
 	vertical_size_value         uint32
 	aspect_ratio_information    uint32
@@ -43,18 +41,17 @@ type sequence_header struct {
 	non_intra_quantizer_matrix  [64]byte
 }
 
-func read_sequence_header(br br.Reader32) (*sequence_header, error) {
+func sequence_header(br br.Reader32) (*SequenceHeader, error) {
 	var err error
 
-	if start_code, err := br.Read32(32); start_code != sequence_header_code || err != nil {
-		if err != nil {
-			return nil, err
-		} else {
-			return nil, ErrUnexpectedStartCode
-		}
+	start_code, err := br.Read32(32)
+	if err != nil {
+		return nil, err
+	} else if StartCode(start_code) != SequenceHeaderStartCode {
+		return nil, ErrUnexpectedStartCode
 	}
 
-	sh := sequence_header{}
+	sh := SequenceHeader{}
 
 	if sh.horizontal_size_value, err = br.Read32(12); err != nil {
 		return nil, err
@@ -76,12 +73,9 @@ func read_sequence_header(br br.Reader32) (*sequence_header, error) {
 		return nil, err
 	}
 
-	if marker_bit, err := br.ReadBit(); marker_bit == false || err != nil {
-		if err != nil {
-			return nil, err
-		} else {
-			return nil, ErrMissingMarkerBit
-		}
+	err = marker_bit(br)
+	if err != nil {
+		return nil, err
 	}
 
 	if sh.vbv_buffer_size_value, err = br.Read32(10); err != nil {
