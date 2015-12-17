@@ -107,7 +107,5 @@ func picture_header(br util.BitReader32) (*PictureHeader, error) {
 		return nil, err
 	}
 
-	next_start_code(br)
-
-	return &ph, nil
+	return &ph, next_start_code(br)
 }
