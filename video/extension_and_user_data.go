@@ -2,8 +2,6 @@ package video
 
 import "github.com/32bitkid/mpeg/util"
 
-var log2 = util.NewLog("mpeg:video:uae")
-
 func extension_and_user_data(i int, br util.BitReader32) error {
 
 	for {

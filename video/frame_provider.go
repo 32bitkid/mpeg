@@ -4,8 +4,6 @@ import "io"
 import "github.com/32bitkid/mpeg/util"
 import "errors"
 
-var log = util.NewLog("mpeg:video:frame_provider")
-
 var ErrUnsupportedVideoStream_ISO_IEC_11172_2 = errors.New("unsupported video stream ISO/IEC 11172-2")
 
 type FrameProvider interface {
