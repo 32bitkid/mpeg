@@ -62,6 +62,7 @@ func (fp *frameProvider) Next() (interface{}, error) {
 					group_of_pictures_header(br)
 					extension_and_user_data(1, br)
 				}
+				picture_header(br)
 			}
 
 			val, err := br.Peek32(32)
