@@ -63,6 +63,8 @@ func (fp *frameProvider) Next() (interface{}, error) {
 					extension_and_user_data(1, br)
 				}
 				picture_header(br)
+				picture_coding_extension(br)
+				extension_and_user_data(2, br)
 			}
 
 			val, err := br.Peek32(32)
