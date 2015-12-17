@@ -28,7 +28,14 @@ const (
 	GroupStartCode                    = (StartCodePrefix << 8) + GroupCode
 	PictureStartCode                  = (StartCodePrefix << 8) + PictureCode
 	UserDataStartCode                 = (StartCodePrefix << 8) + UserDataCode
+
+	MinSliceStartCode StartCode = (StartCodePrefix << 8) + 0x01
+	MaxSliceStartCode StartCode = (StartCodePrefix << 8) + 0xAF
 )
+
+func is_slice_start_code(code StartCode) bool {
+	return code >= MinSliceStartCode && code <= MaxSliceStartCode
+}
 
 // slice_start_code 01 through AF
 // system start codes (see note) B9 through FF
