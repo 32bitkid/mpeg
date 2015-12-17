@@ -31,16 +31,14 @@ type SequenceScalableExtension struct {
 
 func sequence_scalable_extension(br util.BitReader32) (*SequenceScalableExtension, error) {
 
-	val, err := br.Read32(4)
+	err := extension_code_check(br, SequenceScalableExtensionID)
 	if err != nil {
 		return nil, err
-	} else if ExtensionID(val) != SequenceScalableExtensionID {
-		return nil, ErrUnexpectedSequenceExtensionID
 	}
 
 	sse := SequenceScalableExtension{}
 
-	val, err = br.Read32(2)
+	val, err := br.Read32(2)
 	if err != nil {
 		return nil, err
 	}

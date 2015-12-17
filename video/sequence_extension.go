@@ -25,6 +25,17 @@ const (
 
 var ErrUnexpectedSequenceExtensionID = errors.New("unexpected sequence extension id")
 
+func extension_code_check(br util.BitReader32, expected ExtensionID) error {
+	actual, err := br.Read32(4)
+	if err != nil {
+		return err
+	}
+	if ExtensionID(actual) != expected {
+		return ErrUnexpectedSequenceExtensionID
+	}
+	return nil
+}
+
 type SequenceExtension struct {
 	extension_start_code            uint32 // 32 bslbf
 	extension_start_code_identifier uint32 // 4 uimsbf
@@ -43,21 +54,14 @@ type SequenceExtension struct {
 
 func sequence_extension(br util.BitReader32) (*SequenceExtension, error) {
 
-	var (
-		val uint32
-		err error
-	)
-
-	err = start_code_check(br, ExtensionStartCode)
+	err := start_code_check(br, ExtensionStartCode)
 	if err != nil {
 		return nil, err
 	}
 
-	val, err = br.Read32(4)
+	err = extension_code_check(br, SequenceExtensionID)
 	if err != nil {
 		return nil, err
-	} else if ExtensionID(val) != SequenceExtensionID {
-		return nil, ErrUnexpectedSequenceExtensionID
 	}
 
 	se := SequenceExtension{}

@@ -13,11 +13,10 @@ type SequenceDisplayExtension struct {
 }
 
 func sequence_display_extension(br util.BitReader32) (*SequenceDisplayExtension, error) {
-	val, err := br.Read32(4)
+
+	err := extension_code_check(br, SequenceDisplayExtensionID)
 	if err != nil {
 		return nil, err
-	} else if ExtensionID(val) != SequenceDisplayExtensionID {
-		return nil, ErrUnexpectedSequenceExtensionID
 	}
 
 	sde := SequenceDisplayExtension{}
