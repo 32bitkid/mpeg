@@ -23,7 +23,7 @@ type Packet struct {
 	Payload []byte
 }
 
-func ReadPacketFrom(br util.BitReader32) (packet *Packet, err error) {
+func NewPacket(br util.BitReader32) (packet *Packet, err error) {
 	packet = new(Packet)
 	err = packet.readFrom(br)
 	return packet, err
