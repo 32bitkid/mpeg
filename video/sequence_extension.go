@@ -48,12 +48,9 @@ func sequence_extension(br util.BitReader32) (*SequenceExtension, error) {
 		err error
 	)
 
-	val, err = br.Read32(32)
+	err = start_code_check(br, ExtensionStartCode)
 	if err != nil {
 		return nil, err
-	}
-	if val != ExtensionStartCode {
-		return nil, ErrUnexpectedStartCode
 	}
 
 	val, err = br.Read32(4)

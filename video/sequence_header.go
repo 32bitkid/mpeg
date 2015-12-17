@@ -44,11 +44,9 @@ type SequenceHeader struct {
 func sequence_header(br br.Reader32) (*SequenceHeader, error) {
 	var err error
 
-	start_code, err := br.Read32(32)
+	err = start_code_check(br, SequenceHeaderStartCode)
 	if err != nil {
 		return nil, err
-	} else if StartCode(start_code) != SequenceHeaderStartCode {
-		return nil, ErrUnexpectedStartCode
 	}
 
 	sh := SequenceHeader{}
