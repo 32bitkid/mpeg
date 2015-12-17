@@ -76,7 +76,7 @@ func extension_data(i int, br util.BitReader32) error {
 			case PictureSpatialScalableExtensionID:
 				picture_spatial_scalable_extension()
 			default:
-				picture_temporal_scalable_extension()
+				picture_temporal_scalable_extension(br)
 			}
 		}
 	}
@@ -98,10 +98,6 @@ func picture_display_extension() {
 
 func picture_spatial_scalable_extension() {
 	panic("unsupported: picture_spatial_scalable_extension")
-}
-
-func picture_temporal_scalable_extension() {
-	panic("unsupported: picture_temporal_scalable_extension")
 }
 
 func user_data() {
