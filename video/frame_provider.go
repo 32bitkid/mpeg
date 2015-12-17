@@ -48,27 +48,45 @@ func (fp *frameProvider) Next() (interface{}, error) {
 		log.Printf("%#v\n", se)
 
 		for {
-			extension_and_user_data(0, br)
+			err = extension_and_user_data(0, br)
+			if err != nil {
+				panic("extension_and_user_data")
+			}
 
 			for {
 				nextbits, err := br.Peek32(32)
 				if err != nil {
-					panic(err)
+					panic("Peek32")
 				}
 
 				if StartCode(nextbits) == GroupStartCode {
-					group_of_pictures_header(br)
-					extension_and_user_data(1, br)
+					_, err = group_of_pictures_header(br)
+					if err != nil {
+						panic("group_of_pictures_header")
+					}
+					err = extension_and_user_data(1, br)
+					if err != nil {
+						panic("extension_and_user_data")
+					}
 				}
-				picture_header(br)
-				picture_coding_extension(br)
-				extension_and_user_data(2, br)
+				_, err = picture_header(br)
+				if err != nil {
+					panic("picture_header")
+				}
+				_, err = picture_coding_extension(br)
+				if err != nil {
+					panic("picture_coding_extension")
+				}
+				err = extension_and_user_data(2, br)
+				if err != nil {
+					panic("extension_and_user_data")
+				}
 			}
 
 			val, err := br.Peek32(32)
 			log.Printf("%x\n", val)
 			if err != nil {
-				panic(err)
+				panic("Peek32")
 			}
 
 			if val == SequenceEndStartCode {
