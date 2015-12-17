@@ -3,7 +3,7 @@ package video
 import "github.com/32bitkid/mpeg/util"
 
 type PictureCodingExtension struct {
-	fcode                      [4][4]byte
+	f_code                     [2][2]uint32
 	intra_dc_precision         uint32 // 2 uimsbf
 	picture_structure          uint32 // 2 uimsbf
 	top_field_first            bool   // 1 uimsbf
@@ -36,32 +36,107 @@ func picture_coding_extension(br util.BitReader32) (*PictureCodingExtension, err
 		return nil, err
 	}
 
-	// extension_start_code 32 bslbf
-	// extension_start_code_identifier 4 uimsbf
-	// f_code[0][0] /* forward horizontal */ 4 uimsbf
-	// f_code[0][1] /* forward vertical */ 4 uimsbf
-	// f_code[1][0] /* backward horizontal */ 4 uimsbf
-	// f_code[1][1] /* backward vertical */ 4 uimsbf
-	// intra_dc_precision 2 uimsbf
-	// picture_structure 2 uimsbf
-	// top_field_first 1 uimsbf
-	// frame_pred_frame_dct 1 uimsbf
-	// concealment_motion_vectors 1 uimsbf
-	// q_scale_type 1 uimsbf
-	// intra_vlc_format 1 uimsbf
-	// alternate_scan 1 uimsbf
-	// repeat_first_field 1 uimsbf
-	// chroma_420_type 1 uimsbf
-	// progressive_frame 1 uimsbf
-	// composite_display_flag 1 uimsbf
-	// if ( composite_display_flag ) {
-	// v_axis 1 uimsbf
-	// field_sequence 3 uimsbf
-	// sub_carrier 1 uimsbf
-	// burst_amplitude 7 uimsbf
-	// sub_carrier_phase 8 uimsbf
-	// }
-	next_start_code(br)
+	pce := PictureCodingExtension{}
 
-	panic("not supported: picture_coding_extension")
+	pce.f_code[0][0], err = br.Read32(2)
+	if err != nil {
+		return nil, err
+	}
+	pce.f_code[0][1], err = br.Read32(2)
+	if err != nil {
+		return nil, err
+	}
+	pce.f_code[1][0], err = br.Read32(2)
+	if err != nil {
+		return nil, err
+	}
+	pce.f_code[1][1], err = br.Read32(2)
+	if err != nil {
+		return nil, err
+	}
+
+	pce.intra_dc_precision, err = br.Read32(2)
+	if err != nil {
+		return nil, err
+	}
+
+	pce.picture_structure, err = br.Read32(2)
+	if err != nil {
+		return nil, err
+	}
+
+	pce.top_field_first, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	pce.frame_pred_frame_dct, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	pce.concealment_motion_vectors, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	pce.q_scale_type, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	pce.intra_vlc_format, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	pce.alternate_scan, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	pce.repeat_first_field, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	pce.chroma_420_type, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	pce.progressive_frame, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	pce.composite_display_flag, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+
+	if pce.composite_display_flag {
+		pce.v_axis, err = br.ReadBit()
+		if err != nil {
+			return nil, err
+		}
+		pce.field_sequence, err = br.Read32(3)
+		if err != nil {
+			return nil, err
+		}
+		pce.sub_carrier, err = br.ReadBit()
+		if err != nil {
+			return nil, err
+		}
+		pce.burst_amplitude, err = br.Read32(7)
+		if err != nil {
+			return nil, err
+		}
+		pce.sub_carrier_phase, err = br.Read32(8)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &pce, next_start_code(br)
 }
