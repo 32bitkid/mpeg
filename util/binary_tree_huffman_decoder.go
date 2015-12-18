@@ -1,7 +1,5 @@
 package util
 
-var l = NewLog("mpeg:util")
-
 func NewBinaryTreeHuffmanDecoder(init HuffmanTable) HuffmanDecoder {
 	root, depth := parseInitIntoTree(init)
 	return &binaryTreeHuffmanDecoder{root, depth}
@@ -86,8 +84,6 @@ func (self *binaryTreeHuffmanDecoder) Decode(br BitReader32) (interface{}, error
 
 		mask := uint32(1) << (self.depth - i)
 		bit := nextbits&mask == mask
-
-		l.Printf("%b %b %t\n", nextbits, mask, bit)
 
 		if bit {
 			val = currentNode.left
