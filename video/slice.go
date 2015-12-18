@@ -6,26 +6,30 @@ import "errors"
 var ErrInvalidReservedBits = errors.New("invalid reserved bits")
 
 type Slice struct {
-	slice_start_code                  uint32 // 32 bslbf
-	slice_vertical_position_extension uint32 // 3 uimsbf
-	priority_breakpoint               uint32 // 7 uimsbf
-	quantiser_scale_code              uint32 // 5 uimsbf
-	intra_slice_flag                  bool   // 1 bslbf
-	intra_slice                       bool   // 1 uimsbf
+	slice_start_code                  StartCode // 32 bslbf
+	slice_vertical_position_extension uint32    // 3 uimsbf
+	priority_breakpoint               uint32    // 7 uimsbf
+	quantiser_scale_code              uint32    // 5 uimsbf
+	intra_slice_flag                  bool      // 1 bslbf
+	intra_slice                       bool      // 1 uimsbf
 	extra_information                 []byte
 	macroblocks                       []interface{}
 }
 
 func slice(br util.BitReader32) (*Slice, error) {
 
-	var err error
-
 	s := Slice{}
 
-	s.slice_start_code, err = br.Read32(32)
+	code, err := br.Read32(32)
 	if err != nil {
 		return nil, err
 	}
+
+	if is_slice_start_code(StartCode(code)) == false {
+		return nil, ErrUnexpectedStartCode
+	}
+
+	s.slice_start_code = StartCode(code)
 
 	if false /* (vertical_size > 2800) */ {
 		s.slice_vertical_position_extension, err = br.Read32(3)
@@ -67,8 +71,7 @@ func slice(br util.BitReader32) (*Slice, error) {
 		reserved_bits, err := br.Read32(7)
 		if err != nil {
 			return nil, err
-		}
-		if reserved_bits != 0 {
+		} else if reserved_bits != 0 {
 			return nil, ErrInvalidReservedBits
 		}
 
@@ -76,14 +79,15 @@ func slice(br util.BitReader32) (*Slice, error) {
 			nextbits, err = br.Peek32(1)
 			if err != nil {
 				return nil, err
-			}
-			if nextbits != 1 {
+			} else if nextbits != 1 {
 				break
 			}
+
 			err = br.Trash(1)
 			if err != nil {
 				return nil, err
 			}
+
 			data, err := br.Read32(8)
 			if err != nil {
 				return nil, err
@@ -91,6 +95,7 @@ func slice(br util.BitReader32) (*Slice, error) {
 			s.extra_information = append(s.extra_information, byte(data))
 		}
 	}
+
 	err = br.Trash(1)
 	if err != nil {
 		return nil, err
