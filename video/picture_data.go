@@ -1,30 +1,31 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
-
 type PictureData struct {
 	slices []*Slice
 }
 
-func picture_data(br util.BitReader32) (*PictureData, error) {
+func (self *VideoSequence) picture_data() (err error) {
 
 	pd := PictureData{}
 
 	for {
-		s, err := slice(br)
+		s, err := self.slice()
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		pd.slices = append(pd.slices, s)
 
-		nextbits, err := br.Peek32(32)
+		nextbits, err := self.Peek32(32)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		if is_slice_start_code(StartCode(nextbits)) {
 			break
 		}
 	}
-	return &pd, next_start_code(br)
+
+	self.PictureData = &pd
+
+	return self.next_start_code()
 }

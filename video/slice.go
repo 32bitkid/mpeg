@@ -1,6 +1,5 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
 import "errors"
 
 var ErrInvalidReservedBits = errors.New("invalid reserved bits")
@@ -16,7 +15,7 @@ type Slice struct {
 	macroblocks                       []interface{}
 }
 
-func slice(br util.BitReader32) (*Slice, error) {
+func (br *VideoSequence) slice() (*Slice, error) {
 
 	s := Slice{}
 
@@ -31,13 +30,14 @@ func slice(br util.BitReader32) (*Slice, error) {
 
 	s.slice_start_code = StartCode(code)
 
-	if false /* (vertical_size > 2800) */ {
+	if br.VerticalSize() > 2800 {
 		s.slice_vertical_position_extension, err = br.Read32(3)
 		if err != nil {
 			return nil, err
 		}
 	}
 
+	// TODO
 	if false /* (<sequence_scalable_extension() is present in the bitstream>) */ {
 		if false /* (scalable_mode == “data partitioning” ) */ {
 			s.priority_breakpoint, err = br.Read32(7)
@@ -102,7 +102,7 @@ func slice(br util.BitReader32) (*Slice, error) {
 	}
 
 	for {
-		mb, err := macroblock(br)
+		mb, err := br.macroblock()
 		if err != nil {
 			return nil, err
 		}

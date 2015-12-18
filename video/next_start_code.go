@@ -7,6 +7,10 @@ var (
 	ErrUnexpectedNonZeroByte = errors.New("unexpected non-zero byte")
 )
 
+func (self *VideoSequence) next_start_code() (err error) {
+	return next_start_code(self)
+}
+
 func next_start_code(br util.BitReader32) (err error) {
 	for !br.IsByteAligned() {
 		err = br.ByteAlign()

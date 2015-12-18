@@ -1,6 +1,6 @@
 package video
 
-import br "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/mpeg/util"
 import "errors"
 import "io"
 
@@ -41,7 +41,7 @@ type SequenceHeader struct {
 	non_intra_quantizer_matrix  [64]byte
 }
 
-func sequence_header(br br.Reader32) (*SequenceHeader, error) {
+func sequence_header(br util.BitReader32) (*SequenceHeader, error) {
 	var err error
 
 	err = start_code_check(br, SequenceHeaderStartCode)
