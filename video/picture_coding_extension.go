@@ -2,6 +2,13 @@ package video
 
 import "github.com/32bitkid/mpeg/util"
 
+const (
+	_ uint32 = iota
+	PictureStructure_TopField
+	PictureStructure_BottomField
+	PictureStructure_FramePicture
+)
+
 type PictureCodingExtension struct {
 	f_code                     [2][2]uint32
 	intra_dc_precision         uint32 // 2 uimsbf
