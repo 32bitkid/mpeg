@@ -1,5 +1,9 @@
 package util
 
+import "regexp"
+
+var cleaner = regexp.MustCompile(`[^01]`)
+
 func NewBinaryTreeHuffmanDecoder(init HuffmanTable) HuffmanDecoder {
 	root, depth := parseInitIntoTree(init)
 	return &binaryTreeHuffmanDecoder{root, depth}
@@ -22,14 +26,16 @@ func parseInitIntoTree(init HuffmanTable) (*binaryHuffmanNode, uint) {
 	for _, value := range init {
 		currentNode := root
 
-		bitStringLength := len(value.BitString)
+		bitString := cleaner.ReplaceAllString(value.BitString, "")
+
+		bitStringLength := len(bitString)
 		if uint(bitStringLength) > depth {
 			depth = uint(bitStringLength)
 		}
 
 		for i := 0; i < bitStringLength; i++ {
 
-			bit := value.BitString[i : i+1]
+			bit := bitString[i : i+1]
 
 			if i < bitStringLength-1 {
 				// Descending
