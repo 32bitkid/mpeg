@@ -1,6 +1,6 @@
 package ps
 
-import br "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/mpeg/util"
 import "github.com/32bitkid/mpeg/pes"
 
 type Pack struct {
@@ -13,7 +13,7 @@ func (p *Pack) Packets() pes.PacketChannel {
 }
 
 // TODO better errors?
-func readPack(r br.Reader32) (*Pack, <-chan bool, error) {
+func readPack(r util.BitReader32) (*Pack, <-chan bool, error) {
 	var err error
 
 	packComplete := make(chan bool)
