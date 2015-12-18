@@ -1,6 +1,6 @@
 package util
 
-import "log"
+import deflog "log"
 import "io/ioutil"
 import "os"
 import "strings"
@@ -13,7 +13,7 @@ type Logger interface {
 	Println(...interface{})
 }
 
-var NoopLogger = log.New(ioutil.Discard, "", 0)
+var NoopLogger = deflog.New(ioutil.Discard, "", 0)
 
 func NewLog(ns string) Logger {
 	for _, namespace := range namespaces {
@@ -33,5 +33,5 @@ func NewLog(ns string) Logger {
 }
 
 func createLogger(ns string) Logger {
-	return log.New(os.Stdout, ns+": ", 0)
+	return deflog.New(os.Stdout, ns+": ", 0)
 }
