@@ -7,7 +7,7 @@ type PictureCodingExtension struct {
 	intra_dc_precision         uint32 // 2 uimsbf
 	picture_structure          uint32 // 2 uimsbf
 	top_field_first            bool   // 1 uimsbf
-	frame_pred_frame_dct       bool   // 1 uimsbf
+	frame_pred_frame_dct       uint32 // 1 uimsbf
 	concealment_motion_vectors bool   // 1 uimsbf
 	q_scale_type               bool   // 1 uimsbf
 	intra_vlc_format           bool   // 1 uimsbf
@@ -70,7 +70,7 @@ func picture_coding_extension(br util.BitReader32) (*PictureCodingExtension, err
 		return nil, err
 	}
 
-	pce.frame_pred_frame_dct, err = br.ReadBit()
+	pce.frame_pred_frame_dct, err = br.Read32(1)
 	if err != nil {
 		return nil, err
 	}
