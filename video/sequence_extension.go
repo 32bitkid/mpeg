@@ -36,6 +36,13 @@ func extension_code_check(br util.BitReader32, expected ExtensionID) error {
 	return nil
 }
 
+const (
+	_ uint32 = iota // reserved
+	ChromaFormat_4_2_0
+	ChromaFormat_4_2_2
+	ChromaFormat_4_4_4
+)
+
 type SequenceExtension struct {
 	extension_start_code            uint32 // 32 bslbf
 	extension_start_code_identifier uint32 // 4 uimsbf
