@@ -23,10 +23,10 @@ func parseInitIntoTree(init HuffmanTable) (*binaryHuffmanNode, uint) {
 	root := &binaryHuffmanNode{}
 	var depth uint = 0
 
-	for _, value := range init {
+	for bitString, value := range init {
 		currentNode := root
 
-		bitString := cleaner.ReplaceAllString(value.BitString, "")
+		bitString = cleaner.ReplaceAllString(bitString, "")
 
 		bitStringLength := len(bitString)
 		if uint(bitStringLength) > depth {
@@ -64,9 +64,9 @@ func parseInitIntoTree(init HuffmanTable) (*binaryHuffmanNode, uint) {
 				// Ending
 
 				if bit == "1" {
-					currentNode.left = value.Value
+					currentNode.left = value
 				} else {
-					currentNode.right = value.Value
+					currentNode.right = value
 				}
 			}
 		}

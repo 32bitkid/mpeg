@@ -11,9 +11,9 @@ func TestBTHD_Simple(t *t.T) {
 	br := util.NewBitReader(bytes.NewReader([]byte{0xa5}))
 
 	init := util.HuffmanTable{
-		{"1", "True"},
-		{"01", "False"},
-		{"00", "Maybe"},
+		"1":  "True",
+		"01": "False",
+		"00": "Maybe",
 	}
 
 	hd := util.NewBinaryTreeHuffmanDecoder(init)
@@ -62,9 +62,9 @@ func TestBTHD_Formatted(t *t.T) {
 	br := util.NewBitReader(bytes.NewReader([]byte{0xa5}))
 
 	init := util.HuffmanTable{
-		{"1", "True"},
-		{"0 1", "False"},
-		{"0 0", "Maybe"},
+		"1":   "True",
+		"0 1": "False",
+		"0 0": "Maybe",
 	}
 
 	hd := util.NewBinaryTreeHuffmanDecoder(init)

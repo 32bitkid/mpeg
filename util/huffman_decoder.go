@@ -6,10 +6,7 @@ type HuffmanDecoder interface {
 	Decode(BitReader32) (interface{}, error)
 }
 
-type HuffmanTable []struct {
-	BitString string
-	Value     interface{}
-}
+type HuffmanTable map[string]interface{}
 
 var ErrMissingHuffmanValue = errors.New("missing huffman value")
 
