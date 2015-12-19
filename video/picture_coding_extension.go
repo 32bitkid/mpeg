@@ -17,7 +17,7 @@ type PictureCodingExtension struct {
 	frame_pred_frame_dct       uint32 // 1 uimsbf
 	concealment_motion_vectors bool   // 1 uimsbf
 	q_scale_type               bool   // 1 uimsbf
-	intra_vlc_format           bool   // 1 uimsbf
+	intra_vlc_format           uint32 // 1 uimsbf
 	alternate_scan             bool   // 1 uimsbf
 	repeat_first_field         bool   // 1 uimsbf
 	chroma_420_type            bool   // 1 uimsbf
@@ -92,7 +92,7 @@ func picture_coding_extension(br util.BitReader32) (*PictureCodingExtension, err
 		return nil, err
 	}
 
-	pce.intra_vlc_format, err = br.ReadBit()
+	pce.intra_vlc_format, err = br.Read32(1)
 	if err != nil {
 		return nil, err
 	}
