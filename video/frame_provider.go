@@ -66,6 +66,7 @@ func (self *frameProvider) Next() (interface{}, error) {
 						panic("extension_and_user_data")
 					}
 				}
+
 				err = self.picture_header()
 				if err != nil {
 					panic("picture_header")
@@ -83,18 +84,28 @@ func (self *frameProvider) Next() (interface{}, error) {
 					panic(err)
 				}
 
-				panic("not implemented: frame_provider")
+				nextbits, err = self.Peek32(32)
+				if err != nil {
+					panic("peeking")
+				}
+
+				if StartCode(nextbits) != PictureStartCode &&
+					StartCode(nextbits) != GroupStartCode {
+					break
+				}
 			}
 
-			val, err := self.Peek32(32)
-			log.Printf("%x\n", val)
+			panic("not implemented: frame_provider")
+
+			nextbits, err := self.Peek32(32)
 			if err != nil {
 				panic("Peek32")
 			}
 
-			if val == SequenceEndStartCode {
+			if nextbits == SequenceEndStartCode {
 				break
 			}
+
 		}
 
 		err = self.Trash(32)
