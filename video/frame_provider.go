@@ -78,10 +78,12 @@ func (self *frameProvider) Next() (interface{}, error) {
 				if err != nil {
 					panic("extension_and_user_data")
 				}
+				err = self.picture_data()
+				if err != nil {
+					panic(err)
+				}
 
-				self.picture_data()
-
-				panic("not implemented")
+				panic("not implemented: frame_provider")
 			}
 
 			val, err := self.Peek32(32)
