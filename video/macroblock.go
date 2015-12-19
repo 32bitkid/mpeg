@@ -14,69 +14,67 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 
 	mb := Macroblock{}
 
-	for {
-		nextbits, err := br.Peek32(11)
+	nextbits, err := br.Peek32(11)
+	if err != nil {
+		return nil, err
+	}
+	if nextbits == 0x08 { // 0000 0001 000
+		br.Trash(11)
+		mb.macroblock_address_increment += 33
+	}
+
+	incr, err := MacroblockAddressIncrementDecoder.Decode(br)
+	if err != nil {
+		return nil, err
+	}
+	mb.macroblock_address_increment += incr
+
+	err = br.macroblock_mode(&mb)
+	if err != nil {
+		return nil, err
+	}
+
+	if mb.macroblock_type.macroblock_quant {
+		mb.quantiser_scale_code, err = br.Read32(5)
 		if err != nil {
 			return nil, err
 		}
-		if nextbits == 0x08 { // 0000 0001 000
-			br.Trash(11)
-			mb.macroblock_address_increment += 33
-		}
+	}
 
-		incr, err := MacroblockAddressIncrementDecoder.Decode(br)
+	if mb.macroblock_type.macroblock_motion_forward ||
+		(mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors) {
+		motion_vectors(0)
+	}
+
+	if mb.macroblock_type.macroblock_motion_backward {
+		motion_vectors(1)
+	}
+
+	if mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors {
+		err := marker_bit(br)
 		if err != nil {
 			return nil, err
 		}
-		mb.macroblock_address_increment += incr
+	}
 
-		err = br.macroblock_mode(&mb)
+	if mb.macroblock_type.macroblock_pattern {
+		coded_block_pattern()
+	}
+
+	var block_count int
+	switch br.SequenceExtension.chroma_format {
+	case ChromaFormat_4_2_0:
+		block_count = 6
+	case ChromaFormat_4_2_2:
+		block_count = 8
+	case ChromaFormat_4_4_4:
+		block_count = 12
+	}
+
+	for i := 0; i < block_count; i++ {
+		_, err := br.block(i, &mb)
 		if err != nil {
 			return nil, err
-		}
-
-		if mb.macroblock_type.macroblock_quant {
-			mb.quantiser_scale_code, err = br.Read32(5)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		if mb.macroblock_type.macroblock_motion_forward ||
-			(mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors) {
-			motion_vectors(0)
-		}
-
-		if mb.macroblock_type.macroblock_motion_backward {
-			motion_vectors(1)
-		}
-
-		if mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors {
-			err := marker_bit(br)
-			if err != nil {
-				return nil, err
-			}
-		}
-
-		if mb.macroblock_type.macroblock_pattern {
-			coded_block_pattern()
-		}
-
-		var block_count int
-		switch br.SequenceExtension.chroma_format {
-		case ChromaFormat_4_2_0:
-			block_count = 6
-		case ChromaFormat_4_2_2:
-			block_count = 8
-		case ChromaFormat_4_4_4:
-			block_count = 12
-		}
-
-		for i := 0; i < block_count; i++ {
-			_, err := br.block(i, &mb)
-			if err != nil {
-				return nil, err
-			}
 		}
 	}
 
