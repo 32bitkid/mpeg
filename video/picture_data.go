@@ -20,7 +20,8 @@ func (self *VideoSequence) picture_data() (err error) {
 		if err != nil {
 			return err
 		}
-		if is_slice_start_code(StartCode(nextbits)) {
+
+		if !is_slice_start_code(StartCode(nextbits)) {
 			break
 		}
 	}
