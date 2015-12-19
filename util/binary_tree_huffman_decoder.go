@@ -97,7 +97,9 @@ func (self *binaryTreeHuffmanDecoder) Decode(br BitReader32) (interface{}, error
 			val = currentNode.right
 		}
 
-		if nextNode, ok := val.(*binaryHuffmanNode); ok {
+		if val == nil {
+			break
+		} else if nextNode, ok := val.(*binaryHuffmanNode); ok {
 			currentNode = nextNode
 		} else {
 			br.Trash(i)
