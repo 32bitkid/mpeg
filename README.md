@@ -66,9 +66,9 @@ import "github.com/32bitkid/mpeg/pes"
 import "github.com/32bitkid/mpeg/video"
 
 func main() {
-  file, err := os.Open("source")
+  tsReader, err := os.Open("source.ts")
   // Decode PID 0x21 from the TS stream
-  pesReader := ts.NewPayloadUnitReader(file, ts.IsPID(0x21))
+  pesReader := ts.NewPayloadUnitReader(tsReader, ts.IsPID(0x21))
   // Decode the PES stream
   esReader := pes.NewPayloadReader(pesReader)
   // Decode the ES into video
