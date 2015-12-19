@@ -77,8 +77,7 @@ func newDCTCoefficientDecoder(tables [2]util.HuffmanTable) DCTCoefficientDecoder
 			return run, level, false, nil
 
 		}
-		log.Println(n, val, err)
-		panic("Wat")
+
 		return 0, 0, false, ErrUnexpectedDecodedValueType
 	}
 }
