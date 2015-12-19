@@ -25,7 +25,7 @@ func newDCTCoefficientDecoder(tables [2]util.HuffmanTable) DCTCoefficientDecoder
 	return func(br util.BitReader32, n int) (run int, level int, end bool, err error) {
 
 		var decoder util.HuffmanDecoder
-		if n == 1 {
+		if n == 0 {
 			decoder = inital
 		} else {
 			decoder = rest
