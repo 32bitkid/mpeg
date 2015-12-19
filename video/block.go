@@ -83,7 +83,9 @@ func (self *VideoSequence) block(i int, mb *Macroblock) (interface{}, error) {
 		}
 	}
 
-	log.Println(QFS)
+	if false {
+		log.Println(QFS)
+	}
 
 	return nil, nil
 	/*
