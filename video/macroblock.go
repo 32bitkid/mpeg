@@ -73,7 +73,7 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 		}
 
 		for i := 0; i < block_count; i++ {
-			_, err := block(i)
+			_, err := br.block(i, &mb)
 			if err != nil {
 				return nil, err
 			}
@@ -97,10 +97,6 @@ func motion_vectors(i int) {
 
 func coded_block_pattern() {
 	panic("coding block pattern")
-}
-
-func block(i int) (interface{}, error) {
-	panic("not implemented: block")
 }
 
 func (br *VideoSequence) macroblock_mode(mb *Macroblock) (err error) {
