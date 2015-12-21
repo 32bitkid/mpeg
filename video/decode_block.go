@@ -33,7 +33,7 @@ func sign(i int32) int32 {
 	return 0
 }
 
-func (self *VideoSequence) decode_block(cc int, QFS *[64]int32, mb *Macroblock) error {
+func (self *VideoSequence) decode_block(cc int, QFS *[64]int32, mb *Macroblock) (*block, error) {
 	var QF [8][8]int32
 	var Fpp [8][8]int32
 	var Fp [8][8]int32
@@ -122,9 +122,7 @@ func (self *VideoSequence) decode_block(cc int, QFS *[64]int32, mb *Macroblock) 
 		}
 
 		idct(&F)
-
-		log.Println(F)
 	}
 
-	return nil
+	return &F, nil
 }

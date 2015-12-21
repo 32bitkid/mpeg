@@ -1,6 +1,6 @@
 package video
 
-func (self *VideoSequence) block(i int, mb *Macroblock) error {
+func (self *VideoSequence) block(i int, mb *Macroblock) (*block, error) {
 
 	var QFS [64]int32
 
@@ -26,12 +26,12 @@ func (self *VideoSequence) block(i int, mb *Macroblock) error {
 
 		dc_dct_size, err := dcSizeDecoder(self)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		dc_dct_differential, err := self.Read32(dc_dct_size)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		var dct_diff int32
@@ -68,7 +68,7 @@ func (self *VideoSequence) block(i int, mb *Macroblock) error {
 
 		run, level, end, err := dctDecoder(self, n)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if end {
@@ -87,7 +87,5 @@ func (self *VideoSequence) block(i int, mb *Macroblock) error {
 		}
 	}
 
-	self.decode_block(cc, &QFS, mb)
-
-	return nil
+	return self.decode_block(cc, &QFS, mb)
 }

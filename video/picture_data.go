@@ -1,20 +1,33 @@
 package video
 
-type PictureData struct {
-	slices []*Slice
-}
+import "image"
+import "image/png"
+import "os"
 
 func (self *VideoSequence) picture_data() (err error) {
 
-	pd := PictureData{}
+	w := int(self.SequenceHeader.horizontal_size_value)
+	h := int(self.SequenceHeader.vertical_size_value)
+
+	r := image.Rect(0, 0, w, h)
+
+	var subsampleRatio image.YCbCrSubsampleRatio
+	switch self.SequenceExtension.chroma_format {
+	case ChromaFormat_4_2_0:
+		subsampleRatio = image.YCbCrSubsampleRatio420
+	case ChromaFormat_4_2_2:
+		subsampleRatio = image.YCbCrSubsampleRatio422
+	case ChromaFormat_4_4_4:
+		subsampleRatio = image.YCbCrSubsampleRatio444
+	}
+
+	frame := image.NewYCbCr(r, subsampleRatio)
 
 	for {
-		s, err := self.slice()
+		err := self.slice(frame)
 		if err != nil {
 			return err
 		}
-
-		pd.slices = append(pd.slices, s)
 
 		nextbits, err := self.Peek32(32)
 		if err != nil {
@@ -26,7 +39,8 @@ func (self *VideoSequence) picture_data() (err error) {
 		}
 	}
 
-	self.PictureData = &pd
+	f, _ := os.Create("test.png")
+	png.Encode(f, frame)
 
 	return self.next_start_code()
 }

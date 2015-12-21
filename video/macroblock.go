@@ -1,5 +1,7 @@
 package video
 
+import "image"
+
 type Macroblock struct {
 	macroblock_address_increment uint32
 	macroblock_type              *MacroblockType
@@ -10,13 +12,13 @@ type Macroblock struct {
 	quantiser_scale_code         uint32
 }
 
-func (br *VideoSequence) macroblock() (*Macroblock, error) {
+func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int, error) {
 
 	mb := Macroblock{}
 
 	nextbits, err := br.Peek32(11)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	if nextbits == 0x08 { // 0000 0001 000
 		br.Trash(11)
@@ -25,9 +27,11 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 
 	incr, err := MacroblockAddressIncrementDecoder.Decode(br)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	mb.macroblock_address_increment += incr
+
+	mbAddress += int(mb.macroblock_address_increment)
 
 	if incr > 1 {
 		br.resetPredictors()
@@ -35,7 +39,7 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 
 	err = br.macroblock_mode(&mb)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 
 	if !mb.macroblock_type.macroblock_intra {
@@ -45,7 +49,7 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 	if mb.macroblock_type.macroblock_quant {
 		mb.quantiser_scale_code, err = br.Read32(5)
 		if err != nil {
-			return nil, err
+			return 0, err
 		}
 		br.lastQuantiserScaleCode = mb.quantiser_scale_code
 	}
@@ -62,7 +66,7 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 	if mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors {
 		err := marker_bit(br)
 		if err != nil {
-			return nil, err
+			return 0, err
 		}
 	}
 
@@ -81,13 +85,63 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 	}
 
 	for i := 0; i < block_count; i++ {
-		err := br.block(i, &mb)
+		decoded, err := br.block(i, &mb)
 		if err != nil {
-			return nil, err
+			return 0, err
+		}
+		updateFrameSlice(i, mbAddress, frameSlice, decoded)
+
+	}
+
+	return mbAddress, nil
+}
+
+func updateFrameSlice(i int, mbAddress int, frameSlice *image.YCbCr, b *block) {
+	switch i {
+	case 0:
+		xs := (mbAddress - 1) * 16
+		for y := 0; y < 8; y++ {
+			for x := 0; x < 8; x++ {
+				frameSlice.Y[y*frameSlice.YStride+xs+x] = uint8(b[y*8+x])
+			}
+		}
+	case 1:
+		xs := (mbAddress - 1) * 16
+		for y := 0; y < 8; y++ {
+			for x := 0; x < 8; x++ {
+				frameSlice.Y[y*frameSlice.YStride+xs+x+8] = uint8(b[y*8+x])
+			}
+		}
+	case 2:
+		xs := (mbAddress - 1) * 16
+		for y := 0; y < 8; y++ {
+			for x := 0; x < 8; x++ {
+				frameSlice.Y[(y+8)*frameSlice.YStride+xs+x] = uint8(b[y*8+x])
+			}
+		}
+	case 3:
+		xs := (mbAddress - 1) * 16
+		for y := 0; y < 8; y++ {
+			for x := 0; x < 8; x++ {
+				frameSlice.Y[(y+8)*frameSlice.YStride+xs+x+8] = uint8(b[y*8+x])
+			}
+		}
+	case 4:
+		xs := (mbAddress - 1) * 8
+		for y := 0; y < 8; y++ {
+			for x := 0; x < 8; x++ {
+				frameSlice.Cb[y*frameSlice.CStride+xs+x] = uint8(b[y*8+x])
+			}
+		}
+	case 5:
+		xs := (mbAddress - 1) * 8
+		for y := 0; y < 8; y++ {
+			for x := 0; x < 8; x++ {
+				frameSlice.Cr[y*frameSlice.CStride+xs+x] = uint8(b[y*8+x])
+			}
 		}
 	}
 
-	return &mb, nil
 }
 
 func motion_vectors(i int) {

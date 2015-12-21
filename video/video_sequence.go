@@ -18,7 +18,6 @@ type VideoSequence struct {
 	*GroupOfPicturesHeader
 	*PictureHeader
 	*PictureCodingExtension
-	*PictureData
 
 	dcDctPredictors        [3]int32
 	quantisationMatricies  [4]QuantisationMatrix
