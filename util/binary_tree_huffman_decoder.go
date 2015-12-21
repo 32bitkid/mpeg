@@ -1,7 +1,9 @@
 package util
 
 import "regexp"
+import "fmt"
 
+var log = NewLog("mpeg:util")
 var cleaner = regexp.MustCompile(`[^01]`)
 
 func NewBinaryTreeHuffmanDecoder(init HuffmanTable) HuffmanDecoder {
@@ -98,6 +100,8 @@ func (self *binaryTreeHuffmanDecoder) Decode(br BitReader32) (interface{}, error
 		}
 
 		if val == nil {
+			format := fmt.Sprintf("%%0%db", self.depth)
+			log.Printf(format, nextbits)
 			break
 		} else if nextNode, ok := val.(*binaryHuffmanNode); ok {
 			currentNode = nextNode

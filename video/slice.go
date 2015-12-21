@@ -12,10 +12,12 @@ type Slice struct {
 	intra_slice_flag                  bool      // 1 bslbf
 	intra_slice                       bool      // 1 uimsbf
 	extra_information                 []byte
-	macroblocks                       []interface{}
+	macroblocks                       []*Macroblock
 }
 
 func (br *VideoSequence) slice() (*Slice, error) {
+
+	br.resetPredictors()
 
 	s := Slice{}
 
@@ -51,6 +53,8 @@ func (br *VideoSequence) slice() (*Slice, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	br.lastQuantiserScaleCode = s.quantiser_scale_code
 
 	nextbits, err := br.Peek32(1)
 	if err != nil {

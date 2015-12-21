@@ -4,7 +4,7 @@ import "github.com/32bitkid/mpeg/util"
 
 type DCTCoefficient struct {
 	run   int
-	level int
+	level int32
 }
 
 type DCTSpecialToken string
@@ -17,12 +17,12 @@ var DCTSpecial = struct {
 	DCTSpecialToken("escape"),
 }
 
-type DCTCoefficientDecoderFn func(br util.BitReader32, n int) (int, int, bool, error)
+type DCTCoefficientDecoderFn func(br util.BitReader32, n int) (int, int32, bool, error)
 
 func newDCTCoefficientDecoder(tables [2]util.HuffmanTable) DCTCoefficientDecoderFn {
 	inital := util.NewHuffmanDecoder(tables[0])
 	rest := util.NewHuffmanDecoder(tables[1])
-	return func(br util.BitReader32, n int) (run int, level int, end bool, err error) {
+	return func(br util.BitReader32, n int) (run int, level int32, end bool, err error) {
 
 		var decoder util.HuffmanDecoder
 		if n == 0 {
@@ -56,7 +56,7 @@ func newDCTCoefficientDecoder(tables [2]util.HuffmanTable) DCTCoefficientDecoder
 				if err != nil {
 					return 0, 0, false, err
 				}
-				level = int(val)
+				level = int32(val)
 				if sign {
 					level += -2048
 				}

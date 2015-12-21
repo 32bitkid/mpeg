@@ -29,9 +29,17 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 	}
 	mb.macroblock_address_increment += incr
 
+	if incr > 1 {
+		br.resetPredictors()
+	}
+
 	err = br.macroblock_mode(&mb)
 	if err != nil {
 		return nil, err
+	}
+
+	if !mb.macroblock_type.macroblock_intra {
+		br.resetPredictors()
 	}
 
 	if mb.macroblock_type.macroblock_quant {
@@ -39,6 +47,7 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 		if err != nil {
 			return nil, err
 		}
+		br.lastQuantiserScaleCode = mb.quantiser_scale_code
 	}
 
 	if mb.macroblock_type.macroblock_motion_forward ||
@@ -72,7 +81,7 @@ func (br *VideoSequence) macroblock() (*Macroblock, error) {
 	}
 
 	for i := 0; i < block_count; i++ {
-		_, err := br.block(i, &mb)
+		err := br.block(i, &mb)
 		if err != nil {
 			return nil, err
 		}
