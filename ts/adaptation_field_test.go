@@ -1,11 +1,11 @@
 package ts_test
 
 import "testing"
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/mpeg/ts"
 
 func TestAdaptationField(t *testing.T) {
-	reader := util.NewBitReader(adaptationFieldReader())
+	reader := bitreader.NewBitReader(adaptationFieldReader())
 	packet := new(ts.Packet)
 
 	err := packet.ReadFrom(reader)

@@ -3,7 +3,7 @@ package pes
 import "errors"
 import "io"
 import "io/ioutil"
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/mpeg/ts"
 
 const (
@@ -23,13 +23,13 @@ type Packet struct {
 	Payload []byte
 }
 
-func NewPacket(br util.BitReader32) (packet *Packet, err error) {
+func NewPacket(br bitreader.BitReader) (packet *Packet, err error) {
 	packet = new(Packet)
 	err = packet.readFrom(br)
 	return packet, err
 }
 
-func (packet *Packet) readFrom(reader util.BitReader32) error {
+func (packet *Packet) readFrom(reader bitreader.BitReader) error {
 
 	var (
 		val uint32

@@ -1,7 +1,7 @@
 package video
 
 import "io"
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 import "errors"
 
 var ErrUnsupportedVideoStream_ISO_IEC_11172_2 = errors.New("unsupported video stream ISO/IEC 11172-2")
@@ -12,7 +12,7 @@ type FrameProvider interface {
 
 func NewFrameProvider(source io.Reader) FrameProvider {
 	return &frameProvider{
-		NewVideoSequence(util.NewBitReader(source)),
+		NewVideoSequence(bitreader.NewBitReader(source)),
 	}
 }
 

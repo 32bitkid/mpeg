@@ -1,6 +1,6 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 type PictureTemporalScalableExtension struct {
 	reference_select_code       uint32 // 2 uimsbf
@@ -8,7 +8,7 @@ type PictureTemporalScalableExtension struct {
 	backward_temporal_reference uint32 // 10 uimsbf
 }
 
-func picture_temporal_scalable_extension(br util.BitReader32) (*PictureTemporalScalableExtension, error) {
+func picture_temporal_scalable_extension(br bitreader.BitReader) (*PictureTemporalScalableExtension, error) {
 	err := extension_code_check(br, PictureTemporalScalableExtensionID)
 	if err != nil {
 		return nil, err

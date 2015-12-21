@@ -1,5 +1,5 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/clogo"
 
-var log = util.NewLog("mpeg:video")
+var log = clogo.NewLog("mpeg:video")

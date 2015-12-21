@@ -2,7 +2,7 @@ package ts
 
 import "io"
 import "bytes"
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 type PayloadReader interface {
 	io.Reader
@@ -11,7 +11,7 @@ type PayloadReader interface {
 
 func NewPayloadReader(source io.Reader, where PacketTester) PayloadReader {
 	return &payloadReader{
-		br:        util.NewBitReader(source),
+		br:        bitreader.NewBitReader(source),
 		where:     where,
 		closed:    false,
 		skipUntil: nil,
@@ -21,7 +21,7 @@ func NewPayloadReader(source io.Reader, where PacketTester) PayloadReader {
 
 type payloadReader struct {
 	currentPacket *Packet
-	br            util.BitReader32
+	br            bitreader.BitReader
 	where         PacketTester
 	skipUntil     PacketTester
 	takeWhile     PacketTester

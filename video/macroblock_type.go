@@ -1,12 +1,13 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/huffman"
 
-type macroblockTypeDecoder func(util.BitReader32) (*MacroblockType, error)
+type macroblockTypeDecoder func(bitreader.BitReader) (*MacroblockType, error)
 
-func newMacroblockTypeDecoder(table util.HuffmanTable) macroblockTypeDecoder {
-	decoder := util.NewHuffmanDecoder(table)
-	return func(br util.BitReader32) (*MacroblockType, error) {
+func newMacroblockTypeDecoder(table huffman.HuffmanTable) macroblockTypeDecoder {
+	decoder := huffman.NewHuffmanDecoder(table)
+	return func(br bitreader.BitReader) (*MacroblockType, error) {
 		val, err := decoder.Decode(br)
 		if err != nil {
 			return nil, err
@@ -38,12 +39,12 @@ type MacroblockType struct {
 	spatial_temporal_weight_classes   SpatialTemporalWeightClass
 }
 
-var iFrameMacroblockTypesTable = util.HuffmanTable{
+var iFrameMacroblockTypesTable = huffman.HuffmanTable{
 	"1":  &MacroblockType{false, false, false, false, true, false, SpatialTemporalWeightClass_0},
 	"01": &MacroblockType{true, false, false, false, true, false, SpatialTemporalWeightClass_0},
 }
 
-var pFrameMacroblockTypesTable = util.HuffmanTable{
+var pFrameMacroblockTypesTable = huffman.HuffmanTable{
 	"1":       &MacroblockType{false, true, false, true, false, false, SpatialTemporalWeightClass_0},
 	"01":      &MacroblockType{false, false, false, true, false, false, SpatialTemporalWeightClass_0},
 	"001":     &MacroblockType{false, true, false, false, false, false, SpatialTemporalWeightClass_0},
@@ -53,7 +54,7 @@ var pFrameMacroblockTypesTable = util.HuffmanTable{
 	"0000 01": &MacroblockType{true, false, false, false, true, false, SpatialTemporalWeightClass_0},
 }
 
-var bFrameMacroblockTypesTable = util.HuffmanTable{
+var bFrameMacroblockTypesTable = huffman.HuffmanTable{
 	"10":      &MacroblockType{false, true, true, false, false, false, SpatialTemporalWeightClass_0},
 	"11":      &MacroblockType{false, true, true, true, false, false, SpatialTemporalWeightClass_0},
 	"010":     &MacroblockType{false, false, true, false, false, false, SpatialTemporalWeightClass_0},

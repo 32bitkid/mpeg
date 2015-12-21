@@ -1,12 +1,13 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/huffman"
 import "errors"
 
-type macroblockAddressIncrementDecoder func(util.BitReader32) (uint32, error)
+type macroblockAddressIncrementDecoder func(bitreader.BitReader) (uint32, error)
 
 var ErrUnexpectedDecodedValueType = errors.New("unexpected decoded value type")
-var macroblockAddressIncrementHuffmanDecoder = util.NewHuffmanDecoder(util.HuffmanTable{
+var macroblockAddressIncrementHuffmanDecoder = huffman.NewHuffmanDecoder(huffman.HuffmanTable{
 	"1":             uint32(1),
 	"011":           uint32(2),
 	"010":           uint32(3),
@@ -42,7 +43,7 @@ var macroblockAddressIncrementHuffmanDecoder = util.NewHuffmanDecoder(util.Huffm
 	"0000 0011 000": uint32(33),
 })
 
-func decodeMacroblockAddressIncrement(br util.BitReader32) (uint32, error) {
+func decodeMacroblockAddressIncrement(br bitreader.BitReader) (uint32, error) {
 	val, err := macroblockAddressIncrementHuffmanDecoder.Decode(br)
 	if err != nil {
 		return 0, err

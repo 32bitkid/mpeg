@@ -60,7 +60,7 @@ package main
 
 import "os"
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/mpeg/ts"
 import "github.com/32bitkid/mpeg/pes"
 import "github.com/32bitkid/mpeg/video"
@@ -86,14 +86,14 @@ func main() {
 
 ```go
 import "github.com/32bitkid/mpeg/ts"
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 import "os"
 
 func main() {
 	file, _ := os.Open("source.ts")
   
-	demux := ts.NewDemuxer(util.NewBitReader32(file))
+	demux := ts.NewDemuxer(bitreader.NewBitReader32(file))
 	packets := demux.Where(ts.IsPID(0x21))
 	demux.Go()
 	for packet := range packets {
@@ -106,14 +106,14 @@ func main() {
 
 ```go
 import "github.com/32bitkid/mpeg/ts"
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 import "os"
 
 func main() {
 	file, _ := os.Open("source.ts")
   
-	demux := ts.NewDemuxer(util.NewBitReader32(file))
+	demux := ts.NewDemuxer(bitreader.NewBitReader32(file))
 	hd := demux.Where(ts.IsPID(0x21))
 	sd := demux.Where(ts.IsPID(0x31))
 	demux.Go()

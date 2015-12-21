@@ -2,17 +2,17 @@ package pes
 
 import "io"
 import "bytes"
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 func NewPayloadReader(source io.Reader) io.Reader {
 	return &payloadReader{
-		br:            util.NewBitReader(source),
+		br:            bitreader.NewBitReader(source),
 		currentPacket: new(Packet),
 	}
 }
 
 type payloadReader struct {
-	br            util.BitReader32
+	br            bitreader.BitReader
 	currentPacket *Packet
 	remainder     bytes.Buffer
 }

@@ -1,6 +1,6 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 const (
 	_ uint32 = iota
@@ -31,7 +31,7 @@ type PictureCodingExtension struct {
 	sub_carrier_phase uint32 // 8 uimsbf
 }
 
-func picture_coding_extension(br util.BitReader32) (*PictureCodingExtension, error) {
+func picture_coding_extension(br bitreader.BitReader) (*PictureCodingExtension, error) {
 
 	err := start_code_check(br, ExtensionStartCode)
 	if err != nil {

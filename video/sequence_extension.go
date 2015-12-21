@@ -1,6 +1,6 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 import "errors"
 
 type ExtensionID uint32
@@ -25,7 +25,7 @@ const (
 
 var ErrUnexpectedSequenceExtensionID = errors.New("unexpected sequence extension id")
 
-func extension_code_check(br util.BitReader32, expected ExtensionID) error {
+func extension_code_check(br bitreader.BitReader, expected ExtensionID) error {
 	actual, err := br.Read32(4)
 	if err != nil {
 		return err
@@ -59,7 +59,7 @@ type SequenceExtension struct {
 	frame_rate_extension_d          uint32 // 5 uimsbf
 }
 
-func sequence_extension(br util.BitReader32) (*SequenceExtension, error) {
+func sequence_extension(br bitreader.BitReader) (*SequenceExtension, error) {
 
 	err := start_code_check(br, ExtensionStartCode)
 	if err != nil {

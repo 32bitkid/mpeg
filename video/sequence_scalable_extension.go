@@ -1,6 +1,6 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 type ScalableMode uint32
 
@@ -29,7 +29,7 @@ type SequenceScalableExtension struct {
 	picture_mux_factor          uint32 // 3 uimsbf
 }
 
-func sequence_scalable_extension(br util.BitReader32) (*SequenceScalableExtension, error) {
+func sequence_scalable_extension(br bitreader.BitReader) (*SequenceScalableExtension, error) {
 
 	err := extension_code_check(br, SequenceScalableExtensionID)
 	if err != nil {

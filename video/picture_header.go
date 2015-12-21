@@ -1,6 +1,6 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 type PictureCodingType uint32
 
@@ -31,7 +31,7 @@ type PictureHeader struct {
 	extra_information []byte
 }
 
-func picture_header(br util.BitReader32) (*PictureHeader, error) {
+func picture_header(br bitreader.BitReader) (*PictureHeader, error) {
 
 	err := start_code_check(br, PictureStartCode)
 	if err != nil {

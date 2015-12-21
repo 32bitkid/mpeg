@@ -1,11 +1,11 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 type DC_DCT_Predictors [3]int
 
 type VideoSequence struct {
-	util.BitReader32
+	bitreader.BitReader
 
 	// Sequence Headers
 	*SequenceHeader
@@ -24,9 +24,9 @@ type VideoSequence struct {
 	lastQuantiserScaleCode uint32
 }
 
-func NewVideoSequence(br util.BitReader32) VideoSequence {
+func NewVideoSequence(br bitreader.BitReader) VideoSequence {
 	return VideoSequence{
-		BitReader32: br,
+		BitReader: br,
 	}
 }
 

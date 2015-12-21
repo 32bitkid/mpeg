@@ -1,8 +1,8 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
-func extension_and_user_data(i int, br util.BitReader32) error {
+func extension_and_user_data(i int, br bitreader.BitReader) error {
 
 	for {
 		nextbits, err := br.Peek32(32)
@@ -27,7 +27,7 @@ func extension_and_user_data(i int, br util.BitReader32) error {
 	return nil
 }
 
-func extension_data(i int, br util.BitReader32) error {
+func extension_data(i int, br bitreader.BitReader) error {
 	for {
 		nextbits, err := br.Peek32(32)
 		if err != nil {

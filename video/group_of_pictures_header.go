@@ -1,6 +1,6 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 type GroupOfPicturesHeader struct {
 	time_code   uint32 // 25 bslbf
@@ -9,7 +9,7 @@ type GroupOfPicturesHeader struct {
 
 }
 
-func group_of_pictures_header(br util.BitReader32) (*GroupOfPicturesHeader, error) {
+func group_of_pictures_header(br bitreader.BitReader) (*GroupOfPicturesHeader, error) {
 	err := start_code_check(br, GroupStartCode)
 	if err != nil {
 		return nil, err

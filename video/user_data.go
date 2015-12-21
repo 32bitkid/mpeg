@@ -1,10 +1,10 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 type UserData []byte
 
-func user_data(br util.BitReader32) (UserData, error) {
+func user_data(br bitreader.BitReader) (UserData, error) {
 	err := start_code_check(br, UserDataStartCode)
 	if err != nil {
 		return nil, err

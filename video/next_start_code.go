@@ -1,6 +1,6 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 import "errors"
 
 var (
@@ -11,9 +11,9 @@ func (self *VideoSequence) next_start_code() (err error) {
 	return next_start_code(self)
 }
 
-func next_start_code(br util.BitReader32) (err error) {
+func next_start_code(br bitreader.BitReader) (err error) {
 	for !br.IsByteAligned() {
-		err = br.ByteAlign()
+		_, err = br.ByteAlign()
 		if err != nil {
 			return err
 		}
@@ -44,7 +44,7 @@ func next_start_code(br util.BitReader32) (err error) {
 	}
 }
 
-func marker_bit(br util.BitReader32) error {
+func marker_bit(br bitreader.BitReader) error {
 	marker, err := br.ReadBit()
 	if err != nil {
 		return err

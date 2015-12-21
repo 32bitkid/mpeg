@@ -1,6 +1,6 @@
 package pes
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 const (
 	MinimumHeaderSize uint32 = 3
@@ -27,7 +27,7 @@ type Header struct {
 	Extension *Extension
 }
 
-func ReadHeader(reader util.BitReader32) (*Header, uint32, error) {
+func ReadHeader(reader bitreader.BitReader) (*Header, uint32, error) {
 
 	val, err := reader.Read32(2)
 	if val != 2 || err != nil {
@@ -175,7 +175,7 @@ func ReadHeader(reader util.BitReader32) (*Header, uint32, error) {
 	return &header, bytesRead, nil
 }
 
-func readStuffingBytes(reader util.BitReader32, length uint32) (uint32, error) {
+func readStuffingBytes(reader bitreader.BitReader, length uint32) (uint32, error) {
 	for i := uint32(0); i < length; i++ {
 		val, err := reader.Read32(8)
 		if err != nil {
@@ -188,7 +188,7 @@ func readStuffingBytes(reader util.BitReader32, length uint32) (uint32, error) {
 	return length, nil
 }
 
-func readTimeStamp(marker uint32, reader util.BitReader32) (uint32, uint32, error) {
+func readTimeStamp(marker uint32, reader bitreader.BitReader) (uint32, uint32, error) {
 
 	var (
 		timeStamp uint32

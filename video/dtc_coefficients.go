@@ -1,6 +1,7 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
+import "github.com/32bitkid/huffman"
 
 type DCTCoefficient struct {
 	run   int
@@ -17,14 +18,14 @@ var DCTSpecial = struct {
 	DCTSpecialToken("escape"),
 }
 
-type DCTCoefficientDecoderFn func(br util.BitReader32, n int) (int, int32, bool, error)
+type DCTCoefficientDecoderFn func(br bitreader.BitReader, n int) (int, int32, bool, error)
 
-func newDCTCoefficientDecoder(tables [2]util.HuffmanTable) DCTCoefficientDecoderFn {
-	inital := util.NewHuffmanDecoder(tables[0])
-	rest := util.NewHuffmanDecoder(tables[1])
-	return func(br util.BitReader32, n int) (run int, level int32, end bool, err error) {
+func newDCTCoefficientDecoder(tables [2]huffman.HuffmanTable) DCTCoefficientDecoderFn {
+	inital := huffman.NewHuffmanDecoder(tables[0])
+	rest := huffman.NewHuffmanDecoder(tables[1])
+	return func(br bitreader.BitReader, n int) (run int, level int32, end bool, err error) {
 
-		var decoder util.HuffmanDecoder
+		var decoder huffman.HuffmanDecoder
 		if n == 0 {
 			decoder = inital
 		} else {
@@ -82,7 +83,7 @@ func newDCTCoefficientDecoder(tables [2]util.HuffmanTable) DCTCoefficientDecoder
 	}
 }
 
-var dctCoefficientTables = [2][2]util.HuffmanTable{
+var dctCoefficientTables = [2][2]huffman.HuffmanTable{
 	{
 		{
 			"1":            DCTCoefficient{0, 1},
@@ -557,11 +558,11 @@ var dctCoefficientTables = [2][2]util.HuffmanTable{
 	},
 }
 
-type DCTDCSizeDecoderFn func(br util.BitReader32) (uint, error)
+type DCTDCSizeDecoderFn func(br bitreader.BitReader) (uint, error)
 
-func newDCTDCSizeDecoder(table util.HuffmanTable) DCTDCSizeDecoderFn {
-	decoder := util.NewHuffmanDecoder(table)
-	return func(br util.BitReader32) (uint, error) {
+func newDCTDCSizeDecoder(table huffman.HuffmanTable) DCTDCSizeDecoderFn {
+	decoder := huffman.NewHuffmanDecoder(table)
+	return func(br bitreader.BitReader) (uint, error) {
 		val, err := decoder.Decode(br)
 		if err != nil {
 			return 0, err
@@ -574,7 +575,7 @@ func newDCTDCSizeDecoder(table util.HuffmanTable) DCTDCSizeDecoderFn {
 }
 
 // Table B-12
-var dctDcSizeLuminanceTable = util.HuffmanTable{
+var dctDcSizeLuminanceTable = huffman.HuffmanTable{
 	"100":         uint(0),
 	"00":          uint(1),
 	"01":          uint(2),
@@ -590,7 +591,7 @@ var dctDcSizeLuminanceTable = util.HuffmanTable{
 }
 
 // Table B-13
-var dctDcSizeChrominanceTable = util.HuffmanTable{
+var dctDcSizeChrominanceTable = huffman.HuffmanTable{
 	"00":           uint(0),
 	"01":           uint(1),
 	"10":           uint(2),

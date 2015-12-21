@@ -1,6 +1,6 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 type StartCode uint32
 
@@ -40,7 +40,7 @@ func is_slice_start_code(code StartCode) bool {
 // slice_start_code 01 through AF
 // system start codes (see note) B9 through FF
 
-func start_code_check(br util.BitReader32, expected StartCode) error {
+func start_code_check(br bitreader.BitReader, expected StartCode) error {
 	actual, err := br.Read32(32)
 	if err != nil {
 		return err

@@ -1,6 +1,6 @@
 package video
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 type SequenceDisplayExtension struct {
 	video_format             uint32 // 3 uimsbf
@@ -12,7 +12,7 @@ type SequenceDisplayExtension struct {
 	display_vertical_size    uint32 // 14 uimsbf
 }
 
-func sequence_display_extension(br util.BitReader32) (*SequenceDisplayExtension, error) {
+func sequence_display_extension(br bitreader.BitReader) (*SequenceDisplayExtension, error) {
 
 	err := extension_code_check(br, SequenceDisplayExtensionID)
 	if err != nil {

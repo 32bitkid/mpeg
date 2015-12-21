@@ -2,7 +2,7 @@ package video
 
 import "testing"
 import "bytes"
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 func TestSequenceHeader(t *testing.T) {
 	testData := []byte{
@@ -16,7 +16,7 @@ func TestSequenceHeader(t *testing.T) {
 		0x1A, 0x1A, 0x1A, 0x1B, 0x1B, 0x1B, 0x1B, 0x1C, 0x1C,
 		0x1C, 0x1D, 0x1D, 0x1E}
 
-	br := util.NewSimpleReader32(bytes.NewReader(testData))
+	br := bitreader.NewBitReader(bytes.NewReader(testData))
 
 	actual, err := sequence_header(br)
 	if err != nil {

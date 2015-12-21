@@ -1,6 +1,6 @@
 package ts
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 import "io"
 import "errors"
 
@@ -27,13 +27,13 @@ type Packet struct {
 	payloadBuffer [MaxPayloadSize]byte
 }
 
-func NewPacket(br util.BitReader32) (packet *Packet, err error) {
+func NewPacket(br bitreader.BitReader) (packet *Packet, err error) {
 	packet = new(Packet)
 	err = packet.ReadFrom(br)
 	return
 }
 
-func (packet *Packet) ReadFrom(tsr util.BitReader32) (err error) {
+func (packet *Packet) ReadFrom(tsr bitreader.BitReader) (err error) {
 
 	aligned, err := isAligned(tsr)
 	if err != nil {
@@ -110,7 +110,7 @@ func (packet *Packet) ReadFrom(tsr util.BitReader32) (err error) {
 	return nil
 }
 
-func isAligned(tsr util.BitReader32) (bool, error) {
+func isAligned(tsr bitreader.BitReader) (bool, error) {
 	if tsr.IsByteAligned() == false {
 		return false, nil
 	}
@@ -123,7 +123,7 @@ func isAligned(tsr util.BitReader32) (bool, error) {
 	return val == SyncByte, nil
 }
 
-func realign(tsr util.BitReader32) error {
+func realign(tsr bitreader.BitReader) error {
 	if tsr.IsByteAligned() == false {
 		tsr.ByteAlign()
 	}

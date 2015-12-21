@@ -1,6 +1,6 @@
 package pes
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 import "io"
 
 type Extension struct {
@@ -19,7 +19,7 @@ type P_STD_Buffer struct {
 	Size  uint32
 }
 
-func readExtension(r util.BitReader32) (*Extension, uint32, error) {
+func readExtension(r bitreader.BitReader) (*Extension, uint32, error) {
 	var err error
 	var bytesRead uint32 = 0
 	extension := Extension{}

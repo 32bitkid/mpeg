@@ -1,12 +1,12 @@
 package ts
 
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 import "io"
 
 // Creates a new MPEG-2 Transport Stream Demultiplexer
 func NewDemuxer(reader io.Reader) Demuxer {
 	return &tsDemuxer{
-		reader:    util.NewBitReader(reader),
+		reader:    bitreader.NewBitReader(reader),
 		skipUntil: alwaysTrueTester,
 		takeWhile: alwaysTrueTester,
 	}
@@ -36,7 +36,7 @@ type conditionalChannel struct {
 }
 
 type tsDemuxer struct {
-	reader             util.BitReader32
+	reader             bitreader.BitReader
 	registeredChannels []conditionalChannel
 	lastErr            error
 	skipUntil          PacketTester

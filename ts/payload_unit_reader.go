@@ -3,7 +3,7 @@ package ts
 import "io"
 import "bytes"
 import "errors"
-import "github.com/32bitkid/mpeg/util"
+import "github.com/32bitkid/bitreader"
 
 var (
 	EOP = errors.New("end of packet")
@@ -19,7 +19,7 @@ const (
 
 func NewPayloadUnitReader(source io.Reader, where PacketTester) io.Reader {
 	return &payloadUnitBuffer{
-		br:             util.NewBitReader(source),
+		br:             bitreader.NewBitReader(source),
 		where:          where,
 		startIndicator: where.And(IsPayloadUnitStart),
 		state:          drained,
@@ -29,7 +29,7 @@ func NewPayloadUnitReader(source io.Reader, where PacketTester) io.Reader {
 type payloadUnitBuffer struct {
 	currentPacket  *Packet
 	buffer         bytes.Buffer
-	br             util.BitReader32
+	br             bitreader.BitReader
 	where          PacketTester
 	startIndicator PacketTester
 	state          streamState
