@@ -1,6 +1,7 @@
 package video
 
 import "errors"
+import "github.com/32bitkid/bitreader"
 import "io"
 
 var ErrUnexpectedStartCode = errors.New("unexpected start code")
@@ -14,92 +15,111 @@ type SequenceHeader struct {
 	bit_rate_value              uint32
 	vbv_buffer_size_value       uint32
 	constrained_parameters_flag bool
+
+	load_intra_quantiser_matrix     bool
+	load_non_intra_quantizer_matrix bool
+
+	intra_quantiser_matrix     QuantisationMatrix
+	non_intra_quantizer_matrix QuantisationMatrix
 }
 
-func (br *frameProvider) sequence_header() error {
+func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
+
 	var err error
 
 	err = start_code_check(br, SequenceHeaderStartCode)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	sh := SequenceHeader{}
 
 	if sh.horizontal_size_value, err = br.Read32(12); err != nil {
-		return err
+		return nil, err
 	}
 
 	if sh.vertical_size_value, err = br.Read32(12); err != nil {
-		return err
+		return nil, err
 	}
 
 	if sh.aspect_ratio_information, err = br.Read32(4); err != nil {
-		return err
+		return nil, err
 	}
 
 	if sh.frame_rate_code, err = br.Read32(4); err != nil {
-		return err
+		return nil, err
 	}
 
 	if sh.bit_rate_value, err = br.Read32(18); err != nil {
-		return err
+		return nil, err
 	}
 
 	err = marker_bit(br)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if sh.vbv_buffer_size_value, err = br.Read32(10); err != nil {
-		return err
+		return nil, err
 	}
 
 	if sh.constrained_parameters_flag, err = br.ReadBit(); err != nil {
-		return err
+		return nil, err
 	}
 
-	load_intra_quantiser_matrix, err := br.ReadBit()
+	sh.load_intra_quantiser_matrix, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+	if sh.load_intra_quantiser_matrix {
+		for i := 0; i < 8; i++ {
+			_, err := io.ReadFull(br, sh.intra_quantiser_matrix[i][:])
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	sh.load_non_intra_quantizer_matrix, err = br.ReadBit()
+	if err != nil {
+		return nil, err
+	}
+	if sh.load_non_intra_quantizer_matrix {
+		for i := 0; i < 8; i++ {
+			_, err := io.ReadFull(br, sh.non_intra_quantizer_matrix[i][:])
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
+	return &sh, next_start_code(br)
+}
+
+func (fp *frameProvider) sequence_header() (err error) {
+
+	sh, err := sequence_header(fp)
 	if err != nil {
 		return err
 	}
-	if load_intra_quantiser_matrix {
-		var intraQuantiserMatrix QuantisationMatrix
-		for i := 0; i < 8; i++ {
-			_, err := io.ReadFull(br, intraQuantiserMatrix[i][:])
-			if err != nil {
-				return err
-			}
-		}
-		br.quantisationMatricies[0] = intraQuantiserMatrix
-		br.quantisationMatricies[2] = intraQuantiserMatrix
+
+	if sh.load_intra_quantiser_matrix {
+		fp.quantisationMatricies[0] = sh.intra_quantiser_matrix
+		fp.quantisationMatricies[2] = sh.intra_quantiser_matrix
 	} else {
-		br.quantisationMatricies[0] = DefaultQuantisationMatrices.Intra
-		br.quantisationMatricies[2] = DefaultQuantisationMatrices.Intra
+		fp.quantisationMatricies[0] = DefaultQuantisationMatrices.Intra
+		fp.quantisationMatricies[2] = DefaultQuantisationMatrices.Intra
 	}
 
-	load_non_intra_quantiser_matrix, err := br.ReadBit()
-	if err != nil {
-		return err
-	}
-	if load_non_intra_quantiser_matrix {
-		var nonIntraQuantiserMatrix QuantisationMatrix
-		for i := 0; i < 8; i++ {
-			_, err := io.ReadFull(br, nonIntraQuantiserMatrix[i][:])
-			if err != nil {
-				return err
-			}
-		}
-		br.quantisationMatricies[1] = nonIntraQuantiserMatrix
-		br.quantisationMatricies[3] = nonIntraQuantiserMatrix
+	if sh.load_non_intra_quantizer_matrix {
+		fp.quantisationMatricies[1] = sh.non_intra_quantizer_matrix
+		fp.quantisationMatricies[3] = sh.non_intra_quantizer_matrix
 	} else {
-		br.quantisationMatricies[1] = DefaultQuantisationMatrices.NonIntra
-		br.quantisationMatricies[3] = DefaultQuantisationMatrices.NonIntra
+		fp.quantisationMatricies[1] = DefaultQuantisationMatrices.NonIntra
+		fp.quantisationMatricies[3] = DefaultQuantisationMatrices.NonIntra
 	}
 
-	next_start_code(br)
-
-	br.SequenceHeader = &sh
+	fp.SequenceHeader = sh
 
 	return nil
 }
