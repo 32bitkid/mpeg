@@ -55,10 +55,13 @@ go get -d github.com/32bitkid/mpeg
 
 ### Using the `io.Reader` interface
 
+Decode a frame of video and save it as a png
+
 ```go 
 package main
 
 import "os"
+import "image/png"
 
 import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/mpeg/ts"
@@ -74,8 +77,9 @@ func main() {
   // Decode the ES into video
   v := video.NewFrameProvider(esReader)
 
-  // This is still *in progress*.
-  v.Next()
+  frame, _ = v.Next()
+  file, _ := os.Create("output.png")
+  png.Encode(file, frame)
 }
 ```
 
