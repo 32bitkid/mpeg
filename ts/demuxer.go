@@ -12,11 +12,6 @@ func NewDemuxer(reader io.Reader) Demuxer {
 	}
 }
 
-type TransportStreamControl interface {
-	SkipUntil(skipUntil PacketTester)
-	TakeWhile(takeWhile PacketTester)
-}
-
 // Demuxer is the interface to control and extract
 // streams out of a Multiplexed Transport Stream.
 type Demuxer interface {

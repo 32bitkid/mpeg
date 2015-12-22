@@ -4,11 +4,6 @@ import "io"
 import "bytes"
 import "github.com/32bitkid/bitreader"
 
-type PayloadReader interface {
-	io.Reader
-	TransportStreamControl
-}
-
 func NewPayloadReader(source io.Reader, where PacketTester) PayloadReader {
 	return &payloadReader{
 		br:        bitreader.NewBitReader(source),
