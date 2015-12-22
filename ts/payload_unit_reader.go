@@ -5,9 +5,10 @@ import "bytes"
 import "errors"
 import "github.com/32bitkid/bitreader"
 
-var (
-	EOP = errors.New("end of packet")
-)
+// EOP is the error returned by Read when the current payload unit
+// has been completed. The Readonly only returns EOP only to
+// signal graceful end of input.
+var EOP = errors.New("end of packet")
 
 type streamState int
 
@@ -17,6 +18,8 @@ const (
 	drained
 )
 
+// NewPayloadUnitReader creates a payload reader from source, where
+// packets match the packet tester.
 func NewPayloadUnitReader(source io.Reader, where PacketTester) io.Reader {
 	return &payloadUnitBuffer{
 		br:             bitreader.NewBitReader(source),

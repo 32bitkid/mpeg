@@ -4,7 +4,9 @@ import "io"
 import "bytes"
 import "github.com/32bitkid/bitreader"
 
-func NewPayloadReader(source io.Reader, where PacketTester) PayloadReader {
+// NewPayloadReader takes a transport stream and creates a reader
+// that delivers just the packet payload bytes.
+func NewPayloadReader(source io.Reader, where PacketTester) StreamControlReader {
 	return &payloadReader{
 		br:        bitreader.NewBitReader(source),
 		where:     where,
