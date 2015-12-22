@@ -33,7 +33,7 @@ func sign(i int32) int32 {
 	return 0
 }
 
-func (self *VideoSequence) decode_block(cc int, QFS *[64]int32, mb *Macroblock) (*block, error) {
+func (self *VideoSequence) decode_block(cc int, QFS *block, macroblock_intra bool) (*block, error) {
 	var QF [8][8]int32
 	var Fpp [8][8]int32
 	var Fp [8][8]int32
@@ -55,20 +55,20 @@ func (self *VideoSequence) decode_block(cc int, QFS *[64]int32, mb *Macroblock) 
 
 		var w int
 		if cc == 0 {
-			if mb.macroblock_type.macroblock_intra {
+			if macroblock_intra {
 				w = 0
 			} else {
 				w = 1
 			}
 		} else {
 			if self.SequenceExtension.chroma_format == ChromaFormat_4_2_0 {
-				if mb.macroblock_type.macroblock_intra {
+				if macroblock_intra {
 					w = 0
 				} else {
 					w = 1
 				}
 			} else {
-				if mb.macroblock_type.macroblock_intra {
+				if macroblock_intra {
 					w = 2
 				} else {
 					w = 3
@@ -78,7 +78,7 @@ func (self *VideoSequence) decode_block(cc int, QFS *[64]int32, mb *Macroblock) 
 
 		quantiser_scale := quantiser_scale_table[q_scale_type][quantiser_scale_code]
 
-		macroblock_intra := mb.macroblock_type.macroblock_intra
+		macroblock_intra := macroblock_intra
 
 		for v := 0; v < 8; v++ {
 			for u := 0; u < 8; u++ {
@@ -120,8 +120,6 @@ func (self *VideoSequence) decode_block(cc int, QFS *[64]int32, mb *Macroblock) 
 				}
 			}
 		}
-
-		idct(&F)
 	}
 
 	return &F, nil

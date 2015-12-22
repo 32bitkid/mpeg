@@ -85,60 +85,96 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 	}
 
 	for i := 0; i < block_count; i++ {
-		decoded, err := br.block(i, &mb)
-		if err != nil {
-			return 0, err
-		}
-		updateFrameSlice(i, mbAddress, frameSlice, decoded)
 
+		cc := calcCC(i)
+
+		block, err := br.block(cc, &mb)
+		if err != nil {
+			return mbAddress, err
+		}
+		decoded, err := br.decode_block(cc, block, mb.macroblock_type.macroblock_intra)
+		if err != nil {
+			return mbAddress, err
+		}
+		idct(decoded)
+		updateFrameSlice(i, mbAddress, frameSlice, decoded)
 	}
 
 	return mbAddress, nil
 }
 
+func calcCC(i int) int {
+	switch {
+	case i < 4:
+		return 0
+	case i&1 == 0:
+		return 1
+	default:
+		return 2
+	}
+}
+
+type clampedBlock [blockSize]uint8
+
+func clamp(dest *clampedBlock, src *block) {
+	for i := 0; i < 64; i++ {
+		if src[i] > 255 {
+			dest[i] = 255
+		} else if src[i] < 0 {
+			dest[i] = 0
+		} else {
+			dest[i] = uint8(src[i])
+		}
+	}
+}
+
 func updateFrameSlice(i int, mbAddress int, frameSlice *image.YCbCr, b *block) {
+
+	var cb clampedBlock
+	clamp(&cb, b)
+
 	switch i {
 	case 0:
 		xs := (mbAddress - 1) * 16
 		for y := 0; y < 8; y++ {
-			for x := 0; x < 8; x++ {
-				frameSlice.Y[y*frameSlice.YStride+xs+x] = uint8(b[y*8+x])
-			}
+			si := y * 8
+			di := y*frameSlice.YStride + xs
+			copy(frameSlice.Y[di:di+8], cb[si:si+8])
 		}
 	case 1:
 		xs := (mbAddress - 1) * 16
 		for y := 0; y < 8; y++ {
-			for x := 0; x < 8; x++ {
-				frameSlice.Y[y*frameSlice.YStride+xs+x+8] = uint8(b[y*8+x])
-			}
+			si := y * 8
+			di := y*frameSlice.YStride + xs + 8
+			copy(frameSlice.Y[di:di+8], cb[si:si+8])
 		}
 	case 2:
 		xs := (mbAddress - 1) * 16
 		for y := 0; y < 8; y++ {
-			for x := 0; x < 8; x++ {
-				frameSlice.Y[(y+8)*frameSlice.YStride+xs+x] = uint8(b[y*8+x])
-			}
+			si := y * 8
+			di := (y+8)*frameSlice.YStride + xs
+			copy(frameSlice.Y[di:di+8], cb[si:si+8])
 		}
 	case 3:
 		xs := (mbAddress - 1) * 16
 		for y := 0; y < 8; y++ {
-			for x := 0; x < 8; x++ {
-				frameSlice.Y[(y+8)*frameSlice.YStride+xs+x+8] = uint8(b[y*8+x])
-			}
+			si := y * 8
+			di := (y+8)*frameSlice.YStride + xs + 8
+			copy(frameSlice.Y[di:di+8], cb[si:si+8])
 		}
 	case 4:
 		xs := (mbAddress - 1) * 8
 		for y := 0; y < 8; y++ {
-			for x := 0; x < 8; x++ {
-				frameSlice.Cb[y*frameSlice.CStride+xs+x] = uint8(b[y*8+x])
-			}
+			si := y * 8
+			di := y*frameSlice.CStride + xs
+			copy(frameSlice.Cb[di:di+8], cb[si:si+8])
 		}
 	case 5:
 		xs := (mbAddress - 1) * 8
 		for y := 0; y < 8; y++ {
-			for x := 0; x < 8; x++ {
-				frameSlice.Cr[y*frameSlice.CStride+xs+x] = uint8(b[y*8+x])
-			}
+			si := y * 8
+			di := y*frameSlice.CStride + xs
+			copy(frameSlice.Cr[di:di+8], cb[si:si+8])
 		}
 	}
 

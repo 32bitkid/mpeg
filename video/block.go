@@ -1,17 +1,8 @@
 package video
 
-func (self *VideoSequence) block(i int, mb *Macroblock) (*block, error) {
+func (self *VideoSequence) block(cc int, mb *Macroblock) (*block, error) {
 
-	var QFS [64]int32
-
-	var cc int
-	if i < 4 {
-		cc = 0
-	} else if i&1 == 0 {
-		cc = 1
-	} else {
-		cc = 2
-	}
+	var QFS block
 
 	eob_not_read, n := true, 0
 
@@ -87,5 +78,5 @@ func (self *VideoSequence) block(i int, mb *Macroblock) (*block, error) {
 		}
 	}
 
-	return self.decode_block(cc, &QFS, mb)
+	return &QFS, nil
 }

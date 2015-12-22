@@ -3,11 +3,12 @@ package video
 import "io"
 import "github.com/32bitkid/bitreader"
 import "errors"
+import "image"
 
 var ErrUnsupportedVideoStream_ISO_IEC_11172_2 = errors.New("unsupported video stream ISO/IEC 11172-2")
 
 type FrameProvider interface {
-	Next() (interface{}, error)
+	Next() (image.Image, error)
 }
 
 func NewFrameProvider(source io.Reader) FrameProvider {
@@ -20,7 +21,7 @@ type frameProvider struct {
 	VideoSequence
 }
 
-func (self *frameProvider) Next() (interface{}, error) {
+func (self *frameProvider) Next() (image.Image, error) {
 
 	// Align to next start code
 	err := next_start_code(self)
@@ -79,10 +80,12 @@ func (self *frameProvider) Next() (interface{}, error) {
 				if err != nil {
 					panic("extension_and_user_data")
 				}
-				err = self.picture_data()
+				frame, err := self.picture_data()
 				if err != nil {
 					panic(err)
 				}
+
+				return frame, nil
 
 				nextbits, err = self.Peek32(32)
 				if err != nil {

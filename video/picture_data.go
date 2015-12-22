@@ -1,10 +1,8 @@
 package video
 
 import "image"
-import "image/png"
-import "os"
 
-func (self *VideoSequence) picture_data() (err error) {
+func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
 
 	w := int(self.SequenceHeader.horizontal_size_value)
 	h := int(self.SequenceHeader.vertical_size_value)
@@ -21,17 +19,17 @@ func (self *VideoSequence) picture_data() (err error) {
 		subsampleRatio = image.YCbCrSubsampleRatio444
 	}
 
-	frame := image.NewYCbCr(r, subsampleRatio)
+	frame = image.NewYCbCr(r, subsampleRatio)
 
 	for {
 		err := self.slice(frame)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		nextbits, err := self.Peek32(32)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if !is_slice_start_code(StartCode(nextbits)) {
@@ -39,8 +37,5 @@ func (self *VideoSequence) picture_data() (err error) {
 		}
 	}
 
-	f, _ := os.Create("test.png")
-	png.Encode(f, frame)
-
-	return self.next_start_code()
+	return frame, self.next_start_code()
 }
