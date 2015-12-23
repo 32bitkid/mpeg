@@ -71,7 +71,7 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 	}
 
 	if mb.macroblock_type.macroblock_pattern {
-		coded_block_pattern()
+		coded_block_pattern(br, br.SequenceExtension.chroma_format)
 	}
 
 	var block_count int
@@ -190,10 +190,6 @@ func motion_vectors(i int) {
 		panic("unknown motion vectors")
 	}
 
-}
-
-func coded_block_pattern() {
-	panic("coding block pattern")
 }
 
 func (br *VideoSequence) macroblock_mode(mb *Macroblock) (err error) {
