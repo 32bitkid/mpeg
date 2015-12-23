@@ -180,18 +180,6 @@ func updateFrameSlice(i int, mbAddress int, frameSlice *image.YCbCr, b *block) {
 
 }
 
-func motion_vectors(i int) {
-	switch i {
-	case 0:
-		panic("forward motion vectors")
-	case 1:
-		panic("backwards motion vectors")
-	default:
-		panic("unknown motion vectors")
-	}
-
-}
-
 func (br *VideoSequence) macroblock_mode(mb *Macroblock) (err error) {
 
 	var typeDecoder macroblockTypeDecoder
