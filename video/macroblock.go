@@ -196,6 +196,10 @@ func (br *VideoSequence) macroblock_mode(mb *Macroblock) (err error) {
 
 	mb.macroblock_type, err = typeDecoder(br)
 
+	if err != nil {
+		return err
+	}
+
 	if mb.macroblock_type.spatial_temporal_weight_code_flag &&
 		false /* ( spatial_temporal_weight_code_table_index != ‘00’) */ {
 		mb.spatial_temporal_weight_code, err = br.Read32(2)
