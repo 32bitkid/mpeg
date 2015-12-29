@@ -9,8 +9,10 @@ const (
 	PictureStructure_FramePicture
 )
 
+type FCode [2][2]uint32
+
 type PictureCodingExtension struct {
-	f_code                     [2][2]uint32
+	f_code                     FCode
 	intra_dc_precision         uint32 // 2 uimsbf
 	picture_structure          uint32 // 2 uimsbf
 	top_field_first            bool   // 1 uimsbf
