@@ -3,9 +3,8 @@ package video
 import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/huffman"
 
-func coded_block_pattern(br bitreader.Reader32, chroma_format uint32) (int, error) {
-
-	return decodeCpb(br)
+func coded_block_pattern(br bitreader.BitReader, chroma_format uint32) (int, error) {
+	val, err := decodeCpb(br)
 
 	if ChromaFormat_4_2_2 == chroma_format {
 		panic("unsupported: cbp 4:2:2")
@@ -13,6 +12,8 @@ func coded_block_pattern(br bitreader.Reader32, chroma_format uint32) (int, erro
 	if ChromaFormat_4_4_4 == chroma_format {
 		panic("unsupported: cbp 4:4:4")
 	}
+
+	return val, err
 }
 
 var cbpTable = huffman.HuffmanTable{
@@ -84,7 +85,7 @@ var cbpTable = huffman.HuffmanTable{
 
 var cbpDecoder = huffman.NewHuffmanDecoder(cbpTable)
 
-func decodeCpb(br bitreader.Reader32) (int, error) {
+func decodeCpb(br bitreader.BitReader) (int, error) {
 	val, err := cbpDecoder.Decode(br)
 	if err != nil {
 		return 0, err
