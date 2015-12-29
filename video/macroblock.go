@@ -10,36 +10,44 @@ type Macroblock struct {
 	field_motion_type            uint32
 	dct_type                     bool
 	quantiser_scale_code         uint32
+
+	cpb int
 }
 
 func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int, error) {
 
 	mb := Macroblock{}
 
-	nextbits, err := br.Peek32(11)
-	if err != nil {
-		return 0, err
-	}
-	if nextbits == 0x08 { // 0000 0001 000
-		br.Trash(11)
-		mb.macroblock_address_increment += 33
+	{
+		nextbits, err := br.Peek32(11)
+		if err != nil {
+			return 0, err
+		}
+		if nextbits == 0x08 { // 0000 0001 000
+			br.Trash(11)
+			mb.macroblock_address_increment += 33
+		}
 	}
 
-	incr, err := MacroblockAddressIncrementDecoder.Decode(br)
-	if err != nil {
-		return 0, err
+	{
+		incr, err := MacroblockAddressIncrementDecoder.Decode(br)
+		if err != nil {
+			return 0, err
+		}
+		mb.macroblock_address_increment += incr
 	}
-	mb.macroblock_address_increment += incr
 
 	mbAddress += int(mb.macroblock_address_increment)
 
-	if incr > 1 {
+	if mb.macroblock_address_increment > 1 {
 		br.resetPredictors()
 	}
 
-	err = br.macroblock_mode(&mb)
-	if err != nil {
-		return 0, err
+	{
+		err := br.macroblock_mode(&mb)
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	if !mb.macroblock_type.macroblock_intra {
@@ -47,6 +55,7 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 	}
 
 	if mb.macroblock_type.macroblock_quant {
+		var err error
 		mb.quantiser_scale_code, err = br.Read32(5)
 		if err != nil {
 			return 0, err
@@ -56,22 +65,29 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 
 	if mb.macroblock_type.macroblock_motion_forward ||
 		(mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors) {
-		motion_vectors(0)
+		if err := br.motion_vectors(0, &mb); err != nil {
+			return 0, err
+		}
 	}
 
 	if mb.macroblock_type.macroblock_motion_backward {
-		motion_vectors(1)
+		if err := br.motion_vectors(1, &mb); err != nil {
+			return 0, err
+		}
 	}
 
 	if mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors {
-		err := marker_bit(br)
-		if err != nil {
+		if err := marker_bit(br); err != nil {
 			return 0, err
 		}
 	}
 
 	if mb.macroblock_type.macroblock_pattern {
-		coded_block_pattern(br, br.SequenceExtension.chroma_format)
+		cpb, err := coded_block_pattern(br, br.SequenceExtension.chroma_format)
+		if err != nil {
+			return 0, nil
+		}
+		mb.cpb = cpb
 	}
 
 	var block_count int
@@ -84,15 +100,24 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 		block_count = 12
 	}
 
+	pattern_code := mb.calcPatternCode(br.SequenceExtension.chroma_format)
+
 	for i := 0; i < block_count; i++ {
+		var b *block
 
 		cc := calcCC(i)
 
-		block, err := br.block(cc, &mb)
-		if err != nil {
-			return mbAddress, err
+		if pattern_code[i] {
+			var err error
+			b, err = br.block(cc, &mb)
+			if err != nil {
+				return mbAddress, err
+			}
+		} else {
+			b = new(block)
 		}
-		decoded, err := br.decode_block(cc, block, mb.macroblock_type.macroblock_intra)
+
+		decoded, err := br.decode_block(cc, b, mb.macroblock_type.macroblock_intra)
 		if err != nil {
 			return mbAddress, err
 		}
@@ -178,6 +203,30 @@ func updateFrameSlice(i int, mbAddress int, frameSlice *image.YCbCr, b *block) {
 		}
 	}
 
+}
+
+func (mb *Macroblock) calcPatternCode(chroma_format uint32) (pattern_code [12]bool) {
+	for i := 0; i < 12; i++ {
+		if mb.macroblock_type.macroblock_intra {
+			pattern_code[i] = true
+		} else {
+			pattern_code[i] = false
+		}
+	}
+
+	if mb.macroblock_type.macroblock_pattern {
+		for i := 0; i < 6; i++ {
+			if mb.cpb&(1<<uint(5-i)) != 0 {
+				pattern_code[i] = true
+			}
+		}
+
+		if chroma_format == ChromaFormat_4_2_2 || chroma_format == ChromaFormat_4_4_4 {
+			panic("unsupported: coded block pattern chroma format")
+		}
+	}
+
+	return
 }
 
 func (br *VideoSequence) macroblock_mode(mb *Macroblock) (err error) {
