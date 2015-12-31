@@ -10,15 +10,15 @@ func extension_and_user_data(i int, br bitreader.BitReader) error {
 			return err
 		}
 
-		if nextbits != ExtensionStartCode && nextbits != UserDataStartCode {
+		if StartCode(nextbits) != ExtensionStartCode && StartCode(nextbits) != UserDataStartCode {
 			break
 		}
 
-		if (i != 1) && (nextbits == ExtensionStartCode) {
+		if (i != 1) && (StartCode(nextbits) == ExtensionStartCode) {
 			extension_data(i, br)
 		}
 
-		if nextbits == UserDataStartCode {
+		if StartCode(nextbits) == UserDataStartCode {
 			user_data(br)
 		}
 
@@ -32,7 +32,7 @@ func extension_data(i int, br bitreader.BitReader) error {
 		nextbits, err := br.Peek32(32)
 		if err != nil {
 			return err
-		} else if nextbits != ExtensionStartCode {
+		} else if StartCode(nextbits) != ExtensionStartCode {
 			break
 		}
 

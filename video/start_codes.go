@@ -23,11 +23,11 @@ const (
 	groupCode          = 0xB8
 
 	SequenceHeaderStartCode StartCode = (StartCodePrefix << 8) + sequenceHeaderCode
-	ExtensionStartCode                = (StartCodePrefix << 8) + extensionCode
-	SequenceEndStartCode              = (StartCodePrefix << 8) + sequenceEndCode
-	GroupStartCode                    = (StartCodePrefix << 8) + groupCode
-	PictureStartCode                  = (StartCodePrefix << 8) + pictureCode
-	UserDataStartCode                 = (StartCodePrefix << 8) + userDataCode
+	ExtensionStartCode      StartCode = (StartCodePrefix << 8) + extensionCode
+	SequenceEndStartCode    StartCode = (StartCodePrefix << 8) + sequenceEndCode
+	GroupStartCode          StartCode = (StartCodePrefix << 8) + groupCode
+	PictureStartCode        StartCode = (StartCodePrefix << 8) + pictureCode
+	UserDataStartCode       StartCode = (StartCodePrefix << 8) + userDataCode
 
 	MinSliceStartCode StartCode = (StartCodePrefix << 8) + 0x01
 	MaxSliceStartCode StartCode = (StartCodePrefix << 8) + 0xAF

@@ -41,7 +41,7 @@ func (self *frameProvider) Next() (image.Image, error) {
 		panic(err)
 	}
 
-	if val == ExtensionStartCode {
+	if StartCode(val) == ExtensionStartCode {
 
 		err := self.sequence_extension()
 
@@ -109,7 +109,7 @@ func (self *frameProvider) Next() (image.Image, error) {
 				panic("Peek32")
 			}
 
-			if nextbits == SequenceEndStartCode {
+			if StartCode(nextbits) == SequenceEndStartCode {
 				break
 			}
 
