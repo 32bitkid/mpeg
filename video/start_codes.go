@@ -11,23 +11,23 @@ const (
 const (
 	StartCodePrefix = 0x000001
 
-	PictureCode        = 0x00
-	ReservedCode_1     = 0xB0
-	ReservedCode_2     = 0xB1
-	UserDataCode       = 0xB2
-	SequenceHeaderCode = 0xB3
-	SequenceErrorCode  = 0xB4
-	ExtensionCode      = 0xB5
-	ReservedCode_3     = 0xB6
-	SequenceEndCode    = 0xB7
-	GroupCode          = 0xB8
+	pictureCode        = 0x00
+	reservedCode1      = 0xB0
+	reservedCode2      = 0xB1
+	userDataCode       = 0xB2
+	sequenceHeaderCode = 0xB3
+	sequenceErrorCode  = 0xB4
+	extensionCode      = 0xB5
+	reservedCode3      = 0xB6
+	sequenceEndCode    = 0xB7
+	groupCode          = 0xB8
 
-	SequenceHeaderStartCode StartCode = (StartCodePrefix << 8) + SequenceHeaderCode
-	ExtensionStartCode                = (StartCodePrefix << 8) + ExtensionCode
-	SequenceEndStartCode              = (StartCodePrefix << 8) + SequenceEndCode
-	GroupStartCode                    = (StartCodePrefix << 8) + GroupCode
-	PictureStartCode                  = (StartCodePrefix << 8) + PictureCode
-	UserDataStartCode                 = (StartCodePrefix << 8) + UserDataCode
+	SequenceHeaderStartCode StartCode = (StartCodePrefix << 8) + sequenceHeaderCode
+	ExtensionStartCode                = (StartCodePrefix << 8) + extensionCode
+	SequenceEndStartCode              = (StartCodePrefix << 8) + sequenceEndCode
+	GroupStartCode                    = (StartCodePrefix << 8) + groupCode
+	PictureStartCode                  = (StartCodePrefix << 8) + pictureCode
+	UserDataStartCode                 = (StartCodePrefix << 8) + userDataCode
 
 	MinSliceStartCode StartCode = (StartCodePrefix << 8) + 0x01
 	MaxSliceStartCode StartCode = (StartCodePrefix << 8) + 0xAF
