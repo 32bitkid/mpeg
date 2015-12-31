@@ -9,16 +9,15 @@ import "io"
 type AdaptationFieldControl uint32
 
 const (
-	_ AdaptationFieldControl = iota
-	PayloadOnly
-	FieldOnly
-	FieldThenPayload
+	_                AdaptationFieldControl = iota
+	PayloadOnly                             // 0b01
+	FieldOnly                               // 0b10
+	FieldThenPayload                        //0b11
 )
 
 // AdaptationField is an optional field in a transport stream packet header.
 // TODO(jh): Needs implementation
 type AdaptationField struct {
-	Length uint32
 	//DiscontinuityIndicator bool
 	//RandomAccessIndicator bool
 	//ElementaryStreamPriorityIndicator bool
@@ -27,26 +26,25 @@ type AdaptationField struct {
 	//SplicingPointFlag bool
 	//TransportPrivateDataFlag bool
 	//AdaptationFieldExtensionFlag   bool
-	Junk []byte
+
+	length uint32
+	junk   []byte
 }
 
-// ReadAdaptationField reads an AdaptationField from a bit stream.
-func ReadAdaptationField(br bitreader.BitReader) (*AdaptationField, error) {
-	var err error
-
+func newAdaptationField(br bitreader.BitReader) (*AdaptationField, uint32, error) {
 	adaptationField := AdaptationField{}
-	adaptationField.Length, err = br.Read32(8)
+	length, err := br.Read32(8)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	adaptationField.Junk = make([]byte, adaptationField.Length)
-	_, err = io.ReadFull(br, adaptationField.Junk)
+	adaptationField.junk = make([]byte, length)
+	_, err = io.ReadFull(br, adaptationField.junk)
 	if err == io.EOF {
-		return nil, io.ErrUnexpectedEOF
+		return nil, 0, io.ErrUnexpectedEOF
 	} else if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return &adaptationField, nil
+	return &adaptationField, length, nil
 }

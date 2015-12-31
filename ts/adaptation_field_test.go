@@ -6,27 +6,21 @@ import "github.com/32bitkid/mpeg/ts"
 
 func TestAdaptationField(t *testing.T) {
 	reader := bitreader.NewBitReader(adaptationFieldReader())
-	packet := new(ts.Packet)
-
-	err := packet.ReadFrom(reader)
-
+	packet, err := ts.NewPacket(reader)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if packet.AdaptationFieldControl != ts.FieldThenPayload {
-		t.Fatalf("unexpected AdaptationFieldControl. expected %d, got %d", ts.FieldThenPayload, packet.AdaptationFieldControl)
+	if expected, actual := packet.AdaptationFieldControl, ts.FieldThenPayload; actual != expected {
+		t.Fatalf("unexpected AdaptationFieldControl. expected %d, got %d", actual, expected)
 	}
 
 	if packet.AdaptationField == nil {
 		t.Fatal("exptected adaptation field to be set")
 	}
 
-	if packet.AdaptationField.Length != uint32(adapationFieldPacket[4]) {
-		t.Fatalf("unexpected Length. expected %d, got %d", adapationFieldPacket[4], packet.AdaptationField.Length)
+	if expected, actual := 80, len(packet.Payload); actual != expected {
+		t.Fatalf("payload was not the correct size. expected %d, got %d", expected, actual)
 	}
 
-	if len(packet.Payload) != 184-int(adapationFieldPacket[4])-1 {
-		t.Fatal("payload was not the correct size")
-	}
 }
