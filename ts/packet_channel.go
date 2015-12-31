@@ -3,8 +3,10 @@ package ts
 import "bytes"
 import "io/ioutil"
 
+// PacketChannel is a delivery channel of TS Packets
 type PacketChannel <-chan *Packet
 
+// PayloadOnly transforms a PacketChannel into a delivery channel of packet payload
 func (input PacketChannel) PayloadOnly() <-chan []byte {
 	output := make(chan []byte)
 	go func() {
