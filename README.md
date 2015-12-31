@@ -4,14 +4,6 @@ A pure golang implementation of an MPEG-2 decoder for
 educational purposes.
 
 ## Roadmap
-- [ ] Utility Helpers
-  - [x] BitReader
-    - [x] Simple
-    - [ ] High-performance (ring-buffered)
-  - [x] Huffman Decoder
-    - [x] Simple binary-tree implemenation
-    - [ ] High-performance (indexed)
-
 - [ ] MPEG-2 Transport Stream (TS) Support
   - [x] Basic parser
   - [ ] Adapation Feild support
