@@ -1,40 +1,6 @@
 package video
 
 import "github.com/32bitkid/bitreader"
-import "errors"
-
-type ExtensionID uint32
-
-const (
-	_                                  ExtensionID = iota // reserved
-	SequenceExtensionID                                   //
-	SequenceDisplayExtensionID                            //
-	QuantMatrixExtensionID                                //
-	CopyrightExtensionID                                  //
-	SequenceScalableExtensionID                           //
-	_                                                     // reserved
-	PictureDisplayExtensionID                             //
-	PictureCodingExtensionID                              //
-	PictureSpatialScalableExtensionID                     //
-	PictureTemporalScalableExtensionID                    //
-	_                                                     // reserved
-	_                                                     // reserved
-	_                                                     // reserved
-	_                                                     // reserved
-)
-
-var ErrUnexpectedSequenceExtensionID = errors.New("unexpected sequence extension id")
-
-func extension_code_check(br bitreader.BitReader, expected ExtensionID) error {
-	actual, err := br.Read32(4)
-	if err != nil {
-		return err
-	}
-	if ExtensionID(actual) != expected {
-		return ErrUnexpectedSequenceExtensionID
-	}
-	return nil
-}
 
 const (
 	_ uint32 = iota // reserved
@@ -44,19 +10,16 @@ const (
 )
 
 type SequenceExtension struct {
-	extension_start_code            uint32 // 32 bslbf
-	extension_start_code_identifier uint32 // 4 uimsbf
-	profile_and_level_indication    uint32 // 8 uimsbf
-	progressive_sequence            uint32 // 1 uimsbf
-	chroma_format                   uint32 // 2 uimsbf
-	horizontal_size_extension       uint32 // 2 uimsbf
-	vertical_size_extension         uint32 // 2 uimsbf
-	bit_rate_extension              uint32 // 12 uimsbf
-	marker_bit                      uint32 // 1 bslbf
-	vbv_buffer_size_extension       uint32 // 8 uimsbf
-	low_delay                       uint32 // 1 uimsbf
-	frame_rate_extension_n          uint32 // 2 uimsbf
-	frame_rate_extension_d          uint32 // 5 uimsbf
+	profile_and_level_indication uint32 // 8 uimsbf
+	progressive_sequence         uint32 // 1 uimsbf
+	chroma_format                uint32 // 2 uimsbf
+	horizontal_size_extension    uint32 // 2 uimsbf
+	vertical_size_extension      uint32 // 2 uimsbf
+	bit_rate_extension           uint32 // 12 uimsbf
+	vbv_buffer_size_extension    uint32 // 8 uimsbf
+	low_delay                    uint32 // 1 uimsbf
+	frame_rate_extension_n       uint32 // 2 uimsbf
+	frame_rate_extension_d       uint32 // 5 uimsbf
 }
 
 func sequence_extension(br bitreader.BitReader) (*SequenceExtension, error) {
