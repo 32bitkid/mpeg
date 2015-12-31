@@ -11,7 +11,7 @@ educational purposes.
   - [x] PayloadReader (implementing `io.Reader`)
   - [x] PayloadUnitReader (implementing `io.Reader`)
 
-  - [ ] Other TS Packet
+  - [ ] Other TS Packets
     - [ ] Program Association Table support
     - [ ] Conditional Access Table support
     - [ ] Program Map Table support
