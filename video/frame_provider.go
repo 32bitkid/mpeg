@@ -80,12 +80,16 @@ func (self *frameProvider) Next() (image.Image, error) {
 				if err != nil {
 					panic("extension_and_user_data")
 				}
-				frame, err := self.picture_data()
-				if err != nil {
-					panic(err)
-				}
 
-				return frame, nil
+				{
+					frame, err := self.picture_data()
+					if err != nil {
+						panic(err)
+					}
+					if true {
+						return frame, nil
+					}
+				}
 
 				nextbits, err = self.Peek32(32)
 				if err != nil {
