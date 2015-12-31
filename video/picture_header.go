@@ -4,6 +4,20 @@ import "github.com/32bitkid/bitreader"
 
 type PictureCodingType uint32
 
+func (pct PictureCodingType) String() string {
+	switch pct {
+	case IntraCoded:
+		return "I"
+	case PredictiveCoded:
+		return "P"
+	case BidirectionallyPredictiveCoded:
+		return "B"
+	case DCIntraCoded:
+		return "D"
+	}
+	return string(uint32(pct))
+}
+
 const (
 	_                              PictureCodingType = iota // 000 forbidden
 	IntraCoded                                              // 001
