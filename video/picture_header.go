@@ -95,29 +95,25 @@ func picture_header(br bitreader.BitReader) (*PictureHeader, error) {
 	}
 
 	for {
-		extraBit, err := br.PeekBit()
-		if err != nil {
+		if extraBit, err := br.PeekBit(); err != nil {
 			return nil, err
-		}
-
-		if extraBit == false {
+		} else if extraBit == false {
 			break
 		}
 
-		err = br.Trash(1)
-		if err != nil {
+		if err := br.Trash(1); err != nil {
 			return nil, err
 		}
 
 		// extra_information_picture
-		data, err := br.Read32(8)
-		ph.extra_information = append(ph.extra_information, byte(data))
-		if err != nil {
+		if data, err := br.Read32(8); err != nil {
 			return nil, err
+		} else {
+			ph.extra_information = append(ph.extra_information, byte(data))
 		}
 	}
-	err = br.Trash(1)
-	if err != nil {
+
+	if err := br.Trash(1); err != nil {
 		return nil, err
 	}
 
