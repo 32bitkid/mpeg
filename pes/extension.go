@@ -3,6 +3,7 @@ package pes
 import "github.com/32bitkid/bitreader"
 import "io"
 
+// Extension contains the parsed fields from an optional Header Extension.
 type Extension struct {
 	PrivateDataFlag                  bool
 	PackHeaderFieldFlag              bool

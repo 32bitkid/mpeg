@@ -3,9 +3,10 @@ package pes
 import "github.com/32bitkid/bitreader"
 
 const (
-	MinimumHeaderSize uint32 = 3
+	minimumHeaderSize uint32 = 3
 )
 
+// Header contains the optional header fields parsed from a PES packet.
 type Header struct {
 	ScramblingControl      uint32
 	Priority               bool
@@ -27,7 +28,7 @@ type Header struct {
 	Extension *Extension
 }
 
-func ReadHeader(reader bitreader.BitReader) (*Header, uint32, error) {
+func readHeader(reader bitreader.BitReader) (*Header, uint32, error) {
 
 	val, err := reader.Read32(2)
 	if val != 2 || err != nil {
@@ -101,7 +102,7 @@ func ReadHeader(reader bitreader.BitReader) (*Header, uint32, error) {
 		return nil, 0, err
 	}
 
-	var bytesRead uint32 = MinimumHeaderSize
+	var bytesRead uint32 = minimumHeaderSize
 
 	if header.PtsDtsFlags == 2 {
 		var len uint32
@@ -165,7 +166,7 @@ func ReadHeader(reader bitreader.BitReader) (*Header, uint32, error) {
 		bytesRead += len
 	}
 
-	stuffingLength, err := readStuffingBytes(reader, header.HeaderDataLength-(bytesRead-MinimumHeaderSize))
+	stuffingLength, err := readStuffingBytes(reader, header.HeaderDataLength-(bytesRead-minimumHeaderSize))
 	if err != nil {
 		return nil, 0, err
 	}
