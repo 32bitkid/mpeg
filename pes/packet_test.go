@@ -1,12 +1,11 @@
 package pes_test
 
 import "testing"
-import "bytes"
 import "github.com/32bitkid/mpeg/pes"
 import "github.com/32bitkid/bitreader"
 
 func TestPacketWithExtensionFlag(t *testing.T) {
-	br := bitreader.NewBitReader(bytes.NewReader(packetWithExtensionFlag))
+	br := bitreader.NewBitReader(packetWithExtensionFlag())
 
 	p, err := pes.NewPacket(br)
 	if err != nil {
