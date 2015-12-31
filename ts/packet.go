@@ -3,6 +3,7 @@ package ts
 import "github.com/32bitkid/bitreader"
 import "io"
 import "errors"
+import "fmt"
 
 // SyncByte the the fixed 8-bit value that marks the start of a TS packet.
 const SyncByte = 0x47
@@ -14,35 +15,27 @@ const MaxPayloadSize = 184
 // ErrNoSyncByte is the error returned if a sync byte cannot be located in the bitstream.
 var ErrNoSyncByte = errors.New("no sync byte")
 
-//          ┌────────────────┬──────────────────────────────────────────────────────────────────────┐
-//          │ header         │ payload                                                              │
-//          │                │                                                           (184 bytes)│
-//          └────────────────┴──────────────────────────────────────────────────────────────────────┘
-//          ╱                ╲
-//         ╱                  ╲
-//      ╱─╱                    ╲────────────────────────────────────────────────────────────╲
-//     ╱                                                                                     ╲
-//    ╱                                                                                       ╲
-//    ┌──────────────────────┬─┬─┬─┬─────────────────────────────────────┬────┬────┬──────────┐
-//    │ sync_byte (8)        │ │ │ │ PID (13)                            │    │    │continuity│
-//    │                      │ │ │ │                                     │    │    │counter(4)│
-//    └──────────────────────┴─┴─┴─┴─────────────────────────────────────┴────┴────┴──────────┘
-//                           ╱     ╲                                     ╱         ╲
-//                          ╱       ╲                                   ╱           ╲
-//    ╱────────────────────╱         ╲─────────────────────╲           ╱             ╲
-//   ╱                                                      ╲         ╱               ╲
-//  ╱                                                        ╲       ╱                 ╲
-//  ┌──────────────────┬──────────────────┬──────────────────┐      ╱                   ╲
-//  │ transport_error  │payload_unit_start│transport_priority│     ╱                     ╲─────────────────────────────╲
-//  │               (1)│               (1)│               (1)│    ╱                                                     ╲
-//  └──────────────────┴──────────────────┴──────────────────┘   ╱                                                       ╲
-//                                                              ╱                                                         ╲
-//                                                             ╱                                                           ╲
-//                                                            ╱                                                             ╲
-//                                                            ┌──────────────────────────────┬──────────────────────────────┐
-//                                                            │ transport_scrambling_control │  adaptation_field_control    │
-//                                                            │                           (2)│                           (2)│
-//                                                            └──────────────────────────────┴──────────────────────────────┘
+// Packet is a parsed Transport Stream packet from the bit stream.
+//
+//                   ┌────────────────┬──────────────────────────────────────────────────────────────────────┐
+//                   │ header         │ payload                                                              │
+//                   │                │                                                           (184 bytes)│
+//                   └────────────────┴──────────────────────────────────────────────────────────────────────┘
+//                   │                ╲
+//                   │                 ╲────────────────────────────────────────────────────────────────────╲
+//                   │                                                                                       ╲
+//                   ┌──────────────────────┬─┬─┬─┬─────────────────────────────────────┬────┬────┬──────────┐
+//                   │ sync_byte (8)        │ │ │ │ PID (13)                            │    │    │continuity│
+//                   │                      │ │ │ │                                     │    │    │counter(4)│
+//                   └──────────────────────┴─┴─┴─┴─────────────────────────────────────┴────┴────┴──────────┘
+//                                          ╱     ╲                                     ╱         ╲
+//                                         ╱       ╲                                   ╱           ╲
+//   ╱────────────────────────────────────╱         ╲───────╲    ╱────────────────────╱             ╲────────────────────────╲
+//  ╱                                                        ╲  ╱                                                             ╲
+//  ┌──────────────────┬──────────────────┬──────────────────┐  ┌──────────────────────────────┬──────────────────────────────┐
+//  │ transport_error  │payload_unit_start│transport_priority│  │ transport_scrambling_control │  adaptation_field_control    │
+//  │               (1)│               (1)│               (1)│  │                           (2)│                           (2)│
+//  └──────────────────┴──────────────────┴──────────────────┘  └──────────────────────────────┴──────────────────────────────┘
 type Packet struct {
 	TransportErrorIndicator    bool
 	PayloadUnitStartIndicator  bool
@@ -60,12 +53,12 @@ type Packet struct {
 // Create a new Packet and read it from the bit stream.
 func NewPacket(br bitreader.BitReader) (packet *Packet, err error) {
 	packet = new(Packet)
-	err = packet.ReadFrom(br)
+	err = packet.Next(br)
 	return
 }
 
-//  Read a packet from the bit stream into an existing Packet.
-func (packet *Packet) ReadFrom(br bitreader.BitReader) (err error) {
+//  Read the next packet from the bit stream into an existing Packet.
+func (packet *Packet) Next(br bitreader.BitReader) (err error) {
 
 	aligned, err := isAligned(br)
 	if err != nil {
@@ -122,12 +115,13 @@ func (packet *Packet) ReadFrom(br bitreader.BitReader) (err error) {
 	var payloadSize uint32 = MaxPayloadSize
 
 	if packet.AdaptationFieldControl == FieldOnly || packet.AdaptationFieldControl == FieldThenPayload {
-		packet.AdaptationField, err = ReadAdaptationField(br)
+		var length uint32
+		packet.AdaptationField, length, err = newAdaptationField(br)
 
 		if err != nil {
 			return
 		}
-		payloadSize -= packet.AdaptationField.Length + 1
+		payloadSize -= length + 1
 	}
 
 	if packet.AdaptationFieldControl == PayloadOnly || packet.AdaptationFieldControl == FieldThenPayload {
@@ -175,4 +169,8 @@ func realign(br bitreader.BitReader) error {
 		}
 	}
 	return ErrNoSyncByte
+}
+
+func (p *Packet) String() string {
+	return fmt.Sprintf("{ PID: 0x%02x, Counter: %1x }", p.PID, p.ContinuityCounter)
 }

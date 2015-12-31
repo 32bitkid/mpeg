@@ -75,7 +75,7 @@ func (stream *payloadUnitBuffer) fill() (n int, err error) {
 			if isStart {
 				break
 			}
-			err = stream.currentPacket.ReadFrom(stream.br)
+			err = stream.next()
 			if err != nil {
 				return
 			}
@@ -92,7 +92,7 @@ func (stream *payloadUnitBuffer) fill() (n int, err error) {
 			}
 		}
 
-		err = stream.currentPacket.ReadFrom(stream.br)
+		err = stream.next()
 		if err != nil {
 			break
 		}
@@ -103,5 +103,8 @@ func (stream *payloadUnitBuffer) fill() (n int, err error) {
 	}
 
 	return
+}
 
+func (stream *payloadUnitBuffer) next() error {
+	return stream.currentPacket.Next(stream.br)
 }

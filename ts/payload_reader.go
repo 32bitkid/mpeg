@@ -91,7 +91,7 @@ func (r *payloadReader) Read(p []byte) (n int, err error) {
 }
 
 func (r *payloadReader) next() error {
-	return r.currentPacket.ReadFrom(r.br)
+	return r.currentPacket.Next(r.br)
 }
 
 func (r *payloadReader) realign() (err error) {
