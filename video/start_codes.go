@@ -29,24 +29,35 @@ const (
 	PictureStartCode        StartCode = (StartCodePrefix << 8) + pictureCode
 	UserDataStartCode       StartCode = (StartCodePrefix << 8) + userDataCode
 
+	// slice_start_code 01 through AF
 	MinSliceStartCode StartCode = (StartCodePrefix << 8) + 0x01
 	MaxSliceStartCode StartCode = (StartCodePrefix << 8) + 0xAF
+
+	// system start codes (see note) B9 through FF
 )
 
 func (code StartCode) isSlice() bool {
 	return code >= MinSliceStartCode && code <= MaxSliceStartCode
 }
 
-// slice_start_code 01 through AF
-// system start codes (see note) B9 through FF
-
-func start_code_check(br bitreader.BitReader, expected StartCode) error {
-	actual, err := br.Read32(32)
-	if err != nil {
-		return err
+// Check if the next bits in the bitstream matches the expected code
+func (expected StartCode) check(br bitreader.BitReader) (bool, error) {
+	if nextbits, err := br.Peek32(32); err != nil {
+		return false, err
+	} else {
+		return StartCode(nextbits) == expected, nil
 	}
-	if StartCode(actual) != expected {
+}
+
+// Assert the next bits in the bit stream match the expected startcode
+func (expected StartCode) assert(br bitreader.BitReader) error {
+	if test, err := expected.check(br); err != nil {
+		return err
+	} else if test != true {
 		return ErrUnexpectedStartCode
+	}
+	if err := br.Trash(32); err != nil {
+		return err
 	}
 	return nil
 }

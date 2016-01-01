@@ -27,7 +27,7 @@ func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
 
 	var err error
 
-	err = start_code_check(br, SequenceHeaderStartCode)
+	err = SequenceHeaderStartCode.assert(br)
 	if err != nil {
 		return nil, err
 	}

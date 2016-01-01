@@ -5,7 +5,7 @@ import "github.com/32bitkid/bitreader"
 type UserData []byte
 
 func user_data(br bitreader.BitReader) (UserData, error) {
-	err := start_code_check(br, UserDataStartCode)
+	err := UserDataStartCode.assert(br)
 	if err != nil {
 		return nil, err
 	}

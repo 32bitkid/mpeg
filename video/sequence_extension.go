@@ -24,7 +24,7 @@ type SequenceExtension struct {
 
 func sequence_extension(br bitreader.BitReader) (*SequenceExtension, error) {
 
-	err := start_code_check(br, ExtensionStartCode)
+	err := ExtensionStartCode.assert(br)
 	if err != nil {
 		return nil, err
 	}

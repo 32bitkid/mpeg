@@ -35,7 +35,7 @@ type PictureCodingExtension struct {
 
 func picture_coding_extension(br bitreader.BitReader) (*PictureCodingExtension, error) {
 
-	err := start_code_check(br, ExtensionStartCode)
+	err := ExtensionStartCode.assert(br)
 	if err != nil {
 		return nil, err
 	}

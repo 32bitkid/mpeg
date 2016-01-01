@@ -47,7 +47,7 @@ type PictureHeader struct {
 
 func picture_header(br bitreader.BitReader) (*PictureHeader, error) {
 
-	err := start_code_check(br, PictureStartCode)
+	err := PictureStartCode.assert(br)
 	if err != nil {
 		return nil, err
 	}
