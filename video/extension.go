@@ -25,13 +25,22 @@ const (
 
 var ErrUnexpectedSequenceExtensionID = errors.New("unexpected sequence extension id")
 
-func extension_code_check(br bitreader.BitReader, expected ExtensionID) error {
-	actual, err := br.Read32(4)
-	if err != nil {
-		return err
+func (expected ExtensionID) check(br bitreader.BitReader) (bool, error) {
+	if nextbits, err := br.Peek32(4); err != nil {
+		return false, err
+	} else {
+		return ExtensionID(nextbits) == expected, nil
 	}
-	if ExtensionID(actual) != expected {
+}
+
+func (expected ExtensionID) assert(br bitreader.BitReader) error {
+	if test, err := expected.check(br); err != nil {
+		return err
+	} else if test != true {
 		return ErrUnexpectedSequenceExtensionID
+	}
+	if err := br.Trash(4); err != nil {
+		return err
 	}
 	return nil
 }

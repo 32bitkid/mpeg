@@ -9,7 +9,7 @@ type PictureTemporalScalableExtension struct {
 }
 
 func picture_temporal_scalable_extension(br bitreader.BitReader) (*PictureTemporalScalableExtension, error) {
-	err := extension_code_check(br, PictureTemporalScalableExtensionID)
+	err := PictureTemporalScalableExtensionID.assert(br)
 	if err != nil {
 		return nil, err
 	}

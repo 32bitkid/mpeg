@@ -31,7 +31,7 @@ type SequenceScalableExtension struct {
 
 func sequence_scalable_extension(br bitreader.BitReader) (*SequenceScalableExtension, error) {
 
-	err := extension_code_check(br, SequenceScalableExtensionID)
+	err := SequenceScalableExtensionID.assert(br)
 	if err != nil {
 		return nil, err
 	}

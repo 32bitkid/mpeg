@@ -29,7 +29,7 @@ func sequence_extension(br bitreader.BitReader) (*SequenceExtension, error) {
 		return nil, err
 	}
 
-	err = extension_code_check(br, SequenceExtensionID)
+	err = SequenceExtensionID.assert(br)
 	if err != nil {
 		return nil, err
 	}

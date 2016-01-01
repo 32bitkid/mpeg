@@ -40,7 +40,7 @@ func picture_coding_extension(br bitreader.BitReader) (*PictureCodingExtension, 
 		return nil, err
 	}
 
-	err = extension_code_check(br, PictureCodingExtensionID)
+	err = PictureCodingExtensionID.assert(br)
 	if err != nil {
 		return nil, err
 	}
