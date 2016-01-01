@@ -10,25 +10,30 @@ type GroupOfPicturesHeader struct {
 }
 
 func group_of_pictures_header(br bitreader.BitReader) (*GroupOfPicturesHeader, error) {
-	err := GroupStartCode.assert(br)
-	if err != nil {
+
+	if err := GroupStartCode.assert(br); err != nil {
 		return nil, err
 	}
 
 	goph := GroupOfPicturesHeader{}
-	goph.time_code, err = br.Read32(25)
-	if err != nil {
-		return nil, err
-	}
 
-	goph.closed_gop, err = br.ReadBit()
-	if err != nil {
-		return nil, err
-	}
+	{
+		var err error
 
-	goph.broken_link, err = br.ReadBit()
-	if err != nil {
-		return nil, err
+		goph.time_code, err = br.Read32(25)
+		if err != nil {
+			return nil, err
+		}
+
+		goph.closed_gop, err = br.ReadBit()
+		if err != nil {
+			return nil, err
+		}
+
+		goph.broken_link, err = br.ReadBit()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &goph, next_start_code(br)
