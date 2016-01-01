@@ -32,7 +32,7 @@ func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
 			return nil, err
 		}
 
-		if !is_slice_start_code(StartCode(nextbits)) {
+		if StartCode(nextbits).isSlice() == false {
 			break
 		}
 	}

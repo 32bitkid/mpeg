@@ -33,7 +33,7 @@ const (
 	MaxSliceStartCode StartCode = (StartCodePrefix << 8) + 0xAF
 )
 
-func is_slice_start_code(code StartCode) bool {
+func (code StartCode) isSlice() bool {
 	return code >= MinSliceStartCode && code <= MaxSliceStartCode
 }
 

@@ -26,7 +26,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		return err
 	}
 
-	if is_slice_start_code(StartCode(code)) == false {
+	if StartCode(code).isSlice() == false {
 		return ErrUnexpectedStartCode
 	}
 
