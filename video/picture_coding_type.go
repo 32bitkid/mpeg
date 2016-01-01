@@ -13,7 +13,7 @@ func (pct PictureCodingType) String() string {
 	case DCIntraCoded:
 		return "D"
 	}
-	return string(uint32(pct))
+	return string(uint32(pct)) + "?"
 }
 
 const (
