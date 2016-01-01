@@ -23,62 +23,53 @@ type frameProvider struct {
 
 func (self *frameProvider) Next() (image.Image, error) {
 
-	// Align to next start code
-	err := next_start_code(self)
-	if err != nil {
+	// align to next start code
+	if err := next_start_code(self); err != nil {
 		panic(err)
 	}
 
-	// Read sequence_header
-	err = self.sequence_header()
-	if err != nil {
+	// read sequence_header
+	if err := self.sequence_header(); err != nil {
 		panic(err)
 	}
 
 	// peek for sequence_extension
-	val, err := self.Peek32(32)
-	if err != nil {
+	if val, err := self.Peek32(32); err != nil {
 		panic(err)
-	}
+	} else if StartCode(val) == ExtensionStartCode {
 
-	if StartCode(val) == ExtensionStartCode {
-
-		err := self.sequence_extension()
+		if err := self.sequence_extension(); err != nil {
+			panic(err)
+		}
 
 		for {
-			err = extension_and_user_data(0, self)
-			if err != nil {
-				panic("extension_and_user_data")
+
+			if err := extension_and_user_data(0, self); err != nil {
+				panic("extension_and_user_data: " + err.Error())
 			}
 
 			for {
-				nextbits, err := self.Peek32(32)
-				if err != nil {
+				if nextbits, err := self.Peek32(32); err != nil {
 					panic("Peek32")
-				}
-
-				if StartCode(nextbits) == GroupStartCode {
-					err = self.group_of_pictures_header()
-					if err != nil {
-						panic("group_of_pictures_header")
+				} else if StartCode(nextbits) == GroupStartCode {
+					if err := self.group_of_pictures_header(); err != nil {
+						panic("group_of_pictures_header: " + err.Error())
 					}
-					err = extension_and_user_data(1, self)
-					if err != nil {
-						panic("extension_and_user_data")
+					if err := extension_and_user_data(1, self); err != nil {
+						panic("extension_and_user_data:" + err.Error())
 					}
 				}
 
-				err = self.picture_header()
-				if err != nil {
-					panic("picture_header")
+				if err := self.picture_header(); err != nil {
+					panic("picture_header: " + err.Error())
 				}
-				err = self.picture_coding_extension()
-				if err != nil {
-					panic("picture_coding_extension")
+
+				if err := self.picture_coding_extension(); err != nil {
+					panic("picture_coding_extension: " + err.Error())
 				}
-				err = extension_and_user_data(2, self)
-				if err != nil {
-					panic("extension_and_user_data")
+
+				if err := extension_and_user_data(2, self); err != nil {
+					panic("extension_and_user_data: " + err.Error())
 				}
 
 				{
@@ -91,33 +82,24 @@ func (self *frameProvider) Next() (image.Image, error) {
 					}
 				}
 
-				nextbits, err = self.Peek32(32)
-				if err != nil {
-					panic("peeking")
-				}
-
-				if StartCode(nextbits) != PictureStartCode &&
-					StartCode(nextbits) != GroupStartCode {
+				if nextbits, err := self.Peek32(32); err != nil {
+					panic("peeking: " + err.Error())
+				} else if StartCode(nextbits) != PictureStartCode && StartCode(nextbits) != GroupStartCode {
 					break
 				}
 			}
 
 			panic("not implemented: frame_provider")
 
-			nextbits, err := self.Peek32(32)
-			if err != nil {
+			if nextbits, err := self.Peek32(32); err != nil {
 				panic("Peek32")
-			}
-
-			if StartCode(nextbits) == SequenceEndStartCode {
+			} else if StartCode(nextbits) == SequenceEndStartCode {
 				break
 			}
 
 		}
 
-		err = self.Trash(32)
-
-		return nil, err
+		return nil, self.Trash(32)
 	} else {
 		// Stream is MPEG-1 Video
 		return nil, ErrUnsupportedVideoStream_ISO_IEC_11172_2
