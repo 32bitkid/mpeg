@@ -50,7 +50,7 @@ func (self *VideoSequence) decode_block(cc int, QFS *block, macroblock_intra boo
 
 	{
 		q_scale_type := self.PictureCodingExtension.q_scale_type
-		quantiser_scale_code := self.lastQuantiserScaleCode
+		quantiser_scale_code := self.currentQSC
 		W := self.quantisationMatricies
 
 		var w int

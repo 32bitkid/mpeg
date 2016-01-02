@@ -21,7 +21,7 @@ type VideoSequence struct {
 
 	dcDctPredictors        [3]int32
 	quantisationMatricies  [4]QuantisationMatrix
-	lastQuantiserScaleCode uint32
+	currentQSC            uint32
 }
 
 func NewVideoSequence(br bitreader.BitReader) VideoSequence {

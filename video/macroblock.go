@@ -54,7 +54,7 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 			return 0, err
 		} else {
 			mb.quantiser_scale_code = qsc
-			br.lastQuantiserScaleCode = qsc
+			br.currentQSC = qsc
 		}
 	}
 

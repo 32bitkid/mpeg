@@ -62,7 +62,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		return err
 	} else {
 		s.quantiser_scale_code = qsc
-		br.lastQuantiserScaleCode = qsc
+		br.currentQSC = qsc
 	}
 
 	if nextbits, err := br.Peek32(1); err != nil {
