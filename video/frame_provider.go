@@ -99,6 +99,7 @@ func (self *frameProvider) Next() (image.Image, error) {
 
 		}
 
+		// SequenceEndStartCode
 		return nil, self.Trash(32)
 	} else {
 		// Stream is MPEG-1 Video

@@ -56,7 +56,3 @@ func (vs *VideoSequence) picture_coding_extension() (err error) {
 	vs.PictureCodingExtension, err = picture_coding_extension(vs)
 	return
 }
-
-func (vs *VideoSequence) VerticalSize() uint32 {
-	return vs.SequenceHeader.vertical_size_value
-}

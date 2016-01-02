@@ -27,12 +27,9 @@ func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
 			return nil, err
 		}
 
-		nextbits, err := self.Peek32(32)
-		if err != nil {
+		if nextbits, err := self.Peek32(32); err != nil {
 			return nil, err
-		}
-
-		if StartCode(nextbits).isSlice() == false {
+		} else if StartCode(nextbits).isSlice() == false {
 			break
 		}
 	}

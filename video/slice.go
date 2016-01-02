@@ -17,10 +17,6 @@ type Slice struct {
 
 func (br *VideoSequence) slice(frame *image.YCbCr) error {
 
-	br.resetPredictors()
-
-	s := Slice{}
-
 	code, err := br.Read32(32)
 	if err != nil {
 		return err
@@ -30,19 +26,21 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		return ErrUnexpectedStartCode
 	}
 
+	br.resetPredictors()
+	s := Slice{}
 	s.slice_start_code = StartCode(code)
 
-	yPos := int((code & 0xFF) - 1)
+	mb_row := int((code & 0xFF) - 1)
 	frameSlice := &image.YCbCr{
-		Y:       frame.Y[16*yPos*frame.YStride:],
-		Cb:      frame.Cb[8*yPos*frame.CStride:],
-		Cr:      frame.Cr[8*yPos*frame.CStride:],
+		Y:       frame.Y[16*mb_row*frame.YStride:],
+		Cb:      frame.Cb[8*mb_row*frame.CStride:],
+		Cr:      frame.Cr[8*mb_row*frame.CStride:],
 		YStride: frame.YStride,
 		CStride: frame.CStride,
 		Rect:    image.Rect(0, 0, 16, frame.YStride),
 	}
 
-	if br.VerticalSize() > 2800 {
+	if br.SequenceHeader.vertical_size_value > 2800 {
 		s.slice_vertical_position_extension, err = br.Read32(3)
 		if err != nil {
 			return err
@@ -66,12 +64,9 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 
 	br.lastQuantiserScaleCode = s.quantiser_scale_code
 
-	nextbits, err := br.Peek32(1)
-	if err != nil {
+	if nextbits, err := br.Peek32(1); err != nil {
 		return err
-	}
-
-	if nextbits == 1 {
+	} else if nextbits == 1 {
 		s.intra_slice_flag, err = br.ReadBit()
 		if err != nil {
 			return err
@@ -82,36 +77,32 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 			return err
 		}
 
-		reserved_bits, err := br.Read32(7)
-		if err != nil {
+		if reserved_bits, err := br.Read32(7); err != nil {
 			return err
 		} else if reserved_bits != 0 {
 			return ErrInvalidReservedBits
 		}
 
 		for {
-			nextbits, err = br.Peek32(1)
-			if err != nil {
+			if nextbits, err := br.Peek32(1); err != nil {
 				return err
 			} else if nextbits != 1 {
 				break
 			}
 
-			err = br.Trash(1)
-			if err != nil {
+			if err = br.Trash(1); err != nil {
 				return err
 			}
 
-			data, err := br.Read32(8)
-			if err != nil {
+			if data, err := br.Read32(8); err != nil {
 				return err
+			} else {
+				s.extra_information = append(s.extra_information, byte(data))
 			}
-			s.extra_information = append(s.extra_information, byte(data))
 		}
 	}
 
-	err = br.Trash(1)
-	if err != nil {
+	if err = br.Trash(1); err != nil {
 		return err
 	}
 
@@ -122,15 +113,11 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 			return err
 		}
 
-		nextbits, err = br.Peek32(23)
-		if err != nil {
+		if nextbits, err := br.Peek32(23); err != nil {
 			return err
-		}
-
-		if nextbits == 0 {
+		} else if nextbits == 0 {
 			break
 		}
-
 	}
 
 	return next_start_code(br)
