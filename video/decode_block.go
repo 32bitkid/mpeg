@@ -76,7 +76,7 @@ func (self *VideoSequence) decode_block(cc int, QFS *block, macroblock_intra boo
 			}
 		}
 
-		quantiser_scale := quantiser_scale_table[q_scale_type][quantiser_scale_code]
+		quantiser_scale := quantiser_scale_tables[q_scale_type][quantiser_scale_code]
 
 		macroblock_intra := macroblock_intra
 
