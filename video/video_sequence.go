@@ -9,9 +9,6 @@ type VideoSequence struct {
 	*SequenceHeader
 	*SequenceExtension
 
-	// Extensions
-	*SequenceScalableExtension
-
 	// Picture Data
 	*GroupOfPicturesHeader
 	*PictureHeader
