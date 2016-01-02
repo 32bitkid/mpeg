@@ -84,7 +84,11 @@ func (self *frameProvider) Next() (image.Image, error) {
 
 				if nextbits, err := self.Peek32(32); err != nil {
 					panic("peeking: " + err.Error())
-				} else if StartCode(nextbits) != PictureStartCode && StartCode(nextbits) != GroupStartCode {
+				} else if StartCode(nextbits) == PictureStartCode {
+					continue
+				} else if StartCode(nextbits) == GroupStartCode {
+					continue
+				} else {
 					break
 				}
 			}
