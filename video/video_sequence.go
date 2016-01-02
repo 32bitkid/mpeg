@@ -2,8 +2,6 @@ package video
 
 import "github.com/32bitkid/bitreader"
 
-type DC_DCT_Predictors [3]int
-
 type VideoSequence struct {
 	bitreader.BitReader
 
@@ -19,8 +17,8 @@ type VideoSequence struct {
 	*PictureHeader
 	*PictureCodingExtension
 
-	dcDctPredictors        [3]int32
-	quantisationMatricies  [4]QuantisationMatrix
+	dcDctPredictors
+	quantisationMatricies [4]QuantisationMatrix
 	currentQSC            uint32
 }
 
@@ -30,11 +28,8 @@ func NewVideoSequence(br bitreader.BitReader) VideoSequence {
 	}
 }
 
-func (pred *VideoSequence) resetPredictors() {
-	resetValue := int32(1) << (7 + pred.PictureCodingExtension.intra_dc_precision)
-	pred.dcDctPredictors[0] = resetValue
-	pred.dcDctPredictors[1] = resetValue
-	pred.dcDctPredictors[2] = resetValue
+func (pred *VideoSequence) resetDCPredictors() {
+	pred.dcDctPredictors.reset(pred.PictureCodingExtension.intra_dc_precision)
 }
 
 func (vs *VideoSequence) sequence_extension() (err error) {
@@ -55,4 +50,13 @@ func (vs *VideoSequence) picture_header() (err error) {
 func (vs *VideoSequence) picture_coding_extension() (err error) {
 	vs.PictureCodingExtension, err = picture_coding_extension(vs)
 	return
+}
+
+type dcDctPredictors [3]int32
+
+func (pred *dcDctPredictors) reset(intra_dc_precision uint32) {
+	resetValue := int32(1) << (7 + intra_dc_precision)
+	pred[0] = resetValue
+	pred[1] = resetValue
+	pred[2] = resetValue
 }

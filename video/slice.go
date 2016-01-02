@@ -26,7 +26,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		return ErrUnexpectedStartCode
 	}
 
-	br.resetPredictors()
+	br.resetDCPredictors()
 	s := Slice{}
 	s.slice_start_code = StartCode(code)
 

@@ -36,7 +36,7 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 	}
 
 	if mb.macroblock_address_increment > 1 {
-		br.resetPredictors()
+		br.resetDCPredictors()
 	}
 
 	mbAddress += int(mb.macroblock_address_increment)
@@ -46,7 +46,7 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 	}
 
 	if mb.macroblock_type.macroblock_intra == false {
-		br.resetPredictors()
+		br.resetDCPredictors()
 	}
 
 	if mb.macroblock_type.macroblock_quant {
