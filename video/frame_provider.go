@@ -91,14 +91,21 @@ func (self *frameProvider) Next() (image.Image, error) {
 				} else {
 					break
 				}
-			}
 
-			panic("not implemented: frame_provider")
+			}
 
 			if nextbits, err := self.Peek32(32); err != nil {
 				panic("Peek32")
 			} else if StartCode(nextbits) == SequenceEndStartCode {
 				break
+			}
+
+			if err := self.sequence_header(); err != nil {
+				panic(err)
+			}
+
+			if err := self.sequence_extension(); err != nil {
+				panic(err)
 			}
 
 		}
