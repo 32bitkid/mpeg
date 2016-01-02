@@ -60,9 +60,7 @@ func (self *VideoSequence) block(cc int, mb *Macroblock) (*block, error) {
 		run, level, end, err := dctDecoder(self, n)
 		if err != nil {
 			return nil, err
-		}
-
-		if end {
+		} else if end {
 			eob_not_read = false
 			for n < 64 {
 				QFS[n] = 0
