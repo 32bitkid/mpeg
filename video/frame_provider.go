@@ -22,7 +22,6 @@ type frameProvider struct {
 }
 
 func (self *frameProvider) Next() (image.Image, error) {
-
 	// align to next start code
 	if err := next_start_code(self); err != nil {
 		panic(err)
@@ -37,14 +36,12 @@ func (self *frameProvider) Next() (image.Image, error) {
 	if val, err := self.Peek32(32); err != nil {
 		panic(err)
 	} else if StartCode(val) == ExtensionStartCode {
-
 		if err := self.sequence_extension(); err != nil {
 			panic(err)
 		}
 
 		for {
-
-			if err := extension_and_user_data(0, self); err != nil {
+			if err := self.extension_and_user_data(0); err != nil {
 				panic("extension_and_user_data: " + err.Error())
 			}
 
@@ -55,7 +52,7 @@ func (self *frameProvider) Next() (image.Image, error) {
 					if err := self.group_of_pictures_header(); err != nil {
 						panic("group_of_pictures_header: " + err.Error())
 					}
-					if err := extension_and_user_data(1, self); err != nil {
+					if err := self.extension_and_user_data(1); err != nil {
 						panic("extension_and_user_data:" + err.Error())
 					}
 				}
@@ -68,7 +65,7 @@ func (self *frameProvider) Next() (image.Image, error) {
 					panic("picture_coding_extension: " + err.Error())
 				}
 
-				if err := extension_and_user_data(2, self); err != nil {
+				if err := self.extension_and_user_data(2); err != nil {
 					panic("extension_and_user_data: " + err.Error())
 				}
 
@@ -91,7 +88,6 @@ func (self *frameProvider) Next() (image.Image, error) {
 				} else {
 					break
 				}
-
 			}
 
 			if nextbits, err := self.Peek32(32); err != nil {
@@ -107,7 +103,6 @@ func (self *frameProvider) Next() (image.Image, error) {
 			if err := self.sequence_extension(); err != nil {
 				panic(err)
 			}
-
 		}
 
 		// SequenceEndStartCode

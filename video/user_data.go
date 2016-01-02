@@ -1,10 +1,8 @@
 package video
 
-import "github.com/32bitkid/bitreader"
-
 type UserData []byte
 
-func user_data(br bitreader.BitReader) (UserData, error) {
+func (br *VideoSequence) user_data() (UserData, error) {
 	err := UserDataStartCode.assert(br)
 	if err != nil {
 		return nil, err

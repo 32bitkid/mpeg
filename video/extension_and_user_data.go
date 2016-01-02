@@ -1,20 +1,17 @@
 package video
 
-import "github.com/32bitkid/bitreader"
-
-func extension_and_user_data(i int, br bitreader.BitReader) error {
-
+func (br *VideoSequence) extension_and_user_data(i int) error {
 	for {
 		if nextbits, err := br.Peek32(32); err != nil {
 			return err
 		} else if StartCode(nextbits) != ExtensionStartCode && StartCode(nextbits) != UserDataStartCode {
 			break
 		} else if (i != 1) && (StartCode(nextbits) == ExtensionStartCode) {
-			if err := extension_data(i, br); err != nil {
+			if err := br.extension_data(i); err != nil {
 				return err
 			}
 		} else if StartCode(nextbits) == UserDataStartCode {
-			if _, err := user_data(br); err != nil {
+			if _, err := br.user_data(); err != nil {
 				return err
 			}
 		}
@@ -23,7 +20,7 @@ func extension_and_user_data(i int, br bitreader.BitReader) error {
 	return nil
 }
 
-func extension_data(i int, br bitreader.BitReader) error {
+func (br *VideoSequence) extension_data(i int) error {
 	for {
 		if nextbits, err := br.Peek32(32); err != nil {
 			return err
