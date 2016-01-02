@@ -1,6 +1,6 @@
 package video
 
-type QuantisationMatrix [8][8]byte
+type QuantisationMatrix [8][8]uint8
 
 var DefaultQuantisationMatrices = struct {
 	Intra    QuantisationMatrix
