@@ -31,6 +31,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 	s.slice_start_code = StartCode(code)
 
 	mb_row := int((code & 0xFF) - 1)
+
 	frameSlice := &image.YCbCr{
 		Y:       frame.Y[16*mb_row*frame.YStride:],
 		Cb:      frame.Cb[8*mb_row*frame.CStride:],
@@ -57,12 +58,12 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		}
 	}
 
-	s.quantiser_scale_code, err = br.Read32(5)
-	if err != nil {
+	if qsc, err := br.Read32(5); err != nil {
 		return err
+	} else {
+		s.quantiser_scale_code = qsc
+		br.lastQuantiserScaleCode = qsc
 	}
-
-	br.lastQuantiserScaleCode = s.quantiser_scale_code
 
 	if nextbits, err := br.Peek32(1); err != nil {
 		return err
