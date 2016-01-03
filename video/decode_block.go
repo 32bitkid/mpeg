@@ -33,12 +33,14 @@ func sign(i int32) int32 {
 	return 0
 }
 
-func (self *VideoSequence) decode_block(cc int, QFS *block, macroblock_intra bool) (*block, error) {
-	var QF [8][8]int32
-	var Fpp [8][8]int32
-	var Fp [8][8]int32
-	var F block
+type intermediaryblock [8][8]int32
 
+func (self *VideoSequence) decode_block(cc int, QFS *block, F *block, macroblock_intra bool) error {
+	var QF intermediaryblock
+	var Fpp intermediaryblock
+	var Fp intermediaryblock
+
+	// inverse scan
 	{
 		alternate_scan := self.PictureCodingExtension.alternate_scan
 		for v := 0; v < 8; v++ {
@@ -48,6 +50,7 @@ func (self *VideoSequence) decode_block(cc int, QFS *block, macroblock_intra boo
 		}
 	}
 
+	// Inverse quantisation
 	{
 		q_scale_type := self.PictureCodingExtension.q_scale_type
 		quantiser_scale_code := self.currentQSC
@@ -96,31 +99,34 @@ func (self *VideoSequence) decode_block(cc int, QFS *block, macroblock_intra boo
 				}
 			}
 		}
+	}
 
-		{
-			var sum int32 = 0
-			for v := 0; v < 8; v++ {
-				for u := 0; u < 8; u++ {
-					if Fpp[v][u] > 2047 {
-						Fp[v][u] = 2047
-					} else if Fpp[v][u] < -2048 {
-						Fp[v][u] = -2048
-					} else {
-						Fp[v][u] = Fpp[v][u]
-					}
-					sum = sum + Fp[v][u]
-					F[v*8+u] = Fp[v][u]
-				}
-			}
-			if (sum & 1) == 0 {
-				if (F[7*8+7] & 1) != 0 {
-					F[7*8+7] = Fp[7][7] - 1
+	{
+		// Saturation
+		var sum int32 = 0
+		for v := 0; v < 8; v++ {
+			for u := 0; u < 8; u++ {
+				if Fpp[v][u] > 2047 {
+					Fp[v][u] = 2047
+				} else if Fpp[v][u] < -2048 {
+					Fp[v][u] = -2048
 				} else {
-					F[7*8+7] = Fp[7][7] + 1
+					Fp[v][u] = Fpp[v][u]
 				}
+				sum = sum + Fp[v][u]
+				F[v*8+u] = Fp[v][u]
+			}
+		}
+
+		// Mismatch control
+		if (sum & 1) == 0 {
+			if (F[7*8+7] & 1) != 0 {
+				F[7*8+7] = Fp[7][7] - 1
+			} else {
+				F[7*8+7] = Fp[7][7] + 1
 			}
 		}
 	}
 
-	return &F, nil
+	return nil
 }

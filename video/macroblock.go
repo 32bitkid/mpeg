@@ -2,6 +2,8 @@ package video
 
 import "image"
 
+var color_channel = [12]int{0, 0, 0, 0, 1, 2, 1, 2, 1, 2, 1, 2}
+
 type Macroblock struct {
 	macroblock_address_increment uint32
 	macroblock_type              *MacroblockType
@@ -100,41 +102,27 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 
 	pattern_code := mb.calcPatternCode(br.SequenceExtension.chroma_format)
 
-	for i := 0; i < block_count; i++ {
-		var b *block
+	var b block
+	var decoded block
 
-		cc := calcCC(i)
+	for i := 0; i < block_count; i++ {
+		cc := color_channel[i]
 
 		if pattern_code[i] {
-			var err error
-			b, err = br.block(cc, &mb)
-			if err != nil {
-				return mbAddress, err
+			if err := br.block(cc, &b, &mb); err != nil {
+				return 0, err
 			}
-		} else {
-			b = new(block)
 		}
 
-		decoded, err := br.decode_block(cc, b, mb.macroblock_type.macroblock_intra)
+		err := br.decode_block(cc, &b, &decoded, mb.macroblock_type.macroblock_intra)
 		if err != nil {
-			return mbAddress, err
+			return 0, err
 		}
-		idct(decoded)
-		updateFrameSlice(i, mbAddress, frameSlice, decoded)
+		idct(&decoded)
+		updateFrameSlice(i, mbAddress, frameSlice, &decoded)
 	}
 
 	return mbAddress, nil
-}
-
-func calcCC(i int) int {
-	switch {
-	case i < 4:
-		return 0
-	case i&1 == 0:
-		return 1
-	default:
-		return 2
-	}
 }
 
 type clampedBlock [blockSize]uint8
