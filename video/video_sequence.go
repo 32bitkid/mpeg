@@ -2,17 +2,22 @@ package video
 
 import "github.com/32bitkid/bitreader"
 
-type VideoSequence struct {
-	bitreader.BitReader
-
-	// Sequence Headers
+type sequenceHeaders struct {
 	*SequenceHeader
 	*SequenceExtension
+}
 
-	// Picture Data
+type pictureHeaders struct {
 	*GroupOfPicturesHeader
 	*PictureHeader
 	*PictureCodingExtension
+}
+
+type VideoSequence struct {
+	bitreader.BitReader
+
+	sequenceHeaders
+	pictureHeaders
 
 	dcDctPredictors
 	quantisationMatricies [4]QuantisationMatrix
