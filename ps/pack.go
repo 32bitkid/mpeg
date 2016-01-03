@@ -33,31 +33,24 @@ func readPack(r bitreader.BitReader) (*Pack, <-chan bool, error) {
 		defer close(pack.packs)
 
 		for true {
-			v, err := r.Peek32(24)
-			if err != nil {
-				return
-			}
 
-			if v != PacketStartCodePrefix {
+			if nextbits, err := r.Peek32(24); err != nil {
+				return
+			} else if nextbits != StartCodePrefix {
 				break
 			}
 
-			v, err = r.Peek32(32)
-			if err != nil {
+			if nextbits, err := r.Peek32(32); err != nil {
+				return
+			} else if StartCode(nextbits) == PackStartCode || StartCode(nextbits) == ProgramEndCode {
 				return
 			}
 
-			if v == PackStartCode || v == ProgramEndCode {
+			if packet, err := pes.NewPacket(r); err != nil {
 				return
+			} else {
+				pack.packs <- packet
 			}
-
-			packet, err := pes.ReadPacket(r, -1)
-
-			if err != nil {
-				return
-			}
-
-			pack.packs <- packet
 		}
 	}()
 

@@ -22,13 +22,7 @@ func (d *decoder) Go() <-chan bool {
 		defer func() { done <- d.err == nil }()
 		defer close(d.packs)
 
-		var (
-			v   uint32
-			err error
-		)
-
 		for true {
-
 			pack, packComplete, err := readPack(d.r)
 			if err != nil {
 				d.err = err
@@ -39,18 +33,18 @@ func (d *decoder) Go() <-chan bool {
 
 			<-packComplete
 
-			v, err = d.r.Peek32(32)
-			if err != nil {
+			if nextbits, err := d.r.Peek32(32); err != nil {
 				d.err = err
 				return
-			}
-			if v != PackStartCode {
+			} else if StartCode(nextbits) != PackStartCode {
 				break
 			}
 		}
 
-		v, err = d.r.Peek32(32)
-		if v != ProgramEndCode || err != nil {
+		if nextbits, err := d.r.Peek32(32); err != nil {
+			d.err = err
+			return
+		} else if StartCode(nextbits) != ProgramEndCode {
 			d.err = ErrProgramEndCodeNotFound
 			return
 		}

@@ -22,96 +22,120 @@ type SystemHeaderStream struct {
 }
 
 func readSystemHeader(r bitreader.BitReader) (*SystemHeader, error) {
-	var (
-		v   uint32
-		err error
-	)
 
-	if err = r.Trash(32); err != nil {
+	if err := r.Trash(32); err != nil {
 		return nil, err
 	}
 
 	systemHeader := SystemHeader{}
 
-	if systemHeader.HeaderLength, err = r.Read32(16); err != nil {
+	if hl, err := r.Read32(16); err != nil {
 		return nil, err
+	} else {
+		systemHeader.HeaderLength = hl
 	}
 
-	if v, err = r.Read32(1); v != 1 || err != nil {
+	if v, err := r.Read32(1); err != nil {
+		return nil, err
+	} else if v != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
-	if systemHeader.RateBound, err = r.Read32(22); err != nil {
+	if rb, err := r.Read32(22); err != nil {
 		return nil, err
+	} else {
+		systemHeader.RateBound = rb
 	}
 
-	if v, err = r.Read32(1); v != 1 || err != nil {
+	if v, err := r.Read32(1); err != nil {
+		return nil, err
+	} else if v != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
-	if systemHeader.AudioBound, err = r.Read32(6); err != nil {
+	if ab, err := r.Read32(6); err != nil {
 		return nil, err
+	} else {
+		systemHeader.AudioBound = ab
 	}
 
-	if systemHeader.Fixed, err = r.ReadBit(); err != nil {
+	if fixed, err := r.ReadBit(); err != nil {
 		return nil, err
+	} else {
+		systemHeader.Fixed = fixed
 	}
 
-	if systemHeader.CSPS, err = r.ReadBit(); err != nil {
+	if csps, err := r.ReadBit(); err != nil {
 		return nil, err
+	} else {
+		systemHeader.CSPS = csps
 	}
 
-	if systemHeader.SystemAudioLock, err = r.ReadBit(); err != nil {
+	if sal, err := r.ReadBit(); err != nil {
 		return nil, err
+	} else {
+		systemHeader.SystemAudioLock = sal
 	}
 
-	if systemHeader.SystemVideoLock, err = r.ReadBit(); err != nil {
+	if svl, err := r.ReadBit(); err != nil {
 		return nil, err
+	} else {
+		systemHeader.SystemVideoLock = svl
 	}
 
-	if v, err = r.Read32(1); v != 1 || err != nil {
+	if v, err := r.Read32(1); err != nil {
+		return nil, err
+	} else if v != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
-	if systemHeader.AudioBound, err = r.Read32(5); err != nil {
+	if ab, err := r.Read32(5); err != nil {
 		return nil, err
+	} else {
+		systemHeader.AudioBound = ab
 	}
 
-	if systemHeader.PacketRateRestriction, err = r.ReadBit(); err != nil {
+	if prr, err := r.ReadBit(); err != nil {
 		return nil, err
+	} else {
+		systemHeader.PacketRateRestriction = prr
 	}
 
-	if err = r.Trash(7); err != nil {
+	if err := r.Trash(7); err != nil {
 		return nil, err
 	}
 
 	for true {
-		v, err = r.Peek32(1)
-
-		if err != nil {
+		if nextbits, err := r.Peek32(1); err != nil {
 			return nil, err
-		}
-
-		if v != 1 {
+		} else if nextbits != 1 {
 			break
 		}
 
 		stream := SystemHeaderStream{}
 
-		if stream.StreamID, err = r.Read32(8); err != nil {
+		if sid, err := r.Read32(8); err != nil {
 			return nil, err
+		} else {
+			stream.StreamID = sid
 		}
 
-		if v, err = r.Read32(2); v != 3 || err != nil {
+		if v, err := r.Read32(2); err != nil {
 			return nil, err
+		} else if v != 3 {
+			return nil, ErrMarkerNotFound
 		}
 
-		if stream.P_STD_BufferBoundScale, err = r.ReadBit(); err != nil {
+		if scale, err := r.ReadBit(); err != nil {
 			return nil, err
+		} else {
+			stream.P_STD_BufferBoundScale = scale
 		}
 
-		if stream.P_STD_BufferSizeBound, err = r.Read32(13); err != nil {
+		if size, err := r.Read32(13); err != nil {
 			return nil, err
+		} else {
+			stream.P_STD_BufferSizeBound = size
 		}
 
 		systemHeader.Streams = append(systemHeader.Streams, &stream)

@@ -1,6 +1,7 @@
 package ps
 
 import "github.com/32bitkid/bitreader"
+import "errors"
 
 type PackHeader struct {
 	SystemClockReferenceBase      uint32
@@ -9,91 +10,106 @@ type PackHeader struct {
 	*SystemHeader
 }
 
-func readPackHeader(r bitreader.BitReader) (*PackHeader, error) {
-	var (
-		v   uint32
-		err error
-	)
+var ErrNoPackStartCode = errors.New("no pack start code")
 
-	if v, err := r.Read32(32); v != PackStartCode || err != nil {
+func readPackHeader(r bitreader.BitReader) (*PackHeader, error) {
+
+	if nextbits, err := r.Read32(32); err != nil {
 		return nil, err
+	} else if StartCode(nextbits) != PackStartCode {
+		return nil, ErrNoPackStartCode
 	}
 
-	if v, err := r.Read32(2); v != 1 || err != nil {
+	if nextbits, err := r.Read32(2); err != nil {
+		return nil, err
+	} else if nextbits != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
 	packHeader := PackHeader{}
 
-	if v, err = r.Read32(3); err != nil {
+	if v, err := r.Read32(3); err != nil {
 		return nil, err
+	} else {
+		packHeader.SystemClockReferenceBase |= v << 30
 	}
 
-	packHeader.SystemClockReferenceBase |= v << 30
-
-	if v, err = r.Read32(1); v != 1 || err != nil {
+	if v, err := r.Read32(1); err != nil {
+		return nil, err
+	} else if v != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
-	if v, err = r.Read32(15); err != nil {
+	if v, err := r.Read32(15); err != nil {
 		return nil, err
+	} else {
+		packHeader.SystemClockReferenceBase |= v << 15
 	}
 
-	packHeader.SystemClockReferenceBase |= v << 15
-
-	if v, err = r.Read32(1); v != 1 || err != nil {
+	if v, err := r.Read32(1); err != nil {
+		return nil, err
+	} else if v != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
-	if v, err = r.Read32(15); err != nil {
+	if v, err := r.Read32(15); err != nil {
 		return nil, err
+	} else {
+		packHeader.SystemClockReferenceBase |= v
 	}
 
-	packHeader.SystemClockReferenceBase |= v
-
-	if v, err = r.Read32(1); v != 1 || err != nil {
+	if v, err := r.Read32(1); err != nil {
+		return nil, err
+	} else if v != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
-	if packHeader.SystemClockReferenceExtension, err = r.Read32(9); err != nil {
+	if scre, err := r.Read32(9); err != nil {
 		return nil, err
+	} else {
+		packHeader.SystemClockReferenceExtension = scre
 	}
 
-	if v, err = r.Read32(1); v != 1 || err != nil {
+	if v, err := r.Read32(1); err != nil {
+		return nil, err
+	} else if v != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
-	if packHeader.ProgramMuxRate, err = r.Read32(22); err != nil {
+	if pmr, err := r.Read32(22); err != nil {
 		return nil, err
+	} else {
+		packHeader.ProgramMuxRate = pmr
 	}
 
-	if v, err = r.Read32(1); v != 1 || err != nil {
+	if v, err := r.Read32(1); err != nil {
+		return nil, err
+	} else if v != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
-	if v, err = r.Read32(1); v != 1 || err != nil {
+	if v, err := r.Read32(1); err != nil {
+		return nil, err
+	} else if v != 1 {
 		return nil, ErrMarkerNotFound
 	}
 
-	if err = r.Trash(5); err != nil {
+	if err := r.Trash(5); err != nil {
 		return nil, err
 	}
 
-	if v, err = r.Read32(3); err != nil {
+	if pack_stuffing_length, err := r.Read32(3); err != nil {
 		return nil, err
+	} else {
+		for pack_stuffing_length > 0 {
+			r.Trash(8) // stuffing_byte
+			pack_stuffing_length--
+		}
 	}
 
-	for v > 0 {
-		r.Trash(8)
-		v--
-	}
-
-	v, err = r.Peek32(32)
-	if err != nil {
+	if nextbits, err := r.Peek32(32); err != nil {
 		return nil, err
-	}
-
-	if v == SystemHeaderStartCode {
+	} else if StartCode(nextbits) == SystemHeaderStartCode {
 		packHeader.SystemHeader, err = readSystemHeader(r)
 		if err != nil {
 			return nil, err
