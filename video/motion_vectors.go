@@ -3,23 +3,28 @@ package video
 import "github.com/32bitkid/huffman"
 import "github.com/32bitkid/bitreader"
 
-func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock) error {
+type motionCode [2][2][2]int
+type motionResidual [2][2][2]uint32
+
+func (fp *VideoSequence) motion_vectors(s int, motion_code *motionCode, motion_residual *motionResidual, mb *Macroblock) error {
 
 	f_code := fp.PictureCodingExtension.f_code
 
 	mv_count, mv_format, dmv := mv_info(fp, mb)
 
 	motion_vector_part := func(r, s, t int) error {
-		code, err := decodeMotionCode(fp)
-		if err != nil {
+		if code, err := decodeMotionCode(fp); err != nil {
 			return err
+		} else {
+			motion_code[r][s][t] = code
 		}
-		if f_code[s][t] != 1 && code != 0 {
+		if f_code[s][t] != 1 && motion_code[r][s][t] != 0 {
 			r_size := uint(f_code[s][t] - 1)
 
-			_, err := fp.Read32(r_size)
-			if err != nil {
+			if code, err := fp.Read32(r_size); err != nil {
 				return err
+			} else {
+				motion_residual[r][s][t] = code
 			}
 		}
 		if dmv == 1 {
