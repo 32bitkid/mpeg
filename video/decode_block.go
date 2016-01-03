@@ -54,7 +54,7 @@ func (self *VideoSequence) decode_block(cc int, QFS *block, F *block, macroblock
 	{
 		q_scale_type := self.PictureCodingExtension.q_scale_type
 		quantiser_scale_code := self.currentQSC
-		W := self.quantisationMatricies
+		quantiser_scale := quantiser_scale_tables[q_scale_type][quantiser_scale_code]
 
 		var w int
 		if cc == 0 {
@@ -79,9 +79,7 @@ func (self *VideoSequence) decode_block(cc int, QFS *block, F *block, macroblock
 			}
 		}
 
-		quantiser_scale := quantiser_scale_tables[q_scale_type][quantiser_scale_code]
-
-		macroblock_intra := macroblock_intra
+		W := self.quantisationMatricies
 
 		for v := 0; v < 8; v++ {
 			for u := 0; u < 8; u++ {
