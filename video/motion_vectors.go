@@ -12,9 +12,6 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock) error {
 	motion_vector_part := func(r, s, t int) error {
 		code, err := decodeMotionCode(fp)
 		if err != nil {
-			val, _ := fp.Peek32(11)
-			log.Printf("%011b", val)
-			panic(err)
 			return err
 		}
 		if f_code[s][t] != 1 && code != 0 {
