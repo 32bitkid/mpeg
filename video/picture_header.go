@@ -1,6 +1,7 @@
 package video
 
 import "github.com/32bitkid/bitreader"
+import "fmt"
 
 type PictureHeader struct {
 	temporal_reference       uint32            // 10 uimsbf
@@ -12,6 +13,10 @@ type PictureHeader struct {
 	backward_f_code          uint32            // 3 bslbf
 
 	extra_information []byte
+}
+
+func (ph PictureHeader) String() string {
+	return fmt.Sprintf("[%s%d]", ph.picture_coding_type, ph.temporal_reference)
 }
 
 func picture_header(br bitreader.BitReader) (*PictureHeader, error) {
