@@ -6,21 +6,21 @@ import "errors"
 type ExtensionID uint32
 
 const (
-	_                                  ExtensionID = iota // reserved
-	SequenceExtensionID                                   //
-	SequenceDisplayExtensionID                            //
-	QuantMatrixExtensionID                                //
-	CopyrightExtensionID                                  //
-	SequenceScalableExtensionID                           //
-	_                                                     // reserved
-	PictureDisplayExtensionID                             //
-	PictureCodingExtensionID                              //
-	PictureSpatialScalableExtensionID                     //
-	PictureTemporalScalableExtensionID                    //
-	_                                                     // reserved
-	_                                                     // reserved
-	_                                                     // reserved
-	_                                                     // reserved
+	_ ExtensionID = iota // reserved
+	SequenceExtensionID
+	SequenceDisplayExtensionID
+	QuantMatrixExtensionID
+	CopyrightExtensionID
+	SequenceScalableExtensionID
+	_ // reserved
+	PictureDisplayExtensionID
+	PictureCodingExtensionID
+	PictureSpatialScalableExtensionID
+	PictureTemporalScalableExtensionID
+	_ // reserved
+	_ // reserved
+	_ // reserved
+	_ // reserved
 )
 
 var ErrUnexpectedSequenceExtensionID = errors.New("unexpected sequence extension id")
