@@ -5,9 +5,7 @@ import "errors"
 
 const stuffingByte = 0x00
 
-var (
-	ErrUnexpectedNonZeroByte = errors.New("unexpected non-zero byte")
-)
+var ErrUnexpectedNonZeroByte = errors.New("unexpected non-zero byte")
 
 func (self *VideoSequence) next_start_code() (err error) {
 	return next_start_code(self)
