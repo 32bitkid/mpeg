@@ -11,34 +11,23 @@ func (self *VideoSequence) next_start_code() (err error) {
 	return next_start_code(self)
 }
 
-func next_start_code(br bitreader.BitReader) (err error) {
-	for !br.IsByteAligned() {
-		_, err = br.ByteAlign()
-		if err != nil {
+func next_start_code(br bitreader.BitReader) error {
+	if !br.IsByteAligned() {
+		if _, err := br.ByteAlign(); err != nil {
 			return err
 		}
 	}
 
-	var val uint32
-
 	for {
-		val, err = br.Peek32(24)
-
-		if err != nil {
+		if val, err := br.Peek32(24); err != nil {
 			return err
-		}
-
-		if val == StartCodePrefix {
+		} else if val == StartCodePrefix {
 			return nil
 		}
 
-		val, err = br.Read32(8)
-
-		if err != nil {
+		if val, err := br.Read32(8); err != nil {
 			return err
-		}
-
-		if val != StuffingByte {
+		} else if val != StuffingByte {
 			return ErrUnexpectedNonZeroByte
 		}
 	}
