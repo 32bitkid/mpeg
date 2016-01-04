@@ -3,7 +3,7 @@ package video
 import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/huffman"
 
-func coded_block_pattern(br bitreader.BitReader, chroma_format ChromaFormat) (int, error) {
+func coded_block_pattern(br bitreader.BitReader, chroma_format chromaFormat) (int, error) {
 	val, err := decodeCpb(br)
 
 	if ChromaFormat_422 == chroma_format {

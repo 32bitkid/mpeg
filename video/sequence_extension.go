@@ -2,10 +2,10 @@ package video
 
 import "github.com/32bitkid/bitreader"
 
-type ChromaFormat uint32
+type chromaFormat uint32
 
 const (
-	_ ChromaFormat = iota // reserved
+	_ chromaFormat = iota // reserved
 	ChromaFormat_420
 	ChromaFormat_422
 	ChromaFormat_444
@@ -14,7 +14,7 @@ const (
 type SequenceExtension struct {
 	profile_and_level_indication uint32       // 8 uimsbf
 	progressive_sequence         uint32       // 1 uimsbf
-	chroma_format                ChromaFormat // 2 uimsbf
+	chroma_format                chromaFormat // 2 uimsbf
 	horizontal_size_extension    uint32       // 2 uimsbf
 	vertical_size_extension      uint32       // 2 uimsbf
 	bit_rate_extension           uint32       // 12 uimsbf
@@ -51,7 +51,7 @@ func sequence_extension(br bitreader.BitReader) (*SequenceExtension, error) {
 	if chroma_format, err := br.Read32(2); err != nil {
 		return nil, err
 	} else {
-		se.chroma_format = ChromaFormat(chroma_format)
+		se.chroma_format = chromaFormat(chroma_format)
 	}
 
 	se.horizontal_size_extension, err = br.Read32(2)

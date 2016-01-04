@@ -192,7 +192,7 @@ func updateFrameSlice(i int, mbAddress int, frameSlice *image.YCbCr, b *block) {
 
 type PatternCode [12]bool
 
-func (mb *Macroblock) decodePatternCode(chroma_format ChromaFormat) (pattern_code PatternCode) {
+func (mb *Macroblock) decodePatternCode(chroma_format chromaFormat) (pattern_code PatternCode) {
 	for i := 0; i < 12; i++ {
 		if mb.macroblock_type.macroblock_intra {
 			pattern_code[i] = true
