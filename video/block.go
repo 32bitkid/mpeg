@@ -9,11 +9,11 @@ func (self *VideoSequence) block(cc int, QFS *block, mb *Macroblock) error {
 
 	// 7.2.1
 	if mb.macroblock_type.macroblock_intra {
-		var dcSizeDecoder DCTDCSizeDecoderFn
+		var dcSizeDecoder dctDCSizeDecoderFn
 		if cc == 0 {
-			dcSizeDecoder = DCTDCSizeDecoders.Luma
+			dcSizeDecoder = dctDCSizeDecoders.Luma
 		} else {
-			dcSizeDecoder = DCTDCSizeDecoders.Chroma
+			dcSizeDecoder = dctDCSizeDecoders.Chroma
 		}
 
 		dc_dct_size, err := dcSizeDecoder(self)
@@ -48,13 +48,13 @@ func (self *VideoSequence) block(cc int, QFS *block, mb *Macroblock) error {
 	}
 
 	for eob_not_read {
-		var dctDecoder DCTCoefficientDecoderFn
+		var dctDecoder dctCoefficientDecoderFn
 
 		if mb.macroblock_type.macroblock_intra &&
 			self.PictureCodingExtension.intra_vlc_format == 1 {
-			dctDecoder = DCTCoefficientDecoders.TableOne
+			dctDecoder = dctCoefficientDecoders.TableOne
 		} else {
-			dctDecoder = DCTCoefficientDecoders.TableZero
+			dctDecoder = dctCoefficientDecoders.TableZero
 		}
 
 		run, level, end, err := dctDecoder(self, n)
