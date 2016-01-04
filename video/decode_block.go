@@ -26,8 +26,7 @@ var scan = [2][8][8]int{
 func sign(i int32) int32 {
 	if i > 0 {
 		return 1
-	}
-	if i < 0 {
+	} else if i < 0 {
 		return -1
 	}
 	return 0
