@@ -31,7 +31,7 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 		}
 	}
 
-	if incr, err := MacroblockAddressIncrementDecoder.Decode(br); err != nil {
+	if incr, err := macroblockAddressIncrementDecoder.Decode(br); err != nil {
 		return 0, err
 	} else {
 		mb.macroblock_address_increment += incr

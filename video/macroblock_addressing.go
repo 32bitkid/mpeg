@@ -4,7 +4,7 @@ import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/huffman"
 import "errors"
 
-type macroblockAddressIncrementDecoder func(bitreader.BitReader) (uint32, error)
+type macroblockAddressIncrementDecoderFn func(bitreader.BitReader) (uint32, error)
 
 var ErrUnexpectedDecodedValueType = errors.New("unexpected decoded value type")
 var macroblockAddressIncrementHuffmanDecoder = huffman.NewHuffmanDecoder(huffman.HuffmanTable{
@@ -43,19 +43,17 @@ var macroblockAddressIncrementHuffmanDecoder = huffman.NewHuffmanDecoder(huffman
 	"0000 0011 000": uint32(33),
 })
 
-func decodeMacroblockAddressIncrement(br bitreader.BitReader) (uint32, error) {
-	val, err := macroblockAddressIncrementHuffmanDecoder.Decode(br)
-	if err != nil {
-		return 0, err
-	} else if i, ok := val.(uint32); ok {
-		return i, nil
-	} else {
-		return 0, ErrUnexpectedDecodedValueType
-	}
-}
-
-var MacroblockAddressIncrementDecoder = struct {
-	Decode macroblockAddressIncrementDecoder
+var macroblockAddressIncrementDecoder = struct {
+	Decode macroblockAddressIncrementDecoderFn
 }{
-	decodeMacroblockAddressIncrement,
+	func(br bitreader.BitReader) (uint32, error) {
+		val, err := macroblockAddressIncrementHuffmanDecoder.Decode(br)
+		if err != nil {
+			return 0, err
+		} else if i, ok := val.(uint32); ok {
+			return i, nil
+		} else {
+			return 0, ErrUnexpectedDecodedValueType
+		}
+	},
 }
