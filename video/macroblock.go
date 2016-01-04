@@ -99,7 +99,7 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 		block_count = 12
 	}
 
-	pattern_code := mb.calcPatternCode(br.SequenceExtension.chroma_format)
+	pattern_code := mb.decodePatternCode(br.SequenceExtension.chroma_format)
 
 	var b block
 	var decoded block
@@ -192,7 +192,7 @@ func updateFrameSlice(i int, mbAddress int, frameSlice *image.YCbCr, b *block) {
 
 type PatternCode [12]bool
 
-func (mb *Macroblock) calcPatternCode(chroma_format uint32) (pattern_code PatternCode) {
+func (mb *Macroblock) decodePatternCode(chroma_format uint32) (pattern_code PatternCode) {
 	for i := 0; i < 12; i++ {
 		if mb.macroblock_type.macroblock_intra {
 			pattern_code[i] = true
