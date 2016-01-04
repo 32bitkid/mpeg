@@ -3,6 +3,8 @@ package video
 import "github.com/32bitkid/bitreader"
 import "errors"
 
+const stuffingByte = 0x00
+
 var (
 	ErrUnexpectedNonZeroByte = errors.New("unexpected non-zero byte")
 )
@@ -27,7 +29,7 @@ func next_start_code(br bitreader.BitReader) error {
 
 		if val, err := br.Read32(8); err != nil {
 			return err
-		} else if val != StuffingByte {
+		} else if val != stuffingByte {
 			return ErrUnexpectedNonZeroByte
 		}
 	}

@@ -5,10 +5,6 @@ import "github.com/32bitkid/bitreader"
 type StartCode uint32
 
 const (
-	StuffingByte = 0x00
-)
-
-const (
 	StartCodePrefix = 0x000001
 
 	pictureCode        = 0x00
