@@ -19,14 +19,14 @@ func newMacroblockTypeDecoder(table huffman.HuffmanTable) macroblockTypeDecoder 
 	}
 }
 
-type SpatialTemporalWeightClass int
+type spatialTemporalWeightClass int
 
 const (
-	SpatialTemporalWeightClass_0 = 1 << iota
-	SpatialTemporalWeightClass_1
-	SpatialTemporalWeightClass_2
-	SpatialTemporalWeightClass_3
-	SpatialTemporalWeightClass_4
+	spatialTemporalWeightClass_0 spatialTemporalWeightClass = 1 << iota
+	spatialTemporalWeightClass_1
+	spatialTemporalWeightClass_2
+	spatialTemporalWeightClass_3
+	spatialTemporalWeightClass_4
 )
 
 type MacroblockType struct {
@@ -36,36 +36,36 @@ type MacroblockType struct {
 	macroblock_pattern                bool
 	macroblock_intra                  bool
 	spatial_temporal_weight_code_flag bool
-	spatial_temporal_weight_classes   SpatialTemporalWeightClass
+	spatial_temporal_weight_classes   spatialTemporalWeightClass
 }
 
 var iFrameMacroblockTypesTable = huffman.HuffmanTable{
-	"1":  &MacroblockType{false, false, false, false, true, false, SpatialTemporalWeightClass_0},
-	"01": &MacroblockType{true, false, false, false, true, false, SpatialTemporalWeightClass_0},
+	"1":  &MacroblockType{false, false, false, false, true, false, spatialTemporalWeightClass_0},
+	"01": &MacroblockType{true, false, false, false, true, false, spatialTemporalWeightClass_0},
 }
 
 var pFrameMacroblockTypesTable = huffman.HuffmanTable{
-	"1":       &MacroblockType{false, true, false, true, false, false, SpatialTemporalWeightClass_0},
-	"01":      &MacroblockType{false, false, false, true, false, false, SpatialTemporalWeightClass_0},
-	"001":     &MacroblockType{false, true, false, false, false, false, SpatialTemporalWeightClass_0},
-	"0001 1":  &MacroblockType{false, false, false, false, true, false, SpatialTemporalWeightClass_0},
-	"0001 0":  &MacroblockType{true, true, false, true, false, false, SpatialTemporalWeightClass_0},
-	"0000 1":  &MacroblockType{true, false, false, true, false, false, SpatialTemporalWeightClass_0},
-	"0000 01": &MacroblockType{true, false, false, false, true, false, SpatialTemporalWeightClass_0},
+	"1":       &MacroblockType{false, true, false, true, false, false, spatialTemporalWeightClass_0},
+	"01":      &MacroblockType{false, false, false, true, false, false, spatialTemporalWeightClass_0},
+	"001":     &MacroblockType{false, true, false, false, false, false, spatialTemporalWeightClass_0},
+	"0001 1":  &MacroblockType{false, false, false, false, true, false, spatialTemporalWeightClass_0},
+	"0001 0":  &MacroblockType{true, true, false, true, false, false, spatialTemporalWeightClass_0},
+	"0000 1":  &MacroblockType{true, false, false, true, false, false, spatialTemporalWeightClass_0},
+	"0000 01": &MacroblockType{true, false, false, false, true, false, spatialTemporalWeightClass_0},
 }
 
 var bFrameMacroblockTypesTable = huffman.HuffmanTable{
-	"10":      &MacroblockType{false, true, true, false, false, false, SpatialTemporalWeightClass_0},
-	"11":      &MacroblockType{false, true, true, true, false, false, SpatialTemporalWeightClass_0},
-	"010":     &MacroblockType{false, false, true, false, false, false, SpatialTemporalWeightClass_0},
-	"011":     &MacroblockType{false, false, true, true, false, false, SpatialTemporalWeightClass_0},
-	"0010":    &MacroblockType{false, true, false, false, false, false, SpatialTemporalWeightClass_0},
-	"0011":    &MacroblockType{false, true, false, true, false, false, SpatialTemporalWeightClass_0},
-	"0001 1":  &MacroblockType{false, false, false, false, true, false, SpatialTemporalWeightClass_0},
-	"0001 0":  &MacroblockType{true, true, true, true, false, false, SpatialTemporalWeightClass_0},
-	"0000 11": &MacroblockType{true, true, false, true, false, false, SpatialTemporalWeightClass_0},
-	"0000 10": &MacroblockType{true, false, true, true, false, false, SpatialTemporalWeightClass_0},
-	"0000 01": &MacroblockType{true, false, false, false, true, false, SpatialTemporalWeightClass_0},
+	"10":      &MacroblockType{false, true, true, false, false, false, spatialTemporalWeightClass_0},
+	"11":      &MacroblockType{false, true, true, true, false, false, spatialTemporalWeightClass_0},
+	"010":     &MacroblockType{false, false, true, false, false, false, spatialTemporalWeightClass_0},
+	"011":     &MacroblockType{false, false, true, true, false, false, spatialTemporalWeightClass_0},
+	"0010":    &MacroblockType{false, true, false, false, false, false, spatialTemporalWeightClass_0},
+	"0011":    &MacroblockType{false, true, false, true, false, false, spatialTemporalWeightClass_0},
+	"0001 1":  &MacroblockType{false, false, false, false, true, false, spatialTemporalWeightClass_0},
+	"0001 0":  &MacroblockType{true, true, true, true, false, false, spatialTemporalWeightClass_0},
+	"0000 11": &MacroblockType{true, true, false, true, false, false, spatialTemporalWeightClass_0},
+	"0000 10": &MacroblockType{true, false, true, true, false, false, spatialTemporalWeightClass_0},
+	"0000 01": &MacroblockType{true, false, false, false, true, false, spatialTemporalWeightClass_0},
 }
 
 var MacroblockTypeDecoder = struct {
