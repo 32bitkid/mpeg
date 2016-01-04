@@ -7,21 +7,11 @@ import "image"
 
 var ErrUnsupportedVideoStream_ISO_IEC_11172_2 = errors.New("unsupported video stream ISO/IEC 11172-2")
 
-type FrameProvider interface {
-	Next() (image.Image, error)
+func NewFrameProvider(source io.Reader) *VideoSequence {
+	return &VideoSequence{BitReader: bitreader.NewBitReader(source)}
 }
 
-func NewFrameProvider(source io.Reader) FrameProvider {
-	return &frameProvider{
-		NewVideoSequence(bitreader.NewBitReader(source)),
-	}
-}
-
-type frameProvider struct {
-	VideoSequence
-}
-
-func (self *frameProvider) Next() (image.Image, error) {
+func (self *VideoSequence) Next() (image.Image, error) {
 	// align to next start code
 	if err := next_start_code(self); err != nil {
 		panic(err)

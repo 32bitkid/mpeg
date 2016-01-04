@@ -96,7 +96,7 @@ func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
 	return &sh, next_start_code(br)
 }
 
-func (fp *frameProvider) sequence_header() (err error) {
+func (fp *VideoSequence) sequence_header() (err error) {
 
 	sh, err := sequence_header(fp)
 	if err != nil {
