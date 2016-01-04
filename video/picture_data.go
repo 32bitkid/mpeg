@@ -11,11 +11,11 @@ func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
 
 	var subsampleRatio image.YCbCrSubsampleRatio
 	switch self.SequenceExtension.chroma_format {
-	case ChromaFormat_4_2_0:
+	case ChromaFormat_420:
 		subsampleRatio = image.YCbCrSubsampleRatio420
-	case ChromaFormat_4_2_2:
+	case ChromaFormat_422:
 		subsampleRatio = image.YCbCrSubsampleRatio422
-	case ChromaFormat_4_4_4:
+	case ChromaFormat_444:
 		subsampleRatio = image.YCbCrSubsampleRatio444
 	}
 

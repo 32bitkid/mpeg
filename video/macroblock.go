@@ -91,11 +91,11 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 
 	var block_count int
 	switch br.SequenceExtension.chroma_format {
-	case ChromaFormat_4_2_0:
+	case ChromaFormat_420:
 		block_count = 6
-	case ChromaFormat_4_2_2:
+	case ChromaFormat_422:
 		block_count = 8
-	case ChromaFormat_4_4_4:
+	case ChromaFormat_444:
 		block_count = 12
 	}
 
@@ -192,7 +192,7 @@ func updateFrameSlice(i int, mbAddress int, frameSlice *image.YCbCr, b *block) {
 
 type PatternCode [12]bool
 
-func (mb *Macroblock) decodePatternCode(chroma_format uint32) (pattern_code PatternCode) {
+func (mb *Macroblock) decodePatternCode(chroma_format ChromaFormat) (pattern_code PatternCode) {
 	for i := 0; i < 12; i++ {
 		if mb.macroblock_type.macroblock_intra {
 			pattern_code[i] = true
@@ -209,7 +209,7 @@ func (mb *Macroblock) decodePatternCode(chroma_format uint32) (pattern_code Patt
 			}
 		}
 
-		if chroma_format == ChromaFormat_4_2_2 || chroma_format == ChromaFormat_4_4_4 {
+		if chroma_format == ChromaFormat_422 || chroma_format == ChromaFormat_444 {
 			panic("unsupported: coded block pattern chroma format")
 		}
 	}

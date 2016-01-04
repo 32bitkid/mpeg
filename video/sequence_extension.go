@@ -2,24 +2,26 @@ package video
 
 import "github.com/32bitkid/bitreader"
 
+type ChromaFormat uint32
+
 const (
-	_ uint32 = iota // reserved
-	ChromaFormat_4_2_0
-	ChromaFormat_4_2_2
-	ChromaFormat_4_4_4
+	_ ChromaFormat = iota // reserved
+	ChromaFormat_420
+	ChromaFormat_422
+	ChromaFormat_444
 )
 
 type SequenceExtension struct {
-	profile_and_level_indication uint32 // 8 uimsbf
-	progressive_sequence         uint32 // 1 uimsbf
-	chroma_format                uint32 // 2 uimsbf
-	horizontal_size_extension    uint32 // 2 uimsbf
-	vertical_size_extension      uint32 // 2 uimsbf
-	bit_rate_extension           uint32 // 12 uimsbf
-	vbv_buffer_size_extension    uint32 // 8 uimsbf
-	low_delay                    uint32 // 1 uimsbf
-	frame_rate_extension_n       uint32 // 2 uimsbf
-	frame_rate_extension_d       uint32 // 5 uimsbf
+	profile_and_level_indication uint32       // 8 uimsbf
+	progressive_sequence         uint32       // 1 uimsbf
+	chroma_format                ChromaFormat // 2 uimsbf
+	horizontal_size_extension    uint32       // 2 uimsbf
+	vertical_size_extension      uint32       // 2 uimsbf
+	bit_rate_extension           uint32       // 12 uimsbf
+	vbv_buffer_size_extension    uint32       // 8 uimsbf
+	low_delay                    uint32       // 1 uimsbf
+	frame_rate_extension_n       uint32       // 2 uimsbf
+	frame_rate_extension_d       uint32       // 5 uimsbf
 }
 
 func sequence_extension(br bitreader.BitReader) (*SequenceExtension, error) {
@@ -46,9 +48,10 @@ func sequence_extension(br bitreader.BitReader) (*SequenceExtension, error) {
 		return nil, err
 	}
 
-	se.chroma_format, err = br.Read32(2)
-	if err != nil {
+	if chroma_format, err := br.Read32(2); err != nil {
 		return nil, err
+	} else {
+		se.chroma_format = ChromaFormat(chroma_format)
 	}
 
 	se.horizontal_size_extension, err = br.Read32(2)

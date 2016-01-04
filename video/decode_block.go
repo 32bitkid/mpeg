@@ -63,7 +63,7 @@ func (self *VideoSequence) decode_block(cc int, QFS *block, F *block, macroblock
 				w = 1
 			}
 		} else {
-			if self.SequenceExtension.chroma_format == ChromaFormat_4_2_0 {
+			if self.SequenceExtension.chroma_format == ChromaFormat_420 {
 				if macroblock_intra {
 					w = 0
 				} else {
