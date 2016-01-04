@@ -219,14 +219,14 @@ func (mb *Macroblock) decodePatternCode(chroma_format chromaFormat) (pattern_cod
 
 func (br *VideoSequence) macroblock_mode(mb *Macroblock) (err error) {
 
-	var typeDecoder macroblockTypeDecoder
+	var typeDecoder macroblockTypeDecoderFn
 	switch br.PictureHeader.picture_coding_type {
 	case IntraCoded:
-		typeDecoder = MacroblockTypeDecoder.IFrame
+		typeDecoder = macroblockTypeDecoder.IFrame
 	case PredictiveCoded:
-		typeDecoder = MacroblockTypeDecoder.PFrame
+		typeDecoder = macroblockTypeDecoder.PFrame
 	case BidirectionallyPredictiveCoded:
-		typeDecoder = MacroblockTypeDecoder.BFrame
+		typeDecoder = macroblockTypeDecoder.BFrame
 	default:
 		panic("not implemented: macroblock type decoder")
 	}

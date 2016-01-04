@@ -3,9 +3,9 @@ package video
 import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/huffman"
 
-type macroblockTypeDecoder func(bitreader.BitReader) (*MacroblockType, error)
+type macroblockTypeDecoderFn func(bitreader.BitReader) (*MacroblockType, error)
 
-func newMacroblockTypeDecoder(table huffman.HuffmanTable) macroblockTypeDecoder {
+func newMacroblockTypeDecoder(table huffman.HuffmanTable) macroblockTypeDecoderFn {
 	decoder := huffman.NewHuffmanDecoder(table)
 	return func(br bitreader.BitReader) (*MacroblockType, error) {
 		val, err := decoder.Decode(br)
@@ -68,10 +68,10 @@ var bFrameMacroblockTypesTable = huffman.HuffmanTable{
 	"0000 01": &MacroblockType{true, false, false, false, true, false, spatialTemporalWeightClass_0},
 }
 
-var MacroblockTypeDecoder = struct {
-	IFrame macroblockTypeDecoder
-	PFrame macroblockTypeDecoder
-	BFrame macroblockTypeDecoder
+var macroblockTypeDecoder = struct {
+	IFrame macroblockTypeDecoderFn
+	PFrame macroblockTypeDecoderFn
+	BFrame macroblockTypeDecoderFn
 }{
 	newMacroblockTypeDecoder(iFrameMacroblockTypesTable),
 	newMacroblockTypeDecoder(pFrameMacroblockTypesTable),
