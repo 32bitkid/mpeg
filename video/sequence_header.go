@@ -96,30 +96,30 @@ func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
 	return &sh, next_start_code(br)
 }
 
-func (fp *VideoSequence) sequence_header() (err error) {
+func (vs *VideoSequence) sequence_header() (err error) {
 
-	sh, err := sequence_header(fp)
+	sh, err := sequence_header(vs)
 	if err != nil {
 		return err
 	}
 
 	if sh.load_intra_quantiser_matrix {
-		fp.quantisationMatricies[0] = sh.intra_quantiser_matrix
-		fp.quantisationMatricies[2] = sh.intra_quantiser_matrix
+		vs.quantisationMatricies[0] = sh.intra_quantiser_matrix
+		vs.quantisationMatricies[2] = sh.intra_quantiser_matrix
 	} else {
-		fp.quantisationMatricies[0] = DefaultQuantisationMatrices.Intra
-		fp.quantisationMatricies[2] = DefaultQuantisationMatrices.Intra
+		vs.quantisationMatricies[0] = defaultQuantisationMatrices.Intra
+		vs.quantisationMatricies[2] = defaultQuantisationMatrices.Intra
 	}
 
 	if sh.load_non_intra_quantizer_matrix {
-		fp.quantisationMatricies[1] = sh.non_intra_quantizer_matrix
-		fp.quantisationMatricies[3] = sh.non_intra_quantizer_matrix
+		vs.quantisationMatricies[1] = sh.non_intra_quantizer_matrix
+		vs.quantisationMatricies[3] = sh.non_intra_quantizer_matrix
 	} else {
-		fp.quantisationMatricies[1] = DefaultQuantisationMatrices.NonIntra
-		fp.quantisationMatricies[3] = DefaultQuantisationMatrices.NonIntra
+		vs.quantisationMatricies[1] = defaultQuantisationMatrices.NonIntra
+		vs.quantisationMatricies[3] = defaultQuantisationMatrices.NonIntra
 	}
 
-	fp.SequenceHeader = sh
+	vs.SequenceHeader = sh
 
 	return nil
 }

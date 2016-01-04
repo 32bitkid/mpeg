@@ -2,7 +2,7 @@ package video
 
 type QuantisationMatrix [8][8]uint8
 
-var DefaultQuantisationMatrices = struct {
+var defaultQuantisationMatrices = struct {
 	Intra    QuantisationMatrix
 	NonIntra QuantisationMatrix
 }{
