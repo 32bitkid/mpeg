@@ -37,10 +37,6 @@ package video
  *
  */
 
-const blockSize = 64 // A DCT block is 8x8.
-
-type block [blockSize]int32
-
 const (
 	w1 = 2841 // 2048*sqrt(2)*cos(1*pi/16)
 	w2 = 2676 // 2048*sqrt(2)*cos(2*pi/16)

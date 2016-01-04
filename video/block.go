@@ -1,5 +1,8 @@
 package video
 
+const blockSize = 64 // A DCT block is 8x8.
+type block [blockSize]int32
+
 func (self *VideoSequence) block(cc int, QFS *block, mb *Macroblock) error {
 
 	eob_not_read, n := true, 0
@@ -59,7 +62,7 @@ func (self *VideoSequence) block(cc int, QFS *block, mb *Macroblock) error {
 			return err
 		} else if end {
 			eob_not_read = false
-			for n < 64 {
+			for n < blockSize {
 				QFS[n] = 0
 				n = n + 1
 			}
