@@ -44,7 +44,7 @@ func marker_bit(br bitreader.BitReader) error {
 	return nil
 }
 
-func (br *VideoSequence) TrashUntil(startCode StartCode) error {
+func (br *VideoSequence) AlignToNext(startCode StartCode) error {
 	if !br.IsByteAligned() {
 		if _, err := br.ByteAlign(); err != nil {
 			return err
