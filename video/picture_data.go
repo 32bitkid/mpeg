@@ -22,8 +22,7 @@ func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
 	frame = image.NewYCbCr(r, subsampleRatio)
 
 	for {
-		err := self.slice(frame)
-		if err != nil {
+		if err := self.slice(frame); err != nil {
 			return nil, err
 		}
 
