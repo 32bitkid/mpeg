@@ -60,18 +60,17 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 		}
 	}
 
-	var motion_code motionCode
-	var motion_residual motionResidual
+	var mvd motionVectorData
 
 	if mb.macroblock_type.macroblock_motion_forward ||
 		(mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors) {
-		if err := br.motion_vectors(0, &motion_code, &motion_residual, &mb); err != nil {
+		if err := br.motion_vectors(0, &mvd, &mb); err != nil {
 			return 0, err
 		}
 	}
 
 	if mb.macroblock_type.macroblock_motion_backward {
-		if err := br.motion_vectors(1, &motion_code, &motion_residual, &mb); err != nil {
+		if err := br.motion_vectors(1, &mvd, &mb); err != nil {
 			return 0, err
 		}
 	}
