@@ -16,10 +16,10 @@ type SequenceHeader struct {
 	constrained_parameters_flag bool
 
 	load_intra_quantiser_matrix     bool
-	load_non_intra_quantizer_matrix bool
+	load_non_intra_quantiser_matrix bool
 
 	intra_quantiser_matrix     QuantisationMatrix
-	non_intra_quantizer_matrix QuantisationMatrix
+	non_intra_quantiser_matrix QuantisationMatrix
 }
 
 func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
@@ -82,17 +82,17 @@ func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
 		}
 	}
 
-	sh.load_non_intra_quantizer_matrix, err = br.ReadBit()
+	sh.load_non_intra_quantiser_matrix, err = br.ReadBit()
 	if err != nil {
 		return nil, err
 	}
-	if sh.load_non_intra_quantizer_matrix {
+	if sh.load_non_intra_quantiser_matrix {
 		for v := 0; v < 8; v++ {
 			for u := 0; u < 8; u++ {
 				if val, err := br.Read32(8); err != nil {
 					return nil, err
 				} else {
-					sh.non_intra_quantizer_matrix[v][u] = uint8(val)
+					sh.non_intra_quantiser_matrix[v][u] = uint8(val)
 				}
 			}
 		}
@@ -116,9 +116,9 @@ func (vs *VideoSequence) sequence_header() (err error) {
 		vs.quantisationMatricies[2] = defaultQuantisationMatrices.Intra
 	}
 
-	if sh.load_non_intra_quantizer_matrix {
-		vs.quantisationMatricies[1] = sh.non_intra_quantizer_matrix
-		vs.quantisationMatricies[3] = sh.non_intra_quantizer_matrix
+	if sh.load_non_intra_quantiser_matrix {
+		vs.quantisationMatricies[1] = sh.non_intra_quantiser_matrix
+		vs.quantisationMatricies[3] = sh.non_intra_quantiser_matrix
 	} else {
 		vs.quantisationMatricies[1] = defaultQuantisationMatrices.NonIntra
 		vs.quantisationMatricies[3] = defaultQuantisationMatrices.NonIntra
