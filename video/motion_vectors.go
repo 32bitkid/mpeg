@@ -4,11 +4,54 @@ import "github.com/32bitkid/huffman"
 import "github.com/32bitkid/bitreader"
 
 type motionVectors [2][2][2]int
+
+func absInt(in int) int {
+	if in < 0 {
+		return -in
+	}
+	return in
+}
+
 type motionVectorData struct {
 	motion_code     motionVectors
 	motion_residual motionVectors
 }
 
+func (mvD motionVectorData) decode(r, s, t int, f_code FCode, pMV *motionVectorPredictions) int {
+
+	motion_code := mvD.motion_code
+	motion_residual := mvD.motion_residual
+
+	r_size := f_code[s][t] - 1
+	f := 1 << r_size
+	high := (16 * f) - 1
+	low := -16 * f
+	_range := 32 * f
+
+	var delta int
+	if f == 1 || motion_code[r][s][t] == 0 {
+		delta = motion_code[r][s][t]
+	} else {
+		delta = ((absInt(motion_code[r][s][t]) - 1) * f) + motion_residual[r][s][t] + 1
+		if motion_code[r][s][t] < 0 {
+			delta = -delta
+		}
+	}
+
+	prediction := pMV[r][s][t]
+
+	vector := prediction + delta
+	if vector < low {
+		vector += _range
+	}
+	if vector > high {
+		vector -= _range
+	}
+
+	pMV[r][s][t] = vector
+
+	return vector
+}
 
 type motionVectorPredictions [2][2][2]int
 
