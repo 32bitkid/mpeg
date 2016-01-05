@@ -3,7 +3,7 @@ package video
 const blockSize = 64 // A DCT block is 8x8.
 type block [blockSize]int32
 
-func (self *VideoSequence) block(cc int, QFS *block, mb *Macroblock) error {
+func (self *VideoSequence) block(cc int, mb *Macroblock, QFS *block) error {
 
 	eob_not_read, n := true, 0
 

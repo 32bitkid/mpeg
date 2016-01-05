@@ -127,7 +127,7 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 		cc := color_channel[i]
 
 		if pattern_code[i] {
-			if err := br.block(cc, &b, &mb); err != nil {
+			if err := br.block(cc, &mb, &b); err != nil {
 				return 0, err
 			}
 		}
