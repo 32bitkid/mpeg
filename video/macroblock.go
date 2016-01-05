@@ -41,6 +41,12 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 		br.resetDCPredictors()
 	}
 
+	// Reset motion vector predictors: P-picture with a skipped macroblock (7.6.4.3)
+	if br.PictureHeader.picture_coding_type == PFrame &&
+		mb.macroblock_address_increment > 1 {
+		br.pMV.reset()
+	}
+
 	mbAddress += int(mb.macroblock_address_increment)
 
 	if err := br.macroblock_mode(&mb); err != nil {
@@ -49,6 +55,19 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 
 	if mb.macroblock_type.macroblock_intra == false {
 		br.resetDCPredictors()
+	}
+
+	// Reset motion vector predictors: intra macroblock without concealment motion vectors (7.6.4.3)
+	if mb.macroblock_type.macroblock_intra == true &&
+		br.PictureCodingExtension.concealment_motion_vectors {
+		br.pMV.reset()
+	}
+
+	// Reset motion vector predictors: non-intra P-picture with no forward motion vectors (7.6.4.3)
+	if br.PictureHeader.picture_coding_type == PFrame &&
+		mb.macroblock_type.macroblock_intra == false &&
+		mb.macroblock_type.macroblock_motion_forward == false {
+		br.pMV.reset()
 	}
 
 	if mb.macroblock_type.macroblock_quant {

@@ -27,6 +27,10 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 	}
 
 	br.resetDCPredictors()
+
+	// Reset motion vector predictors: Start if each slice (7.6.4.3)
+	br.pMV.reset()
+
 	s := Slice{}
 	s.slice_start_code = StartCode(code)
 
@@ -38,7 +42,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		Cr:      frame.Cr[8*mb_row*frame.CStride:],
 		YStride: frame.YStride,
 		CStride: frame.CStride,
-		Rect:    image.Rect(0, 0, 16, frame.YStride),
+		Rect:    image.Rect(frame.Rect.Min.X, mb_row*16, frame.Rect.Max.X, mb_row*16+16),
 	}
 
 	if br.SequenceHeader.vertical_size_value > 2800 {
@@ -109,7 +113,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 
 	var mbAddress int = 0
 	for {
-		mbAddress, err = br.macroblock(mbAddress, frameSlice)
+		mbAddress, err = br.macroblock(mb_row, mbAddress, frameSlice)
 		if err != nil {
 			return err
 		}
