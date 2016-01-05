@@ -2,7 +2,6 @@ package video
 
 import "errors"
 import "github.com/32bitkid/bitreader"
-import "io"
 
 var ErrUnexpectedStartCode = errors.New("unexpected start code")
 var ErrMissingMarkerBit = errors.New("missing marker bit")
@@ -72,10 +71,13 @@ func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
 		return nil, err
 	}
 	if sh.load_intra_quantiser_matrix {
-		for i := 0; i < 8; i++ {
-			_, err := io.ReadFull(br, sh.intra_quantiser_matrix[i][:])
-			if err != nil {
-				return nil, err
+		for v := 0; v < 8; v++ {
+			for u := 0; u < 8; u++ {
+				if val, err := br.Read32(8); err != nil {
+					return nil, err
+				} else {
+					sh.intra_quantiser_matrix[v][u] = uint8(val)
+				}
 			}
 		}
 	}
@@ -85,10 +87,13 @@ func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
 		return nil, err
 	}
 	if sh.load_non_intra_quantizer_matrix {
-		for i := 0; i < 8; i++ {
-			_, err := io.ReadFull(br, sh.non_intra_quantizer_matrix[i][:])
-			if err != nil {
-				return nil, err
+		for v := 0; v < 8; v++ {
+			for u := 0; u < 8; u++ {
+				if val, err := br.Read32(8); err != nil {
+					return nil, err
+				} else {
+					sh.non_intra_quantizer_matrix[v][u] = uint8(val)
+				}
 			}
 		}
 	}
