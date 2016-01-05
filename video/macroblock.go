@@ -16,7 +16,7 @@ type Macroblock struct {
 	cpb int
 }
 
-func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int, error) {
+func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *image.YCbCr) (int, error) {
 
 	mb := Macroblock{}
 
@@ -47,7 +47,7 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 		br.pMV.reset()
 	}
 
-	mbAddress += int(mb.macroblock_address_increment)
+	mb_address += int(mb.macroblock_address_increment)
 
 	if err := br.macroblock_mode(&mb); err != nil {
 		return 0, err
@@ -137,10 +137,10 @@ func (br *VideoSequence) macroblock(mbAddress int, frameSlice *image.YCbCr) (int
 			return 0, err
 		}
 		idct(&decoded)
-		updateFrameSlice(i, mbAddress, mb.dct_type, frameSlice, &decoded)
+		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &decoded)
 	}
 
-	return mbAddress, nil
+	return mb_address, nil
 }
 
 type clampedBlock [blockSize]uint8
@@ -157,7 +157,7 @@ func clamp(dest *clampedBlock, src *block) {
 	}
 }
 
-func updateFrameSlice(i, mbAddress int, interlaced bool, frameSlice *image.YCbCr, b *block) {
+func updateFrameSlice(i, mb_address int, interlaced bool, frameSlice *image.YCbCr, b *block) {
 
 	var cb clampedBlock
 	clamp(&cb, b)
@@ -165,42 +165,42 @@ func updateFrameSlice(i, mbAddress int, interlaced bool, frameSlice *image.YCbCr
 	if interlaced {
 		switch i {
 		case 0:
-			xs := (mbAddress - 1) * 16
+			xs := (mb_address - 1) * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := (y*2)*frameSlice.YStride + xs
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 1:
-			xs := (mbAddress - 1) * 16
+			xs := (mb_address - 1) * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := (y*2)*frameSlice.YStride + (xs + 8)
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 2:
-			xs := (mbAddress - 1) * 16
+			xs := (mb_address - 1) * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := ((y*2)+1)*frameSlice.YStride + xs
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 3:
-			xs := (mbAddress - 1) * 16
+			xs := (mb_address - 1) * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := ((y*2)+1)*frameSlice.YStride + (xs + 8)
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 4:
-			xs := (mbAddress - 1) * 8
+			xs := (mb_address - 1) * 8
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.CStride + xs
 				copy(frameSlice.Cb[di:di+8], cb[si:si+8])
 			}
 		case 5:
-			xs := (mbAddress - 1) * 8
+			xs := (mb_address - 1) * 8
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.CStride + xs
@@ -210,42 +210,42 @@ func updateFrameSlice(i, mbAddress int, interlaced bool, frameSlice *image.YCbCr
 	} else {
 		switch i {
 		case 0:
-			xs := (mbAddress - 1) * 16
+			xs := (mb_address - 1) * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.YStride + xs
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 1:
-			xs := (mbAddress - 1) * 16
+			xs := (mb_address - 1) * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.YStride + (xs + 8)
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 2:
-			xs := (mbAddress - 1) * 16
+			xs := (mb_address - 1) * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := (y+8)*frameSlice.YStride + xs
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 3:
-			xs := (mbAddress - 1) * 16
+			xs := (mb_address - 1) * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := (y+8)*frameSlice.YStride + (xs + 8)
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 4:
-			xs := (mbAddress - 1) * 8
+			xs := (mb_address - 1) * 8
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.CStride + xs
 				copy(frameSlice.Cb[di:di+8], cb[si:si+8])
 			}
 		case 5:
-			xs := (mbAddress - 1) * 8
+			xs := (mb_address - 1) * 8
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.CStride + xs
