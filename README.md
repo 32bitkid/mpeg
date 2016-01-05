@@ -69,6 +69,10 @@ func main() {
   // Decode the ES into video
   v := video.NewFrameProvider(esReader)
 
+  // Align to next sequence start
+  v.AlignToNext(video.SequenceHeaderStartCode)
+
+  // get the next frame
   frame, _ = v.Next()
   file, _ := os.Create("output.png")
   png.Encode(file, frame)
