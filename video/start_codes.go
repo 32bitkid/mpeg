@@ -1,6 +1,7 @@
 package video
 
 import "github.com/32bitkid/bitreader"
+import "fmt"
 
 type StartCode uint32
 
@@ -34,6 +35,10 @@ const (
 
 func (code StartCode) isSlice() bool {
 	return code >= MinSliceStartCode && code <= MaxSliceStartCode
+}
+
+func (code StartCode) String() string {
+	return fmt.Sprintf("[%08x]", uint32(code))
 }
 
 // Check if the next bits in the bitstream matches the expected code
