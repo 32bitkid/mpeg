@@ -11,6 +11,19 @@ type motionVectorData struct {
 
 func (fp *VideoSequence) motion_vectors(s int, mvd *motionVectorData, mb *Macroblock) error {
 
+type motionVectorPredictions [2][2][2]int
+
+func (pMV *motionVectorPredictions) reset() {
+	pMV[0][0][0] = 0
+	pMV[0][0][1] = 0
+	pMV[0][1][0] = 0
+	pMV[0][1][1] = 0
+	pMV[1][0][0] = 0
+	pMV[1][0][1] = 0
+	pMV[1][1][0] = 0
+	pMV[1][1][1] = 0
+}
+
 	f_code := fp.PictureCodingExtension.f_code
 
 	mv_count, mv_format, dmv := mv_info(fp, mb)
