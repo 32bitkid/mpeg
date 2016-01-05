@@ -60,7 +60,9 @@ func (br *VideoSequence) extension_data(i int) error {
 
 			switch ExtensionID(nextbits) {
 			case QuantMatrixExtensionID:
-				quant_matrix_extension()
+				if err := br.quant_matrix_extension(); err != nil {
+					return err
+				}
 			case CopyrightExtensionID:
 				copyright_extension()
 			case PictureDisplayExtensionID:
@@ -76,10 +78,6 @@ func (br *VideoSequence) extension_data(i int) error {
 	}
 
 	return nil
-}
-
-func quant_matrix_extension() {
-	panic("unsupported: quant_matrix_extension")
 }
 
 func copyright_extension() {
