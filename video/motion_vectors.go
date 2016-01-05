@@ -9,7 +9,6 @@ type motionVectorData struct {
 	motion_residual motionVectors
 }
 
-func (fp *VideoSequence) motion_vectors(s int, mvd *motionVectorData, mb *Macroblock) error {
 
 type motionVectorPredictions [2][2][2]int
 
@@ -23,6 +22,8 @@ func (pMV *motionVectorPredictions) reset() {
 	pMV[1][1][0] = 0
 	pMV[1][1][1] = 0
 }
+
+func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVectorData) error {
 
 	f_code := fp.PictureCodingExtension.f_code
 
