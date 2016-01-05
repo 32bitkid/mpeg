@@ -2,15 +2,23 @@ package video
 
 import "image"
 
-func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
+func createFrameBuffer(w, h uint32, cf chromaFormat) *image.YCbCr {
 
-	w := int(self.SequenceHeader.horizontal_size_value)
-	h := int(self.SequenceHeader.vertical_size_value)
+	horizontalMacroblocks := w >> 4
+	verticalMacroblocks := h >> 4
 
-	r := image.Rect(0, 0, w, h)
+	if w&15 != 0 {
+		horizontalMacroblocks++
+	}
+
+	if h&15 != 0 {
+		verticalMacroblocks++
+	}
+
+	r := image.Rect(0, 0, int(horizontalMacroblocks<<4), int(verticalMacroblocks<<4))
 
 	var subsampleRatio image.YCbCrSubsampleRatio
-	switch self.SequenceExtension.chroma_format {
+	switch cf {
 	case ChromaFormat_420:
 		subsampleRatio = image.YCbCrSubsampleRatio420
 	case ChromaFormat_422:
@@ -19,7 +27,13 @@ func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
 		subsampleRatio = image.YCbCrSubsampleRatio444
 	}
 
-	frame = image.NewYCbCr(r, subsampleRatio)
+	return image.NewYCbCr(r, subsampleRatio)
+
+}
+
+func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
+
+	frame = createFrameBuffer(self.SequenceHeader.horizontal_size_value, self.SequenceHeader.vertical_size_value, self.SequenceExtension.chroma_format)
 
 	for {
 		if err := self.slice(frame); err != nil {
