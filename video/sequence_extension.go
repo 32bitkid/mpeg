@@ -11,6 +11,18 @@ const (
 	ChromaFormat_444
 )
 
+func (cf chromaFormat) String() string {
+	switch cf {
+	case ChromaFormat_420:
+		return "4:2:0"
+	case ChromaFormat_422:
+		return "4:2:2"
+	case ChromaFormat_444:
+		return "4:4:4"
+	}
+	return "[Invalid]"
+}
+
 type SequenceExtension struct {
 	profile_and_level_indication uint32       // 8 uimsbf
 	progressive_sequence         uint32       // 1 uimsbf
