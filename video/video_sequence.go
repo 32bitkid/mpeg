@@ -20,6 +20,8 @@ type VideoSequence struct {
 	pictureHeaders
 
 	dcDctPredictors
+	pMV motionVectorPredictions
+
 	quantisationMatricies [4]QuantisationMatrix
 	currentQSC            uint32
 
