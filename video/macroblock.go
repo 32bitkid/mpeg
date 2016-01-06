@@ -130,7 +130,7 @@ func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *imag
 		cc := color_channel[i]
 
 		if pattern_code[i] {
-			if err := br.block(cc, &mb, &b); err != nil {
+			if err := b.read(br, &br.dcDctPredictors, br.PictureCodingExtension.intra_vlc_format, cc, mb.macroblock_type.macroblock_intra); err != nil {
 				return 0, err
 			}
 		} else {

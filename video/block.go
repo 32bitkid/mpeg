@@ -1,5 +1,7 @@
 package video
 
+import "github.com/32bitkid/bitreader"
+
 const blockSize = 64 // A DCT block is 8x8.
 type block [blockSize]int32
 
@@ -15,12 +17,12 @@ func (b *block) empty() {
 	}
 }
 
-func (self *VideoSequence) block(cc int, mb *Macroblock, QFS *block) error {
+func (QFS *block) read(br bitreader.BitReader, dcDctPredictors *dcDctPredictors, intra_vlc_format uint32, cc int, macroblock_intra bool) error {
 
 	eob_not_read, n := true, 0
 
 	// 7.2.1
-	if mb.macroblock_type.macroblock_intra {
+	if macroblock_intra {
 		var dcSizeDecoder dctDCSizeDecoderFn
 		if cc == 0 {
 			dcSizeDecoder = dctDCSizeDecoders.Luma
@@ -28,12 +30,12 @@ func (self *VideoSequence) block(cc int, mb *Macroblock, QFS *block) error {
 			dcSizeDecoder = dctDCSizeDecoders.Chroma
 		}
 
-		dc_dct_size, err := dcSizeDecoder(self)
+		dc_dct_size, err := dcSizeDecoder(br)
 		if err != nil {
 			return err
 		}
 
-		dc_dct_differential, err := self.Read32(dc_dct_size)
+		dc_dct_differential, err := br.Read32(dc_dct_size)
 		if err != nil {
 			return err
 		}
@@ -50,26 +52,21 @@ func (self *VideoSequence) block(cc int, mb *Macroblock, QFS *block) error {
 			}
 		}
 
-		QFS[0] = self.dcDctPredictors[cc] + dct_diff
-		self.dcDctPredictors[cc] = QFS[0]
+		QFS[0] = dcDctPredictors[cc] + dct_diff
+		dcDctPredictors[cc] = QFS[0]
 		n = 1
-
-		if QFS[0] < 0 || QFS[0] > (1<<(8+self.PictureCodingExtension.intra_dc_precision)-1) {
-			panic("DC is out of range")
-		}
 	}
 
 	for eob_not_read {
 		var dctDecoder dctCoefficientDecoderFn
 
-		if mb.macroblock_type.macroblock_intra &&
-			self.PictureCodingExtension.intra_vlc_format == 1 {
+		if macroblock_intra && intra_vlc_format == 1 {
 			dctDecoder = dctCoefficientDecoders.TableOne
 		} else {
 			dctDecoder = dctCoefficientDecoders.TableZero
 		}
 
-		run, level, end, err := dctDecoder(self, n)
+		run, level, end, err := dctDecoder(br, n)
 		if err != nil {
 			return err
 		} else if end {
