@@ -3,6 +3,18 @@ package video
 const blockSize = 64 // A DCT block is 8x8.
 type block [blockSize]int32
 
+func (dest *block) sum(other *block) {
+	for i := 0; i < blockSize; i++ {
+		dest[i] += other[i]
+	}
+}
+
+func (b *block) empty() {
+	for i := 0; i < blockSize; i++ {
+		b[i] = 0
+	}
+}
+
 func (self *VideoSequence) block(cc int, mb *Macroblock, QFS *block) error {
 
 	eob_not_read, n := true, 0

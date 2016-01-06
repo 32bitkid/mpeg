@@ -133,6 +133,8 @@ func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *imag
 			if err := br.block(cc, &mb, &b); err != nil {
 				return 0, err
 			}
+		} else {
+			b.empty()
 		}
 
 		br.decode_block(cc, mb.macroblock_type.macroblock_intra, &b)
