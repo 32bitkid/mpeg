@@ -34,7 +34,7 @@ func signInt32(i int32) int32 {
 
 type intermediaryblock [8][8]int32
 
-func (self *VideoSequence) decode_block(cc int, macroblock_intra bool, b *block) error {
+func (self *VideoSequence) decode_block(cc int, macroblock_intra bool, b *block) {
 	var (
 		QFS = b
 		F   = b
@@ -131,6 +131,4 @@ func (self *VideoSequence) decode_block(cc int, macroblock_intra bool, b *block)
 			}
 		}
 	}
-
-	return nil
 }

@@ -135,10 +135,7 @@ func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *imag
 			}
 		}
 
-		err := br.decode_block(cc, mb.macroblock_type.macroblock_intra, &b)
-		if err != nil {
-			return 0, err
-		}
+		br.decode_block(cc, mb.macroblock_type.macroblock_intra, &b)
 		idct(&b)
 		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &b)
 	}
