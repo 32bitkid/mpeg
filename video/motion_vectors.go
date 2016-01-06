@@ -17,7 +17,7 @@ type motionVectorData struct {
 	motion_residual motionVectors
 }
 
-func (mvD motionVectorData) decode(r, s, t int, f_code FCode, pMV *motionVectorPredictions) int {
+func (mvD motionVectorData) calc(r, s, t int, f_code FCode, pMV *motionVectorPredictions) int {
 
 	motion_code := mvD.motion_code
 	motion_residual := mvD.motion_residual
