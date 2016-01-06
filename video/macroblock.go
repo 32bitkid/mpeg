@@ -37,6 +37,10 @@ func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *imag
 		mb.macroblock_address_increment += incr
 	}
 
+	if br.PictureHeader.picture_coding_type == PFrame && mb.macroblock_address_increment > 1 {
+		// TODO(jh): Copy macroblocks directly from frame store
+	}
+
 	if mb.macroblock_address_increment > 1 {
 		br.resetDCPredictors()
 	}
