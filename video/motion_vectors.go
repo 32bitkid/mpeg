@@ -13,8 +13,9 @@ func absInt(in int) int {
 }
 
 type motionVectorData struct {
-	motion_code     motionVectors
-	motion_residual motionVectors
+	motion_code                  motionVectors
+	motion_residual              motionVectors
+	motion_vertical_field_select [2][2]uint32
 }
 
 func (mvD motionVectorData) calc(r, s, t int, f_code FCode, pMV *motionVectorPredictions) int {
@@ -103,11 +104,26 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 
 	if mv_count == 1 {
 		if mv_format == MotionVectorFormat_Field && dmv != 1 {
-			panic("not implemented: field format")
+			if val, err := fp.Read32(1); err != nil {
+				return err
+			} else {
+				mvd.motion_vertical_field_select[0][s] = val
+			}
 		}
 		return motion_vector(0, s)
 	} else {
-		panic("not implement: field format")
+		if val, err := fp.Read32(1); err != nil {
+			return err
+		} else {
+			mvd.motion_vertical_field_select[0][s] = val
+		}
+		motion_vector(0, s)
+		if val, err := fp.Read32(1); err != nil {
+			return err
+		} else {
+			mvd.motion_vertical_field_select[1][s] = val
+		}
+		motion_vector(1, s)
 	}
 
 	return nil
