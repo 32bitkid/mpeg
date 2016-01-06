@@ -23,7 +23,7 @@ var scan = [2][8][8]int{
 	},
 }
 
-func sign(i int32) int32 {
+func signInt32(i int32) int32 {
 	if i > 0 {
 		return 1
 	} else if i < 0 {
@@ -97,7 +97,7 @@ func (self *VideoSequence) decode_block(cc int, macroblock_intra bool, b *block)
 					if macroblock_intra {
 						Fpp[v][u] = (QF[v][u] * int32(W[w][v][u]) * quantiser_scale * 2) / 32
 					} else {
-						Fpp[v][u] = (((QF[v][u] * 2) + sign(QF[v][u])) * int32(W[w][v][u]) *
+						Fpp[v][u] = (((QF[v][u] * 2) + signInt32(QF[v][u])) * int32(W[w][v][u]) *
 							quantiser_scale) / 32
 					}
 				}
