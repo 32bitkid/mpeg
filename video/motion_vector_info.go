@@ -14,20 +14,20 @@ func mv_info(fp *VideoSequence, mb *Macroblock) (int, MotionVectorFormat, int) {
 	}
 
 	switch mb.frame_motion_type {
-	case 01:
+	case 1:
 		panic("unsupported: field-based motion type")
-	case 02:
+	case 2:
 		return 1, MotionVectorFormat_Frame, 0
-	case 03:
+	case 3:
 		return 1, MotionVectorFormat_Field, 1
 	}
 
 	switch mb.field_motion_type {
-	case 01:
+	case 1:
 		return 1, MotionVectorFormat_Field, 0
-	case 02:
+	case 2:
 		return 2, MotionVectorFormat_Field, 0
-	case 03:
+	case 3:
 		return 1, MotionVectorFormat_Field, 1
 	}
 
