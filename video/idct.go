@@ -65,7 +65,7 @@ const (
 // For more on the actual algorithm, see Z. Wang, "Fast algorithms for the
 // discrete W transform and for the discrete Fourier transform", IEEE Trans. on
 // ASSP, Vol. ASSP- 32, pp. 803-816, Aug. 1984.
-func idct(src *block) {
+func (src *block) idct() {
 	// Horizontal 1-D IDCT.
 	for y := 0; y < 8; y++ {
 		y8 := y * 8

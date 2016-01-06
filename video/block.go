@@ -2,8 +2,14 @@ package video
 
 import "github.com/32bitkid/bitreader"
 
-const blockSize = 64 // A DCT block is 8x8.
+const (
+	blockSide = 8
+	blockSize = blockSide * blockSide
+)
+
 type block [blockSize]int32
+type intermediaryblock [blockSide][blockSide]int32
+type clampedblock [blockSize]uint8
 
 func (dest *block) sum(other *block) {
 	for i := 0; i < blockSize; i++ {
@@ -14,6 +20,18 @@ func (dest *block) sum(other *block) {
 func (b *block) empty() {
 	for i := 0; i < blockSize; i++ {
 		b[i] = 0
+	}
+}
+
+func (src *block) clamp(dest *clampedblock) {
+	for i := 0; i < blockSize; i++ {
+		if src[i] > 255 {
+			dest[i] = 255
+		} else if src[i] < 0 {
+			dest[i] = 0
+		} else {
+			dest[i] = uint8(src[i])
+		}
 	}
 }
 

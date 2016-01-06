@@ -133,36 +133,22 @@ func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *imag
 			if err := b.read(br, &br.dcDctPredictors, br.PictureCodingExtension.intra_vlc_format, cc, mb.macroblock_type.macroblock_intra); err != nil {
 				return 0, err
 			}
+			b.decode_block(br, cc, mb.macroblock_type.macroblock_intra)
+			b.idct()
 		} else {
 			b.empty()
 		}
 
-		br.decode_block(cc, mb.macroblock_type.macroblock_intra, &b)
-		idct(&b)
 		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &b)
 	}
 
 	return mb_address, nil
 }
 
-type clampedBlock [blockSize]uint8
-
-func clamp(dest *clampedBlock, src *block) {
-	for i := 0; i < 64; i++ {
-		if src[i] > 255 {
-			dest[i] = 255
-		} else if src[i] < 0 {
-			dest[i] = 0
-		} else {
-			dest[i] = uint8(src[i])
-		}
-	}
-}
-
 func updateFrameSlice(i, mb_address int, interlaced bool, frameSlice *image.YCbCr, b *block) {
 
-	var cb clampedBlock
-	clamp(&cb, b)
+	var cb clampedblock
+	b.clamp(&cb)
 
 	if interlaced {
 		switch i {
