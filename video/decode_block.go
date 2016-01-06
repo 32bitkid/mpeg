@@ -34,10 +34,17 @@ func sign(i int32) int32 {
 
 type intermediaryblock [8][8]int32
 
-func (self *VideoSequence) decode_block(cc int, macroblock_intra bool, QFS *block, F *block) error {
-	var QF intermediaryblock
-	var Fpp intermediaryblock
-	var Fp intermediaryblock
+func (self *VideoSequence) decode_block(cc int, macroblock_intra bool, b *block) error {
+	var (
+		QFS = b
+		F   = b
+	)
+
+	var (
+		QF  intermediaryblock
+		Fpp intermediaryblock
+		Fp  intermediaryblock
+	)
 
 	// inverse scan
 	{

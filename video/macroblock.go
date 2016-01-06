@@ -125,7 +125,6 @@ func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *imag
 	pattern_code := mb.decodePatternCode(br.SequenceExtension.chroma_format)
 
 	var b block
-	var decoded block
 
 	for i := 0; i < block_count; i++ {
 		cc := color_channel[i]
@@ -136,12 +135,12 @@ func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *imag
 			}
 		}
 
-		err := br.decode_block(cc, mb.macroblock_type.macroblock_intra, &b, &decoded)
+		err := br.decode_block(cc, mb.macroblock_type.macroblock_intra, &b)
 		if err != nil {
 			return 0, err
 		}
-		idct(&decoded)
-		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &decoded)
+		idct(&b)
+		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &b)
 	}
 
 	return mb_address, nil
