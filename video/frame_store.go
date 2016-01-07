@@ -26,6 +26,6 @@ func (fs *frameStore) set(current_temporal_reference uint32) {
 }
 
 func (fs *frameStore) add(f *image.YCbCr, temporal_reference uint32) {
-	fs.frames[1] = fs.frames[0]
-	fs.frames[0] = referenceFrame{f, temporal_reference}
+	fs.frames[0] = fs.frames[1]
+	fs.frames[1] = referenceFrame{f, temporal_reference}
 }
