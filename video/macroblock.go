@@ -5,7 +5,7 @@ import "image"
 var color_channel = [12]int{0, 0, 0, 0, 1, 2, 1, 2, 1, 2, 1, 2}
 
 type Macroblock struct {
-	macroblock_address_increment uint32
+	macroblock_address_increment int
 	macroblock_type              *MacroblockType
 	spatial_temporal_weight_code uint32
 	frame_motion_type            uint32
@@ -16,7 +16,7 @@ type Macroblock struct {
 	cpb int
 }
 
-func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *image.YCbCr) (int, error) {
+func (br *VideoSequence) macroblock(mb_row, mb_address int, frameSlice *image.YCbCr) (int, error) {
 
 	mb := Macroblock{}
 
@@ -50,8 +50,6 @@ func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *imag
 		mb.macroblock_address_increment > 1 {
 		br.pMV.reset()
 	}
-
-	mb_address += int(mb.macroblock_address_increment)
 
 	if err := br.macroblock_mode(&mb); err != nil {
 		return 0, err
@@ -122,6 +120,7 @@ func (br *VideoSequence) macroblock(mb_row int, mb_address int, frameSlice *imag
 		block_count = 12
 	}
 
+	mb_address += mb.macroblock_address_increment
 	pattern_code := mb.decodePatternCode(br.SequenceExtension.chroma_format)
 
 	var b block
@@ -153,42 +152,42 @@ func updateFrameSlice(i, mb_address int, interlaced bool, frameSlice *image.YCbC
 	if interlaced {
 		switch i {
 		case 0:
-			xs := (mb_address - 1) * 16
+			xs := mb_address * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := (y*2)*frameSlice.YStride + xs
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 1:
-			xs := (mb_address - 1) * 16
+			xs := mb_address * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := (y*2)*frameSlice.YStride + (xs + 8)
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 2:
-			xs := (mb_address - 1) * 16
+			xs := mb_address * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := ((y*2)+1)*frameSlice.YStride + xs
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 3:
-			xs := (mb_address - 1) * 16
+			xs := mb_address * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := ((y*2)+1)*frameSlice.YStride + (xs + 8)
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 4:
-			xs := (mb_address - 1) * 8
+			xs := mb_address * 8
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.CStride + xs
 				copy(frameSlice.Cb[di:di+8], cb[si:si+8])
 			}
 		case 5:
-			xs := (mb_address - 1) * 8
+			xs := mb_address * 8
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.CStride + xs
@@ -198,42 +197,42 @@ func updateFrameSlice(i, mb_address int, interlaced bool, frameSlice *image.YCbC
 	} else {
 		switch i {
 		case 0:
-			xs := (mb_address - 1) * 16
+			xs := mb_address * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.YStride + xs
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 1:
-			xs := (mb_address - 1) * 16
+			xs := mb_address * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.YStride + (xs + 8)
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 2:
-			xs := (mb_address - 1) * 16
+			xs := mb_address * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := (y+8)*frameSlice.YStride + xs
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 3:
-			xs := (mb_address - 1) * 16
+			xs := mb_address * 16
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := (y+8)*frameSlice.YStride + (xs + 8)
 				copy(frameSlice.Y[di:di+8], cb[si:si+8])
 			}
 		case 4:
-			xs := (mb_address - 1) * 8
+			xs := mb_address * 8
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.CStride + xs
 				copy(frameSlice.Cb[di:di+8], cb[si:si+8])
 			}
 		case 5:
-			xs := (mb_address - 1) * 8
+			xs := mb_address * 8
 			for y := 0; y < 8; y++ {
 				si := y * 8
 				di := y*frameSlice.CStride + xs
