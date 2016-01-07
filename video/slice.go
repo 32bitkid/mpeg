@@ -52,7 +52,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		}
 	}
 
-	// TODO
+	// TODO(jh): sequence_scalable support
 	if false /* (<sequence_scalable_extension() is present in the bitstream>) */ {
 		if false /* (scalable_mode == “data partitioning” ) */ {
 			s.priority_breakpoint, err = br.Read32(7)
