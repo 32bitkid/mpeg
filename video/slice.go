@@ -12,7 +12,7 @@ type Slice struct {
 	quantiser_scale_code              uint32    // 5 uimsbf
 	intra_slice_flag                  bool      // 1 bslbf
 	intra_slice                       bool      // 1 uimsbf
-	extra_information                 []byte
+	extra_information                 []uint8
 }
 
 func (br *VideoSequence) slice(frame *image.YCbCr) error {
@@ -102,7 +102,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 			if data, err := br.Read32(8); err != nil {
 				return err
 			} else {
-				s.extra_information = append(s.extra_information, byte(data))
+				s.extra_information = append(s.extra_information, uint8(data))
 			}
 		}
 	}
