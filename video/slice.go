@@ -107,7 +107,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		}
 	}
 
-	if err = br.Trash(1); err != nil {
+	if err := br.Trash(1); err != nil {
 		return err
 	}
 
