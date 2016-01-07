@@ -93,9 +93,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 				return err
 			} else if nextbits != 1 {
 				break
-			}
-
-			if err = br.Trash(1); err != nil {
+			} else if err := br.Trash(1); err != nil {
 				return err
 			}
 
