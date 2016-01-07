@@ -117,13 +117,17 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 		} else {
 			mvd.motion_vertical_field_select[0][s] = val
 		}
-		motion_vector(0, s)
+		if err := motion_vector(0, s); err != nil {
+			return err
+		}
 		if val, err := fp.Read32(1); err != nil {
 			return err
 		} else {
 			mvd.motion_vertical_field_select[1][s] = val
 		}
-		motion_vector(1, s)
+		if err := motion_vector(1, s); err != nil {
+			return err
+		}
 	}
 
 	return nil
