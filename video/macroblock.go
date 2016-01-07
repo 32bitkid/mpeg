@@ -38,7 +38,7 @@ func (br *VideoSequence) macroblock(mb_row, mb_address int, frameSlice *image.YC
 	}
 
 	if br.PictureHeader.picture_coding_type == PFrame && mb.macroblock_address_increment > 1 {
-		// TODO(jh): Copy macroblocks directly from frame store
+		copy_macroblocks(mb_row, mb_address, mb.macroblock_address_increment, frameSlice, br.frameStore.forward)
 	}
 
 	if mb.macroblock_address_increment > 1 {

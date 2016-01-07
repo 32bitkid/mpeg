@@ -64,6 +64,9 @@ func (self *VideoSequence) Next() (image.Image, error) {
 					if err != nil {
 						panic(err)
 					}
+					if self.PictureHeader.picture_coding_type == IFrame {
+						self.frameStore.forward = frame
+					}
 					if true {
 						return frame, nil
 					}
