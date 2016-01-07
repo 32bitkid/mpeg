@@ -100,11 +100,13 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 	}
 
 	motion_vector := func(r, s int) error {
-		err := motion_vector_part(r, s, 0)
-		if err != nil {
+		if err := motion_vector_part(r, s, 0); err != nil {
 			return err
 		}
-		return motion_vector_part(r, s, 1)
+		if err := motion_vector_part(r, s, 1); err != nil {
+			return err
+		}
+		return nil
 	}
 
 	if mv_count == 1 {
