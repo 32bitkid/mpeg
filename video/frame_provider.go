@@ -59,6 +59,8 @@ func (self *VideoSequence) Next() (image.Image, error) {
 					panic("extension_and_user_data: " + err.Error())
 				}
 
+				self.frameStore.set(self.PictureHeader.temporal_reference)
+
 				{
 					frame, err := self.picture_data()
 					if err != nil {
@@ -66,7 +68,7 @@ func (self *VideoSequence) Next() (image.Image, error) {
 					}
 					switch self.PictureHeader.picture_coding_type {
 					case IFrame, PFrame:
-						self.frameStore.forward = frame
+						self.frameStore.add(frame, self.PictureHeader.temporal_reference)
 					}
 					if true {
 						return frame, nil
