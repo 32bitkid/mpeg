@@ -20,7 +20,7 @@ type motionVectorData struct {
 	motion_actual motionVectors
 }
 
-func (mvD motionVectorData) actual(r, s, t int, f_code FCode, pMV *motionVectorPredictions) int {
+func (mvD *motionVectorData) update_actual(r, s, t int, f_code FCode, pMV *motionVectorPredictions) {
 
 	motion_code := mvD.motion_code
 	motion_residual := mvD.motion_residual
@@ -52,8 +52,7 @@ func (mvD motionVectorData) actual(r, s, t int, f_code FCode, pMV *motionVectorP
 	}
 
 	pMV[r][s][t] = vector
-
-	return vector
+	mvD.motion_actual[r][s][t] = vector
 }
 
 type motionVectorPredictions [2][2][2]int
@@ -94,7 +93,7 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 			panic("unsupported: dmv[]")
 		}
 
-		mvd.motion_actual[r][s][t] = mvd.actual(r, s, t, f_code, &fp.pMV)
+		mvd.update_actual(r, s, t, f_code, &fp.pMV)
 
 		return nil
 	}
