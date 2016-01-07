@@ -113,7 +113,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 
 	var mb_address int = -1
 	for {
-		mb_address, err = br.macroblock(mb_row, mb_address, frameSlice)
+		mb_address, err = br.macroblock(mb_address, mb_row, frameSlice)
 		if err != nil {
 			return err
 		}

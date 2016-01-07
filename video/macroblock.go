@@ -16,7 +16,7 @@ type Macroblock struct {
 	cpb int
 }
 
-func (br *VideoSequence) macroblock(mb_row, mb_address int, frameSlice *image.YCbCr) (int, error) {
+func (br *VideoSequence) macroblock(mb_address, mb_row int, frameSlice *image.YCbCr) (int, error) {
 
 	mb := Macroblock{}
 
