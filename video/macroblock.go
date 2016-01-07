@@ -61,7 +61,7 @@ func (br *VideoSequence) macroblock(mb_row, mb_address int, frameSlice *image.YC
 
 	// Reset motion vector predictors: intra macroblock without concealment motion vectors (7.6.4.3)
 	if mb.macroblock_type.macroblock_intra == true &&
-		br.PictureCodingExtension.concealment_motion_vectors {
+		br.PictureCodingExtension.concealment_motion_vectors == false {
 		br.pMV.reset()
 	}
 
