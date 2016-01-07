@@ -16,9 +16,11 @@ type motionVectorData struct {
 	motion_code                  motionVectors
 	motion_residual              motionVectors
 	motion_vertical_field_select [2][2]uint32
+
+	motion_actual motionVectors
 }
 
-func (mvD motionVectorData) calc(r, s, t int, f_code FCode, pMV *motionVectorPredictions) int {
+func (mvD motionVectorData) actual(r, s, t int, f_code FCode, pMV *motionVectorPredictions) int {
 
 	motion_code := mvD.motion_code
 	motion_residual := mvD.motion_residual
@@ -91,6 +93,9 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 		if dmv == 1 {
 			panic("unsupported: dmv[]")
 		}
+
+		mvd.motion_actual[r][s][t] = mvd.actual(r, s, t, f_code, &fp.pMV)
+
 		return nil
 	}
 

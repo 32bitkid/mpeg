@@ -138,6 +138,7 @@ func (br *VideoSequence) macroblock(mb_row, mb_address int, frameSlice *image.YC
 			b.empty()
 		}
 
+		br.motion_compensation(&mvd, i, mb_row, mb_address, &mb, &b)
 		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &b)
 	}
 
