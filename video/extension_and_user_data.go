@@ -50,7 +50,6 @@ func (br *VideoSequence) extension_data(i int) error {
 
 		case 1: /* NOTE - i never takes the value 1 because extension_data()
 			never follows a group_of_pictures_header() */
-			break
 		case 2: /* follows picture_coding_extension() */
 			nextbits, err := br.Peek32(4)
 
