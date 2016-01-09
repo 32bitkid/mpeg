@@ -19,12 +19,7 @@ type VideoSequence struct {
 	sequenceHeaders
 	pictureHeaders
 
-	dcDctPredictors
-	pMV motionVectorPredictions
-
 	quantisationMatricies [4]QuantisationMatrix
-	currentQSC            uint32
-
 	frameStore
 }
 
@@ -32,10 +27,6 @@ func NewVideoSequence(br bitreader.BitReader) VideoSequence {
 	return VideoSequence{
 		BitReader: br,
 	}
-}
-
-func (pred *VideoSequence) resetDCPredictors() {
-	pred.dcDctPredictors.reset(pred.PictureCodingExtension.intra_dc_precision)
 }
 
 func (vs *VideoSequence) sequence_extension() (err error) {
@@ -59,10 +50,13 @@ func (vs *VideoSequence) picture_coding_extension() (err error) {
 }
 
 type dcDctPredictors [3]int32
+type dcDctPredictorResetter func()
 
-func (pred *dcDctPredictors) reset(intra_dc_precision uint32) {
-	resetValue := int32(1) << (7 + intra_dc_precision)
-	pred[0] = resetValue
-	pred[1] = resetValue
-	pred[2] = resetValue
+func (pred *dcDctPredictors) createResetter(intra_dc_precision uint32) dcDctPredictorResetter {
+	return func() {
+		resetValue := int32(1) << (7 + intra_dc_precision)
+		pred[0] = resetValue
+		pred[1] = resetValue
+		pred[2] = resetValue
+	}
 }

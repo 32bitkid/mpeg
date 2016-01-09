@@ -9,7 +9,6 @@ type Slice struct {
 	slice_start_code                  StartCode // 32 bslbf
 	slice_vertical_position_extension uint32    // 3 uimsbf
 	priority_breakpoint               uint32    // 7 uimsbf
-	quantiser_scale_code              uint32    // 5 uimsbf
 	intra_slice_flag                  bool      // 1 bslbf
 	intra_slice                       bool      // 1 uimsbf
 	extra_information                 []uint8
@@ -26,10 +25,14 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		return ErrUnexpectedStartCode
 	}
 
-	br.resetDCPredictors()
+	var dcp dcDctPredictors
+	resetDcPredictors := dcp.createResetter(br.PictureCodingExtension.intra_dc_precision)
+	// Reset dcDctPredictors: at start of slice (7.2.1)
+	resetDcPredictors()
 
 	// Reset motion vector predictors: Start if each slice (7.6.4.3)
-	br.pMV.reset()
+	var mvd motionVectorData
+	mvd.reset()
 
 	s := Slice{}
 	s.slice_start_code = StartCode(code)
@@ -62,11 +65,11 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		}
 	}
 
+	var quantiser_scale_code uint32
 	if qsc, err := br.Read32(5); err != nil {
 		return err
 	} else {
-		s.quantiser_scale_code = qsc
-		br.currentQSC = qsc
+		quantiser_scale_code = qsc
 	}
 
 	if nextbits, err := br.Peek32(1); err != nil {
@@ -111,7 +114,13 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 
 	var mb_address int = -1
 	for {
-		mb_address, err = br.macroblock(mb_address, mb_row, frameSlice)
+		mb_address, err = br.macroblock(
+			mb_address, mb_row,
+			&dcp, resetDcPredictors,
+			&mvd,
+			&quantiser_scale_code,
+			frameSlice)
+
 		if err != nil {
 			return err
 		}

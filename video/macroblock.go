@@ -11,12 +11,18 @@ type Macroblock struct {
 	frame_motion_type            uint32
 	field_motion_type            uint32
 	dct_type                     bool
-	quantiser_scale_code         uint32
 
 	cpb int
 }
 
-func (br *VideoSequence) macroblock(mb_address, mb_row int, frameSlice *image.YCbCr) (int, error) {
+func (br *VideoSequence) macroblock(
+	// location
+	mb_address, mb_row int,
+	// dct predictors
+	dcp *dcDctPredictors, resetDCPredictors dcDctPredictorResetter,
+	mvd *motionVectorData,
+	qsc *uint32,
+	frameSlice *image.YCbCr) (int, error) {
 
 	mb := Macroblock{}
 
@@ -41,57 +47,56 @@ func (br *VideoSequence) macroblock(mb_address, mb_row int, frameSlice *image.YC
 		copy_macroblocks(mb_row, mb_address+1, mb.macroblock_address_increment-1, frameSlice, br.frameStore.forward)
 	}
 
+	// Reset dcDctPredictors: whenever a macroblock is skipped. (7.2.1)
 	if mb.macroblock_address_increment > 1 {
-		br.resetDCPredictors()
+		resetDCPredictors()
 	}
 
 	// Reset motion vector predictors: P-picture with a skipped macroblock (7.6.4.3)
 	if br.PictureHeader.picture_coding_type == PFrame &&
 		mb.macroblock_address_increment > 1 {
-		br.pMV.reset()
+		mvd.reset()
 	}
 
 	if err := br.macroblock_mode(&mb); err != nil {
 		return 0, err
 	}
 
+	// Reset dcDctPredictors: whenever a non-intra macroblock is decoded. (7.2.1)
 	if mb.macroblock_type.macroblock_intra == false {
-		br.resetDCPredictors()
+		resetDCPredictors()
 	}
 
 	// Reset motion vector predictors: intra macroblock without concealment motion vectors (7.6.4.3)
 	if mb.macroblock_type.macroblock_intra == true &&
 		br.PictureCodingExtension.concealment_motion_vectors == false {
-		br.pMV.reset()
+		mvd.reset()
 	}
 
 	// Reset motion vector predictors: non-intra P-picture with no forward motion vectors (7.6.4.3)
 	if br.PictureHeader.picture_coding_type == PFrame &&
 		mb.macroblock_type.macroblock_intra == false &&
 		mb.macroblock_type.macroblock_motion_forward == false {
-		br.pMV.reset()
+		mvd.reset()
 	}
 
 	if mb.macroblock_type.macroblock_quant {
-		if qsc, err := br.Read32(5); err != nil {
+		if mb_qsc, err := br.Read32(5); err != nil {
 			return 0, err
 		} else {
-			mb.quantiser_scale_code = qsc
-			br.currentQSC = qsc
+			*qsc = mb_qsc
 		}
 	}
 
-	var mvd motionVectorData
-
 	if mb.macroblock_type.macroblock_motion_forward ||
 		(mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors) {
-		if err := br.motion_vectors(0, &mb, &mvd); err != nil {
+		if err := br.motion_vectors(0, &mb, mvd); err != nil {
 			return 0, err
 		}
 	}
 
 	if mb.macroblock_type.macroblock_motion_backward {
-		if err := br.motion_vectors(1, &mb, &mvd); err != nil {
+		if err := br.motion_vectors(1, &mb, mvd); err != nil {
 			return 0, err
 		}
 	}
@@ -129,16 +134,16 @@ func (br *VideoSequence) macroblock(mb_address, mb_row int, frameSlice *image.YC
 		cc := color_channel[i]
 
 		if pattern_code[i] {
-			if err := b.read(br, &br.dcDctPredictors, br.PictureCodingExtension.intra_vlc_format, cc, mb.macroblock_type.macroblock_intra); err != nil {
+			if err := b.read(br, dcp, br.PictureCodingExtension.intra_vlc_format, cc, mb.macroblock_type.macroblock_intra); err != nil {
 				return 0, err
 			}
-			b.decode_block(br, cc, mb.macroblock_type.macroblock_intra)
+			b.decode_block(br, cc, *qsc, mb.macroblock_type.macroblock_intra)
 			b.idct()
 		} else {
 			b.empty()
 		}
 
-		br.motion_compensation(&mvd, i, mb_row, mb_address, &mb, &b)
+		br.motion_compensation(mvd, i, mb_row, mb_address, &mb, &b)
 		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &b)
 	}
 

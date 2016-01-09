@@ -32,7 +32,12 @@ func signInt32(i int32) int32 {
 	return 0
 }
 
-func (b *block) decode_block(self *VideoSequence, cc int, macroblock_intra bool) {
+func (b *block) decode_block(
+	self *VideoSequence,
+	cc int,
+	quantiser_scale_code uint32,
+	macroblock_intra bool) {
+
 	var (
 		QFS = b
 		F   = b
@@ -57,7 +62,6 @@ func (b *block) decode_block(self *VideoSequence, cc int, macroblock_intra bool)
 	// Inverse quantisation
 	{
 		q_scale_type := self.PictureCodingExtension.q_scale_type
-		quantiser_scale_code := self.currentQSC
 		quantiser_scale := quantiser_scale_tables[q_scale_type][quantiser_scale_code]
 
 		var w int
