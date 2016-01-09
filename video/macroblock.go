@@ -262,8 +262,7 @@ func (mb *Macroblock) decodePatternCode(chroma_format chromaFormat) (pattern_cod
 
 	if mb.macroblock_type.macroblock_pattern {
 		for i := 0; i < 6; i++ {
-			mask := 1 << uint(5-i)
-			if mb.cpb&mask == mask {
+			if mask := 1 << uint(5-i); mb.cpb&mask == mask {
 				pattern_code[i] = true
 			}
 		}
