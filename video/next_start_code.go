@@ -34,11 +34,9 @@ func next_start_code(br bitreader.BitReader) error {
 }
 
 func marker_bit(br bitreader.BitReader) error {
-	marker, err := br.ReadBit()
-	if err != nil {
+	if marker, err := br.ReadBit(); err != nil {
 		return err
-	}
-	if marker == false {
+	} else if marker == false {
 		return ErrMissingMarkerBit
 	}
 	return nil
