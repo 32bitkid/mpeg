@@ -129,6 +129,7 @@ func (br *VideoSequence) macroblock(
 	pattern_code := mb.decodePatternCode(br.SequenceExtension.chroma_format)
 
 	var b block
+	var cb clampedblock
 
 	for i := 0; i < block_count; i++ {
 		cc := color_channel[i]
@@ -144,16 +145,14 @@ func (br *VideoSequence) macroblock(
 		}
 
 		br.motion_compensation(mvd, i, mb_row, mb_address, &mb, &b)
-		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &b)
+		b.clamp(&cb)
+		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &cb)
 	}
 
 	return mb_address, nil
 }
 
-func updateFrameSlice(i, mb_address int, interlaced bool, frameSlice *image.YCbCr, b *block) {
-
-	var cb clampedblock
-	b.clamp(&cb)
+func updateFrameSlice(i, mb_address int, interlaced bool, frameSlice *image.YCbCr, cb *clampedblock) {
 
 	var (
 		base_i  int
