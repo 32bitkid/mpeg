@@ -7,11 +7,11 @@ func createFrameBuffer(w, h uint32, cf chromaFormat) *image.YCbCr {
 	horizontalMacroblocks := w >> 4
 	verticalMacroblocks := h >> 4
 
-	if w&15 != 0 {
+	if (w & 0xf) != 0 {
 		horizontalMacroblocks++
 	}
 
-	if h&15 != 0 {
+	if (h & 0xf) != 0 {
 		verticalMacroblocks++
 	}
 
@@ -28,7 +28,6 @@ func createFrameBuffer(w, h uint32, cf chromaFormat) *image.YCbCr {
 	}
 
 	return image.NewYCbCr(r, subsampleRatio)
-
 }
 
 func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
