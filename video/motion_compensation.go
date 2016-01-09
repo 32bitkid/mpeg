@@ -1,6 +1,7 @@
 package video
 
 type motionCompensationState struct {
+	active  bool
 	i       int
 	channel []uint8
 	stride  int
@@ -14,15 +15,15 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 		return
 	}
 
-	var (
-		hasB   = mb.macroblock_type.macroblock_motion_backward && vs.frameStore.future != nil
-		hasF   = (mb.macroblock_type.macroblock_motion_forward || vs.PictureHeader.picture_coding_type == PFrame) && vs.frameStore.past != nil
-		bState motionCompensationState
-		fState motionCompensationState
-	)
+	bState := motionCompensationState{
+		active: mb.macroblock_type.macroblock_motion_backward && vs.frameStore.future != nil,
+	}
+	fState := motionCompensationState{
+		active: (mb.macroblock_type.macroblock_motion_forward || vs.PictureHeader.picture_coding_type == PFrame) && vs.frameStore.past != nil,
+	}
 
-	// project future image _backward_...
-	if hasB {
+	// project future temporal image _backward_...
+	if bState.active {
 		horizontal, vertical := motionVectors.actual[0][1][0], motionVectors.actual[0][1][1]
 
 		// Scale Cb/Cr vectors
@@ -57,8 +58,8 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 		bState.i += horizontal
 	}
 
-	// project past image _forward_...
-	if hasF {
+	// project past temporal image _forward_...
+	if fState.active {
 		horizontal, vertical := motionVectors.actual[0][0][0], motionVectors.actual[0][0][1]
 
 		// Scale Cb/Cr vectors
@@ -97,7 +98,7 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 		for u := 0; u < 8; u++ {
 			var pel int32 = 0
 			var samples uint = 0
-			if hasF {
+			if fState.active {
 				i := fState.i + (v * fState.stride) + u
 				samples++
 				switch {
@@ -117,7 +118,7 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 						int32(fState.channel[i+1]) + int32(fState.channel[i+fState.stride]) + int32(fState.channel[i+fState.stride+1])) / 4
 				}
 			}
-			if hasB {
+			if bState.active {
 				i := bState.i + (v * bState.stride) + u
 				samples++
 				switch {
