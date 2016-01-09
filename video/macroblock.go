@@ -155,96 +155,75 @@ func updateFrameSlice(i, mb_address int, interlaced bool, frameSlice *image.YCbC
 	var cb clampedblock
 	b.clamp(&cb)
 
+	var (
+		base_i  int
+		channel []uint8
+		stride  int
+	)
+
+	// channel switch
+	switch i {
+	case 0, 1, 2, 3:
+		channel = frameSlice.Y
+	case 4:
+		channel = frameSlice.Cb
+	case 5:
+		channel = frameSlice.Cr
+	}
+
+	// base address and stride switch
+	switch i {
+	case 0, 1, 2, 3:
+		stride = frameSlice.YStride
+		base_i = mb_address * 16
+	case 4, 5:
+		stride = frameSlice.CStride
+		base_i = mb_address * 8
+	}
+
+	// position switch
 	if interlaced {
+		// Field DCT coding alternates lines from each block:
+		//
+		//  <-8px-> <-8px->
+		//  ───0───│───1───
+		//  ───2───│───3───
+		//  ───0───│───1───
+		//  ───2───│───3───
+		//  ───0───│───1───
+		//  ───2───│───3───
+		//  ───0───│───1───
+		//  ───2───│───3───
 		switch i {
-		case 0:
-			xs := mb_address * 16
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := (y*2)*frameSlice.YStride + xs
-				copy(frameSlice.Y[di:di+8], cb[si:si+8])
-			}
-		case 1:
-			xs := mb_address * 16
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := (y*2)*frameSlice.YStride + (xs + 8)
-				copy(frameSlice.Y[di:di+8], cb[si:si+8])
-			}
-		case 2:
-			xs := mb_address * 16
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := ((y*2)+1)*frameSlice.YStride + xs
-				copy(frameSlice.Y[di:di+8], cb[si:si+8])
-			}
-		case 3:
-			xs := mb_address * 16
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := ((y*2)+1)*frameSlice.YStride + (xs + 8)
-				copy(frameSlice.Y[di:di+8], cb[si:si+8])
-			}
-		case 4:
-			xs := mb_address * 8
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := y*frameSlice.CStride + xs
-				copy(frameSlice.Cb[di:di+8], cb[si:si+8])
-			}
-		case 5:
-			xs := mb_address * 8
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := y*frameSlice.CStride + xs
-				copy(frameSlice.Cr[di:di+8], cb[si:si+8])
-			}
+		case 0, 1, 2, 3:
+			base_i += (i & 1) << 3
+			base_i += ((i & 2) >> 1) * stride
+			stride *= 2
 		}
 	} else {
+		// Frame DCT coding are mapped in the follow order:
+		//
+		//  <-8px-> <-8px->
+		//  ───0───│───1───
+		//  ───0───│───1───
+		//  ───0───│───1───
+		//  ───0───│───1───
+		//  ───2───│───3───
+		//  ───2───│───3───
+		//  ───2───│───3───
+		//  ───2───│───3───
 		switch i {
-		case 0:
-			xs := mb_address * 16
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := y*frameSlice.YStride + xs
-				copy(frameSlice.Y[di:di+8], cb[si:si+8])
-			}
-		case 1:
-			xs := mb_address * 16
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := y*frameSlice.YStride + (xs + 8)
-				copy(frameSlice.Y[di:di+8], cb[si:si+8])
-			}
-		case 2:
-			xs := mb_address * 16
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := (y+8)*frameSlice.YStride + xs
-				copy(frameSlice.Y[di:di+8], cb[si:si+8])
-			}
-		case 3:
-			xs := mb_address * 16
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := (y+8)*frameSlice.YStride + (xs + 8)
-				copy(frameSlice.Y[di:di+8], cb[si:si+8])
-			}
-		case 4:
-			xs := mb_address * 8
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := y*frameSlice.CStride + xs
-				copy(frameSlice.Cb[di:di+8], cb[si:si+8])
-			}
-		case 5:
-			xs := mb_address * 8
-			for y := 0; y < 8; y++ {
-				si := y * 8
-				di := y*frameSlice.CStride + xs
-				copy(frameSlice.Cr[di:di+8], cb[si:si+8])
-			}
+		case 0, 1, 2, 3:
+			base_i += (i & 1) << 3            // horiztonal positioning
+			base_i += ((i & 2) << 2) * stride // vertical positioning
 		}
+	}
+
+	// perform copy
+	for y := 0; y < 8; y++ {
+		si := y * 8
+		di := base_i + (y * stride)
+		copy(channel[di:di+8], cb[si:si+8])
 	}
 
 }
