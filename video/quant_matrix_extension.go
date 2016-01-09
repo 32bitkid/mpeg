@@ -1,5 +1,22 @@
 package video
 
+// Read quatisation matricies from the bitstream
+//
+// The meaning of quantisationMatricies[n] is as follows:
+//
+//                           ┌───────────────┬───────────────┐
+//                           │     4:2:0     │ 4:2:2 & 4:4:4 │
+//                           ├───────┬───────┼───────┬───────┤
+//                           │  lum  │  chr  │  lum  │  chr  │
+//                           │(cc==0)│(cc!=0)│(cc==0)│(cc!=0)│
+//  ┌────────────────────────┼───────┼───────┼───────┼───────┤
+//  │            intra blocks│   0   │   0   │   0   │   2   │
+//  │  (macroblock_intra = 1)│       │       │       │       │
+//  ├────────────────────────┼───────┼───────┼───────┼───────┤
+//  │        non-intra blocks│   1   │   1   │   1   │   3   │
+//  │  (macroblock_intra = 0)│       │       │       │       │
+//  └────────────────────────┴───────┴───────┴───────┴───────┘
+//
 func (vs *VideoSequence) quant_matrix_extension() error {
 
 	QuantMatrixExtensionID.assert(vs)
@@ -51,7 +68,7 @@ func (vs *VideoSequence) quant_matrix_extension() error {
 				}
 			}
 		}
-		vs.quantisationMatricies[1] = chroma_intra_quantiser_matrix
+		vs.quantisationMatricies[2] = chroma_intra_quantiser_matrix
 	}
 
 	if load, err := vs.ReadBit(); err != nil {
