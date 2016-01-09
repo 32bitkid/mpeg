@@ -1,12 +1,12 @@
 package video
 
-func (vs *VideoSequence) motion_compensation(mvd *motionVectorData, i, mb_row, mb_addr int, mb *Macroblock, b *block) {
+func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i, mb_row, mb_addr int, mb *Macroblock, b *block) {
 
 	if vs.PictureHeader.picture_coding_type == PFrame {
 
 		if !mb.macroblock_type.macroblock_intra {
 
-			horizontal, vertical := mvd.motion_actual[0][0][0], mvd.motion_actual[0][0][1]
+			horizontal, vertical := motionVectors.actual[0][0][0], motionVectors.actual[0][0][1]
 
 			// Scale Cb/Cr vectors
 			if i >= 4 {
@@ -24,7 +24,7 @@ func (vs *VideoSequence) motion_compensation(mvd *motionVectorData, i, mb_row, m
 				stride  int
 			)
 
-			image := vs.frameStore.forward
+			image := vs.frameStore.past
 
 			switch i {
 			case 0, 1, 2, 3:

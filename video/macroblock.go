@@ -44,7 +44,7 @@ func (br *VideoSequence) macroblock(
 	}
 
 	if br.PictureHeader.picture_coding_type == PFrame && mb.macroblock_address_increment > 1 {
-		copy_macroblocks(mb_row, mb_address+1, mb.macroblock_address_increment-1, frameSlice, br.frameStore.forward)
+		copy_macroblocks(mb_row, mb_address+1, mb.macroblock_address_increment-1, frameSlice, br.frameStore.past)
 	}
 
 	// Reset dcDctPredictors: whenever a macroblock is skipped. (7.2.1)

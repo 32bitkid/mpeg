@@ -4,6 +4,7 @@ import "github.com/32bitkid/huffman"
 import "github.com/32bitkid/bitreader"
 
 type motionVectors [2][2][2]int
+type motionVectorPredictions motionVectors
 
 func absInt(in int) int {
 	if in < 0 {
@@ -13,17 +14,18 @@ func absInt(in int) int {
 }
 
 type motionVectorData struct {
-	motion_code                  motionVectors
-	motion_residual              motionVectors
-	motion_vertical_field_select [2][2]uint32
+	code                  motionVectors
+	residual              motionVectors
+	vertical_field_select [2][2]uint32
 
-	motion_actual motionVectors
+	predictions motionVectorPredictions
+	actual      motionVectors
 }
 
-func (mvD *motionVectorData) update_actual(r, s, t int, f_code FCode, pMV *motionVectorPredictions) {
+func (motionVector *motionVectorData) update_actual(r, s, t int, f_code FCode) {
 
-	motion_code := mvD.motion_code
-	motion_residual := mvD.motion_residual
+	code := motionVector.code
+	residual := motionVector.residual
 
 	r_size := f_code[s][t] - 1
 	f := 1 << r_size
@@ -32,16 +34,16 @@ func (mvD *motionVectorData) update_actual(r, s, t int, f_code FCode, pMV *motio
 	_range := 32 * f
 
 	var delta int
-	if f == 1 || motion_code[r][s][t] == 0 {
-		delta = motion_code[r][s][t]
+	if f == 1 || code[r][s][t] == 0 {
+		delta = code[r][s][t]
 	} else {
-		delta = ((absInt(motion_code[r][s][t]) - 1) * f) + motion_residual[r][s][t] + 1
-		if motion_code[r][s][t] < 0 {
+		delta = ((absInt(code[r][s][t]) - 1) * f) + residual[r][s][t] + 1
+		if code[r][s][t] < 0 {
 			delta = -delta
 		}
 	}
 
-	prediction := pMV[r][s][t]
+	prediction := motionVector.predictions[r][s][t]
 
 	vector := prediction + delta
 	if vector < low {
@@ -51,21 +53,31 @@ func (mvD *motionVectorData) update_actual(r, s, t int, f_code FCode, pMV *motio
 		vector -= _range
 	}
 
-	pMV[r][s][t] = vector
-	mvD.motion_actual[r][s][t] = vector
+	motionVector.predictions[r][s][t] = vector
+	motionVector.actual[r][s][t] = vector
 }
 
-type motionVectorPredictions [2][2][2]int
+func (mvd *motionVectorData) reset() {
+	mvd.predictions[0][0][0] = 0
+	mvd.predictions[0][0][1] = 0
+	mvd.predictions[0][1][0] = 0
+	mvd.predictions[0][1][1] = 0
+	mvd.predictions[1][0][0] = 0
+	mvd.predictions[1][0][1] = 0
+	mvd.predictions[1][1][0] = 0
+	mvd.predictions[1][1][1] = 0
+	mvd.clear_actual(0)
+	mvd.clear_actual(1)
+}
 
-func (pMV *motionVectorPredictions) reset() {
-	pMV[0][0][0] = 0
-	pMV[0][0][1] = 0
-	pMV[0][1][0] = 0
-	pMV[0][1][1] = 0
-	pMV[1][0][0] = 0
-	pMV[1][0][1] = 0
-	pMV[1][1][0] = 0
-	pMV[1][1][1] = 0
+func (mvd *motionVectorData) clear_actual(s int) {
+	// First Motion Vector
+	mvd.actual[0][s][0] = 0
+	mvd.actual[0][s][1] = 0
+
+	// Second motion vector
+	mvd.actual[1][s][0] = 0
+	mvd.actual[1][s][1] = 0
 }
 
 func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVectorData) error {
@@ -78,22 +90,22 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 		if code, err := decodeMotionCode(fp); err != nil {
 			return err
 		} else {
-			mvd.motion_code[r][s][t] = code
+			mvd.code[r][s][t] = code
 		}
-		if f_code[s][t] != 1 && mvd.motion_code[r][s][t] != 0 {
+		if f_code[s][t] != 1 && mvd.code[r][s][t] != 0 {
 			r_size := uint(f_code[s][t] - 1)
 
 			if code, err := fp.Read32(r_size); err != nil {
 				return err
 			} else {
-				mvd.motion_residual[r][s][t] = int(code)
+				mvd.residual[r][s][t] = int(code)
 			}
 		}
 		if dmv == 1 {
 			panic("unsupported: dmv[]")
 		}
 
-		mvd.update_actual(r, s, t, f_code, &fp.pMV)
+		mvd.update_actual(r, s, t, f_code)
 
 		return nil
 	}
@@ -113,7 +125,7 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 			if val, err := fp.Read32(1); err != nil {
 				return err
 			} else {
-				mvd.motion_vertical_field_select[0][s] = val
+				mvd.vertical_field_select[0][s] = val
 			}
 		}
 		return motion_vector(0, s)
@@ -121,7 +133,7 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 		if val, err := fp.Read32(1); err != nil {
 			return err
 		} else {
-			mvd.motion_vertical_field_select[0][s] = val
+			mvd.vertical_field_select[0][s] = val
 		}
 		if err := motion_vector(0, s); err != nil {
 			return err
@@ -129,7 +141,7 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 		if val, err := fp.Read32(1); err != nil {
 			return err
 		} else {
-			mvd.motion_vertical_field_select[1][s] = val
+			mvd.vertical_field_select[1][s] = val
 		}
 		if err := motion_vector(1, s); err != nil {
 			return err

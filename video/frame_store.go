@@ -8,18 +8,18 @@ type referenceFrame struct {
 }
 
 type frameStore struct {
-	frames   [2]referenceFrame
-	forward  *image.YCbCr
-	backward *image.YCbCr
+	frames [2]referenceFrame
+	past   *image.YCbCr
+	future *image.YCbCr
 }
 
 func (fs *frameStore) set(current_temporal_reference uint32) {
 	for _, ref := range fs.frames {
 		if ref.frame != nil {
 			if ref.temporal_reference < current_temporal_reference {
-				fs.forward = ref.frame
+				fs.past = ref.frame
 			} else {
-				fs.backward = ref.frame
+				fs.future = ref.frame
 			}
 		}
 	}
