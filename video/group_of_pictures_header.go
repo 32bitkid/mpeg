@@ -17,23 +17,22 @@ func group_of_pictures_header(br bitreader.BitReader) (*GroupOfPicturesHeader, e
 
 	goph := GroupOfPicturesHeader{}
 
-	{
-		var err error
+	if time_code, err := br.Read32(25); err != nil {
+		return nil, err
+	} else {
+		goph.time_code = time_code
+	}
 
-		goph.time_code, err = br.Read32(25)
-		if err != nil {
-			return nil, err
-		}
+	if closed_gop, err := br.ReadBit(); err != nil {
+		return nil, err
+	} else {
+		goph.closed_gop = closed_gop
+	}
 
-		goph.closed_gop, err = br.ReadBit()
-		if err != nil {
-			return nil, err
-		}
-
-		goph.broken_link, err = br.ReadBit()
-		if err != nil {
-			return nil, err
-		}
+	if broken_link, err := br.ReadBit(); err != nil {
+		return nil, err
+	} else {
+		goph.broken_link = broken_link
 	}
 
 	return &goph, next_start_code(br)
