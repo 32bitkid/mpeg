@@ -9,17 +9,15 @@ type motionCompensationState struct {
 	v_half  bool
 }
 
-func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i, mb_row, mb_addr int, mb *Macroblock, b *block) {
-
-	if mb.macroblock_type.macroblock_intra {
-		return
-	}
+func (b *block) motion_compensation(motionVectors motionVectorData, i, mb_row, mb_addr int, fs frameStore) {
 
 	bState := motionCompensationState{
-		active: mb.macroblock_type.macroblock_motion_backward && vs.frameStore.future != nil,
+		active: ((motionVectors.previous & motionVectorsFormed_FrameBackward) == motionVectorsFormed_FrameBackward) &&
+			fs.future != nil,
 	}
 	fState := motionCompensationState{
-		active: (mb.macroblock_type.macroblock_motion_forward || vs.PictureHeader.picture_coding_type == PFrame) && vs.frameStore.past != nil,
+		active: ((motionVectors.previous & motionVectorsFormed_FrameForward) == motionVectorsFormed_FrameForward) &&
+			fs.past != nil,
 	}
 
 	// project _future_ temporal sample _backward_...
@@ -27,7 +25,8 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 		horizontal, vertical := motionVectors.actual[0][1][0], motionVectors.actual[0][1][1]
 
 		// Scale Cb/Cr vectors
-		if i >= 4 {
+		switch i {
+		case 4, 5:
 			horizontal >>= 1
 			vertical >>= 1
 		}
@@ -37,19 +36,24 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 		// scale down by half
 		horizontal, vertical = horizontal>>1, vertical>>1
 
-		image := vs.frameStore.future
+		image := fs.future
 
+		// channel switch
 		switch i {
 		case 0, 1, 2, 3:
 			bState.channel = image.Y
-			bState.stride = image.YStride
-			bState.i = (((mb_row * 16) + (i&2)<<2) * bState.stride) + (mb_addr * 16) + (i&1)<<3
 		case 4:
 			bState.channel = image.Cb
-			bState.stride = image.CStride
-			bState.i = (mb_row * 8 * bState.stride) + (mb_addr * 8)
 		case 5:
 			bState.channel = image.Cr
+		}
+
+		// stride and index switch
+		switch i {
+		case 0, 1, 2, 3:
+			bState.stride = image.YStride
+			bState.i = (((mb_row * 16) + (i&2)<<2) * bState.stride) + (mb_addr * 16) + (i&1)<<3
+		case 4, 5:
 			bState.stride = image.CStride
 			bState.i = (mb_row * 8 * bState.stride) + (mb_addr * 8)
 		}
@@ -63,7 +67,8 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 		horizontal, vertical := motionVectors.actual[0][0][0], motionVectors.actual[0][0][1]
 
 		// Scale Cb/Cr vectors
-		if i >= 4 {
+		switch i {
+		case 4, 5:
 			horizontal >>= 1
 			vertical >>= 1
 		}
@@ -73,19 +78,23 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 		// scale down by half
 		horizontal, vertical = horizontal>>1, vertical>>1
 
-		image := vs.frameStore.past
+		image := fs.past
 
+		// channel switch
 		switch i {
 		case 0, 1, 2, 3:
 			fState.channel = image.Y
-			fState.stride = image.YStride
-			fState.i = (((mb_row * 16) + (i&2)<<2) * fState.stride) + (mb_addr * 16) + (i&1)<<3
 		case 4:
 			fState.channel = image.Cb
-			fState.stride = image.CStride
-			fState.i = (mb_row * 8 * fState.stride) + (mb_addr * 8)
 		case 5:
 			fState.channel = image.Cr
+		}
+
+		switch i {
+		case 0, 1, 2, 3:
+			fState.stride = image.YStride
+			fState.i = (((mb_row * 16) + (i&2)<<2) * fState.stride) + (mb_addr * 16) + (i&1)<<3
+		case 4, 5:
 			fState.stride = image.CStride
 			fState.i = (mb_row * 8 * fState.stride) + (mb_addr * 8)
 		}

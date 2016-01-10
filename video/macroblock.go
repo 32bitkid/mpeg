@@ -43,8 +43,22 @@ func (br *VideoSequence) macroblock(
 		mb.macroblock_address_increment += incr
 	}
 
-	if br.PictureHeader.picture_coding_type == PFrame && mb.macroblock_address_increment > 1 {
-		copy_macroblocks(mb_row, mb_address+1, mb.macroblock_address_increment-1, frameSlice, br.frameStore.past)
+	// Copy skipped macroblocks for PFrames and BFrames
+	if mb.macroblock_address_increment > 1 {
+		switch br.PictureHeader.picture_coding_type {
+		case PFrame:
+			pframe_copy_macroblocks(
+				mb_row, mb_address+1,
+				mb.macroblock_address_increment-1,
+				frameSlice, br.frameStore.past)
+		case BFrame:
+			bframe_copy_macroblocks(
+				mb_row, mb_address+1,
+				mb.macroblock_address_increment-1,
+				*mvd,
+				br.frameStore,
+				frameSlice)
+		}
 	}
 
 	// Reset dcDctPredictors: whenever a macroblock is skipped. (7.2.1)
@@ -101,6 +115,8 @@ func (br *VideoSequence) macroblock(
 		}
 	}
 
+	mvd.previous.set(mb.macroblock_type, br.PictureHeader.picture_coding_type)
+
 	if mb.macroblock_type.macroblock_intra && br.PictureCodingExtension.concealment_motion_vectors {
 		if err := marker_bit(br); err != nil {
 			return 0, err
@@ -144,7 +160,7 @@ func (br *VideoSequence) macroblock(
 			b.zero()
 		}
 
-		br.motion_compensation(mvd, i, mb_row, mb_address, &mb, &b)
+		b.motion_compensation(*mvd, i, mb_row, mb_address, br.frameStore)
 		b.clamp(&cb)
 		updateFrameSlice(i, mb_address, mb.dct_type, frameSlice, &cb)
 	}

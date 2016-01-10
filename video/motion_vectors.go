@@ -13,6 +13,32 @@ func absInt(in int) int {
 	return in
 }
 
+type motionVectorsFormed uint
+
+const (
+	motionVectorsFormed_None         = motionVectorsFormed(0)
+	motionVectorsFormed_FrameForward = motionVectorsFormed(1 << (iota - 1))
+	motionVectorsFormed_FrameBackward
+)
+
+func (mvf *motionVectorsFormed) set(mb_type *MacroblockType, pct PictureCodingType) {
+	switch {
+	case mb_type.macroblock_intra:
+		*mvf = motionVectorsFormed_None
+	case pct == PFrame &&
+		mb_type.macroblock_intra == false &&
+		mb_type.macroblock_motion_forward == false &&
+		mb_type.macroblock_motion_backward == false:
+		*mvf = motionVectorsFormed_FrameForward
+	case mb_type.macroblock_motion_forward && mb_type.macroblock_motion_backward:
+		*mvf = motionVectorsFormed_FrameForward | motionVectorsFormed_FrameBackward
+	case mb_type.macroblock_motion_forward:
+		*mvf = motionVectorsFormed_FrameForward
+	case mb_type.macroblock_motion_backward:
+		*mvf = motionVectorsFormed_FrameBackward
+	}
+}
+
 type motionVectorData struct {
 	info                  motionVectorInfo
 	code                  motionVectors
@@ -21,6 +47,7 @@ type motionVectorData struct {
 
 	predictions motionVectorPredictions
 	actual      motionVectors
+	previous    motionVectorsFormed
 }
 
 func (motionVector *motionVectorData) update_actual(r, s, t int, f_code FCode) {
