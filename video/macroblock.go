@@ -141,7 +141,7 @@ func (br *VideoSequence) macroblock(
 			b.decode_block(br, cc, *qsc, mb.macroblock_type.macroblock_intra)
 			b.idct()
 		} else {
-			b.empty()
+			b.zero()
 		}
 
 		br.motion_compensation(mvd, i, mb_row, mb_address, &mb, &b)

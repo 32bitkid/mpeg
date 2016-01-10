@@ -17,7 +17,7 @@ func (dest *block) sum(other *block) {
 	}
 }
 
-func (b *block) empty() {
+func (b *block) zero() {
 	for i := 0; i < blockSize; i++ {
 		b[i] = 0
 	}
