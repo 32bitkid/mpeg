@@ -14,6 +14,7 @@ func absInt(in int) int {
 }
 
 type motionVectorData struct {
+	info                  motionVectorInfo
 	code                  motionVectors
 	residual              motionVectors
 	vertical_field_select [2][2]uint32
@@ -84,7 +85,7 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 
 	f_code := fp.PictureCodingExtension.f_code
 
-	mv_count, mv_format, dmv := mv_info(fp, mb)
+	mvd.info = mv_info(fp, mb)
 
 	motion_vector_part := func(r, s, t int) error {
 		if code, err := decodeMotionCode(fp); err != nil {
@@ -101,7 +102,7 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 				mvd.residual[r][s][t] = int(code)
 			}
 		}
-		if dmv == 1 {
+		if mvd.info.dmv == 1 {
 			panic("unsupported: dmv[]")
 		}
 
@@ -120,8 +121,8 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 		return nil
 	}
 
-	if mv_count == 1 {
-		if mv_format == MotionVectorFormat_Field && dmv != 1 {
+	if mvd.info.motion_vector_count == 1 {
+		if mvd.info.motion_vector_format == motionVectorFormat_Field && mvd.info.dmv != 1 {
 			if val, err := fp.Read32(1); err != nil {
 				return err
 			} else {
