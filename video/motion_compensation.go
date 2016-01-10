@@ -22,7 +22,7 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 		active: (mb.macroblock_type.macroblock_motion_forward || vs.PictureHeader.picture_coding_type == PFrame) && vs.frameStore.past != nil,
 	}
 
-	// project future temporal image _backward_...
+	// project _future_ temporal sample _backward_...
 	if bState.active {
 		horizontal, vertical := motionVectors.actual[0][1][0], motionVectors.actual[0][1][1]
 
@@ -58,7 +58,7 @@ func (vs *VideoSequence) motion_compensation(motionVectors *motionVectorData, i,
 		bState.i += horizontal
 	}
 
-	// project past temporal image _forward_...
+	// project _past_ temporal sample _forward_...
 	if fState.active {
 		horizontal, vertical := motionVectors.actual[0][0][0], motionVectors.actual[0][0][1]
 
