@@ -1,5 +1,6 @@
 package video
 
+import "io"
 import "github.com/32bitkid/bitreader"
 
 type sequenceHeaders struct {
@@ -23,9 +24,9 @@ type VideoSequence struct {
 	frameStore
 }
 
-func NewVideoSequence(br bitreader.BitReader) VideoSequence {
+func NewVideoSequence(r io.Reader) VideoSequence {
 	return VideoSequence{
-		BitReader: br,
+		BitReader: bitreader.NewBitReader(r),
 	}
 }
 
