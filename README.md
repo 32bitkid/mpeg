@@ -1,7 +1,11 @@
 # mpeg
 
-A pure golang implementation of an MPEG-2 decoder for
-educational purposes.
+Package mpeg provides an implementation of an  experimental
+pure golang implementation of an MPEG-2 decoder. It
+is intended as an educational look at some of the patterns and
+algorithms involved in the ubiquitous technology of video
+compression.
+
 
 ## Roadmap
 - [ ] MPEG-2 Transport Stream (TS) Support
@@ -19,7 +23,7 @@ educational purposes.
 - [ ] MPEG-2 Packetized Elementary Stream (PES) Support
   - [x] Basic parser
   - [ ] PES Extension support
-  - [ ] `chan` Packet streamer interface  
+  - [ ] `chan` Packet streamer interface
   - [x] PayloadReader (implementing `io.Reader`)
 
 - [ ] MPEG-2 Program Stream (PS) Support
@@ -49,7 +53,7 @@ go get -d github.com/32bitkid/mpeg
 
 Decode a frame of video and save it as a png
 
-```go 
+```go
 package main
 
 import "os"
@@ -66,14 +70,14 @@ func main() {
   pesReader := ts.NewPayloadUnitReader(tsReader, ts.IsPID(0x21))
   // Decode the PES stream
   esReader := pes.NewPayloadReader(pesReader)
-  // Decode the ES into video
-  v := video.NewFrameProvider(esReader)
+  // Decode the ES into a stream of frames
+  v := video.NewVideoSequence(esReader)
 
-  // Align to next sequence start
+  // Align to next sequence start/entry point
   v.AlignToNext(video.SequenceHeaderStartCode)
 
   // get the next frame
-  frame, _ = v.Next()
+  frame, _, _ = v.Next()
   file, _ := os.Create("output.png")
   png.Encode(file, frame)
 }
@@ -92,7 +96,7 @@ import "os"
 
 func main() {
 	file, _ := os.Open("source.ts")
-  
+
 	demux := ts.NewDemuxer(bitreader.NewBitReader32(file))
 	packets := demux.Where(ts.IsPID(0x21))
 	demux.Go()
@@ -112,7 +116,7 @@ import "os"
 
 func main() {
 	file, _ := os.Open("source.ts")
-  
+
 	demux := ts.NewDemuxer(bitreader.NewBitReader32(file))
 	hd := demux.Where(ts.IsPID(0x21))
 	sd := demux.Where(ts.IsPID(0x31))
