@@ -2,7 +2,6 @@ package video
 
 import "errors"
 import "image"
-import "os"
 
 var EOS = errors.New("end of sequence")
 var ErrUnsupportedVideoStream_ISO_IEC_11172_2 = errors.New("unsupported video stream ISO/IEC 11172-2")
@@ -46,7 +45,6 @@ MORE_FRAMES:
 	if nextbits, err := self.Peek32(32); err != nil {
 		panic("Peek32")
 	} else if StartCode(nextbits) == GroupStartCode {
-		os.Stdout.WriteString("\n")
 		if err := self.group_of_pictures_header(); err != nil {
 			panic("group_of_pictures_header: " + err.Error())
 		}
@@ -58,7 +56,6 @@ MORE_FRAMES:
 	if err := self.picture_header(); err != nil {
 		panic("picture_header: " + err.Error())
 	}
-	os.Stdout.WriteString(self.PictureHeader.String())
 
 	if err := self.picture_coding_extension(); err != nil {
 		panic("picture_coding_extension: " + err.Error())
