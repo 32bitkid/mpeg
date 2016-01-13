@@ -77,7 +77,7 @@ func main() {
   v.AlignToNext(video.SequenceHeaderStartCode)
 
   // get the next frame
-  frame, _, _ = v.Next()
+  frame, _ = v.Next()
   file, _ := os.Create("output.png")
   png.Encode(file, frame)
 }
