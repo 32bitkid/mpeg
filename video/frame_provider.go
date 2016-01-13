@@ -14,62 +14,62 @@ func (self *VideoSequence) Next() (image.Image, error) {
 
 	// align to next start code
 	if err := next_start_code(self); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// read sequence_header
 	if err := self.sequence_header(); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	// peek for sequence_extension
 	if val, err := self.Peek32(32); err != nil {
-		panic(err)
+		return nil, err
 	} else if StartCode(val) != ExtensionStartCode {
 		// Stream is MPEG-1 Video
 		return nil, ErrUnsupportedVideoStream_ISO_IEC_11172_2
 	}
 
 	if err := self.sequence_extension(); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 CONTINUE:
 
 	if err := self.extension_and_user_data(0); err != nil {
-		panic("extension_and_user_data: " + err.Error())
+		return nil, err
 	}
 
 MORE_FRAMES:
 
 	if nextbits, err := self.Peek32(32); err != nil {
-		panic("Peek32")
+		return nil, err
 	} else if StartCode(nextbits) == GroupStartCode {
 		if err := self.group_of_pictures_header(); err != nil {
-			panic("group_of_pictures_header: " + err.Error())
+			return nil, err
 		}
 		self.frameStore.gop()
 		if err := self.extension_and_user_data(1); err != nil {
-			panic("extension_and_user_data:" + err.Error())
+			return nil, err
 		}
 	}
 
 	if err := self.picture_header(); err != nil {
-		panic("picture_header: " + err.Error())
+		return nil, err
 	}
 
 	if err := self.picture_coding_extension(); err != nil {
-		panic("picture_coding_extension: " + err.Error())
+		return nil, err
 	}
 
 	if err := self.extension_and_user_data(2); err != nil {
-		panic("extension_and_user_data: " + err.Error())
+		return nil, err
 	}
 
 	self.frameStore.set(self.PictureHeader.temporal_reference)
 
 	if frame, err := self.picture_data(); err != nil {
-		panic(err)
+		return nil, err
 	} else {
 		switch self.PictureHeader.picture_coding_type {
 		case IFrame, PFrame:
@@ -81,7 +81,7 @@ MORE_FRAMES:
 RESUME:
 
 	if nextbits, err := self.Peek32(32); err != nil {
-		panic("peeking: " + err.Error())
+		return nil, err
 	} else if StartCode(nextbits) == PictureStartCode {
 		goto MORE_FRAMES
 	} else if StartCode(nextbits) == GroupStartCode {
@@ -89,7 +89,7 @@ RESUME:
 	}
 
 	if nextbits, err := self.Peek32(32); err != nil {
-		panic("Peek32")
+		return nil, err
 	} else if StartCode(nextbits) == SequenceEndStartCode {
 		// consume SequenceEndStartCode
 		if err := self.Trash(32); err != nil {
@@ -99,14 +99,15 @@ RESUME:
 	}
 
 	if err := self.sequence_header(); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	if err := self.sequence_extension(); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	goto CONTINUE
+
 END_OF_STREAM:
 	return nil, EOS
 }
