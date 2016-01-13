@@ -6,7 +6,7 @@ import "image"
 var EOS = errors.New("end of sequence")
 var ErrUnsupportedVideoStream_ISO_IEC_11172_2 = errors.New("unsupported video stream ISO/IEC 11172-2")
 
-func (self *VideoSequence) Next() (image.Image, uint32, error) {
+func (self *VideoSequence) Next() (image.Image, error) {
 
 	if self.SequenceHeader != nil {
 		goto RESUME
@@ -27,7 +27,7 @@ func (self *VideoSequence) Next() (image.Image, uint32, error) {
 		panic(err)
 	} else if StartCode(val) != ExtensionStartCode {
 		// Stream is MPEG-1 Video
-		return nil, 0, ErrUnsupportedVideoStream_ISO_IEC_11172_2
+		return nil, ErrUnsupportedVideoStream_ISO_IEC_11172_2
 	}
 
 	if err := self.sequence_extension(); err != nil {
@@ -74,7 +74,7 @@ MORE_FRAMES:
 		case IFrame, PFrame:
 			self.frameStore.add(frame, self.PictureHeader.temporal_reference)
 		}
-		return frame, self.PictureHeader.temporal_reference, nil
+		return frame, nil
 	}
 
 RESUME:
@@ -92,9 +92,9 @@ RESUME:
 	} else if StartCode(nextbits) == SequenceEndStartCode {
 		// consume SequenceEndStartCode
 		if err := self.Trash(32); err != nil {
-			return nil, 0, err
+			return nil, err
 		}
-		return nil, 0, EOS
+		goto END_OF_STREAM
 	}
 
 	if err := self.sequence_header(); err != nil {
@@ -106,4 +106,6 @@ RESUME:
 	}
 
 	goto CONTINUE
+END_OF_STREAM:
+	return nil, EOS
 }
