@@ -48,6 +48,7 @@ MORE_FRAMES:
 		if err := self.group_of_pictures_header(); err != nil {
 			panic("group_of_pictures_header: " + err.Error())
 		}
+		self.frameStore.gop()
 		if err := self.extension_and_user_data(1); err != nil {
 			panic("extension_and_user_data:" + err.Error())
 		}
