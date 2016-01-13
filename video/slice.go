@@ -21,7 +21,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		return err
 	}
 
-	if StartCode(code).isSlice() == false {
+	if StartCode(code).IsSlice() == false {
 		return ErrUnexpectedStartCode
 	}
 

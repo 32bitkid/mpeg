@@ -33,7 +33,7 @@ const (
 	// system start codes (see note) B9 through FF
 )
 
-func (code StartCode) isSlice() bool {
+func (code StartCode) IsSlice() bool {
 	return code >= MinSliceStartCode && code <= MaxSliceStartCode
 }
 

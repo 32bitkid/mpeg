@@ -41,7 +41,7 @@ func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
 
 		if nextbits, err := self.Peek32(32); err != nil {
 			return nil, err
-		} else if StartCode(nextbits).isSlice() == false {
+		} else if StartCode(nextbits).IsSlice() == false {
 			break
 		}
 	}
