@@ -74,7 +74,7 @@ func main() {
   v := video.NewVideoSequence(esReader)
 
   // Align to next sequence start/entry point
-  v.AlignToNext(video.SequenceHeaderStartCode)
+  v.AlignTo(video.SequenceHeaderStartCode)
 
   // get the next frame
   frame, _ = v.Next()

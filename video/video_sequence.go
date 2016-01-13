@@ -30,6 +30,24 @@ func NewVideoSequence(r io.Reader) VideoSequence {
 	}
 }
 
+func (br *VideoSequence) AlignTo(startCode StartCode) error {
+	if !br.IsByteAligned() {
+		if _, err := br.ByteAlign(); err != nil {
+			return err
+		}
+	}
+
+	for {
+		if val, err := br.Peek32(32); err != nil {
+			return err
+		} else if StartCode(val) == startCode {
+			return nil
+		} else if err := br.Trash(8); err != nil {
+			return err
+		}
+	}
+}
+
 func (vs *VideoSequence) sequence_extension() (err error) {
 	vs.SequenceExtension, err = sequence_extension(vs)
 	return
