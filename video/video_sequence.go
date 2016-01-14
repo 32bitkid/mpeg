@@ -24,8 +24,8 @@ type VideoSequence struct {
 	frameStore
 }
 
-func NewVideoSequence(r io.Reader) VideoSequence {
-	return VideoSequence{
+func NewVideoSequence(r io.Reader) *VideoSequence {
+	return &VideoSequence{
 		BitReader: bitreader.NewBitReader(r),
 	}
 }
