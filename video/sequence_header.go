@@ -3,7 +3,6 @@ package video
 import "errors"
 import "github.com/32bitkid/bitreader"
 
-var ErrUnexpectedStartCode = errors.New("unexpected start code")
 var ErrMissingMarkerBit = errors.New("missing marker bit")
 
 type SequenceHeader struct {

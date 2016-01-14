@@ -1,6 +1,7 @@
 package video
 
 import "github.com/32bitkid/bitreader"
+import "errors"
 
 // StartCode is a 32 bit code that acts as a marker in a coded bitstream.
 // They usually signal the structure of following bits and/or how the bits
@@ -25,6 +26,9 @@ const (
 	SequenceEndStartCode    StartCode = (StartCodePrefix << 8) | 0xB7
 	GroupStartCode          StartCode = (StartCodePrefix << 8) | 0xB8
 )
+
+// ErrUnexpectedStartCode indicates that a start code was read from the bitstream that was unexpected.
+var ErrUnexpectedStartCode = errors.New("unexpected start code")
 
 // IsSlice() returns true if the StartCode falls within the
 // acceptable range of codes designated as slice start codes.
