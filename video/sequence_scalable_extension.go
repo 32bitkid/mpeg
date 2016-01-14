@@ -5,10 +5,10 @@ import "github.com/32bitkid/bitreader"
 type ScalableMode uint32
 
 const (
-	DataPartitioning    ScalableMode = 0
-	SpatialScalability               = 1
-	SNRScalability                   = 2
-	TemporalScalability              = 3
+	DataPartitioning ScalableMode = itoa
+	SpatialScalability
+	SNRScalability
+	TemporalScalability
 )
 
 type SequenceScalableExtension struct {
