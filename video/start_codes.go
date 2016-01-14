@@ -3,8 +3,11 @@ package video
 import "github.com/32bitkid/bitreader"
 
 // StartCode is a 32 bit code that acts as a marker in a coded bitstream.
-// They usually signal the structure of following bits, and how the bits
+// They usually signal the structure of following bits and/or how the bits
 // should be interpreted.
+//
+// Start codes always begin with the 24 bit integer 0x000001 followed by a
+// specific identifier.
 type StartCode uint32
 
 const (
