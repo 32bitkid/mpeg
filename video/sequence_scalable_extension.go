@@ -5,7 +5,7 @@ import "github.com/32bitkid/bitreader"
 type ScalableMode uint32
 
 const (
-	DataPartitioning ScalableMode = itoa
+	DataPartitioning ScalableMode = iota
 	SpatialScalability
 	SNRScalability
 	TemporalScalability
