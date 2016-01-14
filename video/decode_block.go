@@ -72,7 +72,7 @@ func (b *block) decode_block(
 				w = 1
 			}
 		} else {
-			if self.SequenceExtension.chroma_format == ChromaFormat_420 {
+			if self.SequenceExtension.chroma_format == ChromaFormat420 {
 				if macroblock_intra {
 					w = 0
 				} else {

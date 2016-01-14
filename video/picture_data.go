@@ -2,7 +2,7 @@ package video
 
 import "image"
 
-func createFrameBuffer(w, h uint32, cf chromaFormat) *image.YCbCr {
+func createFrameBuffer(w, h uint32, cf ChromaFormat) *image.YCbCr {
 
 	horizontalMacroblocks := w >> 4
 	verticalMacroblocks := h >> 4
@@ -19,11 +19,11 @@ func createFrameBuffer(w, h uint32, cf chromaFormat) *image.YCbCr {
 
 	var subsampleRatio image.YCbCrSubsampleRatio
 	switch cf {
-	case ChromaFormat_420:
+	case ChromaFormat420:
 		subsampleRatio = image.YCbCrSubsampleRatio420
-	case ChromaFormat_422:
+	case ChromaFormat422:
 		subsampleRatio = image.YCbCrSubsampleRatio422
-	case ChromaFormat_444:
+	case ChromaFormat444:
 		subsampleRatio = image.YCbCrSubsampleRatio444
 	}
 

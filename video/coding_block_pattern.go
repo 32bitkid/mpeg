@@ -3,13 +3,13 @@ package video
 import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/huffman"
 
-func coded_block_pattern(br bitreader.BitReader, chroma_format chromaFormat) (int, error) {
+func coded_block_pattern(br bitreader.BitReader, chroma_format ChromaFormat) (int, error) {
 	val, err := decodeCpb(br)
 
-	if ChromaFormat_422 == chroma_format {
+	if ChromaFormat422 == chroma_format {
 		panic("unsupported: cbp 4:2:2")
 	}
-	if ChromaFormat_444 == chroma_format {
+	if ChromaFormat444 == chroma_format {
 		panic("unsupported: cbp 4:4:4")
 	}
 
