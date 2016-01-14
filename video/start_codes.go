@@ -37,6 +37,8 @@ func (code StartCode) IsSlice() bool {
 }
 
 // Check() will return true if the next bits in the bitstream match the expected code.
+// Check() does not consume any bits from the bitstream and will only return
+// an error if there is a underlying error attempting to peek into the bitstream.
 func (expected StartCode) Check(br bitreader.BitReader) (bool, error) {
 	if nextbits, err := br.Peek32(32); err != nil {
 		return false, err
@@ -45,7 +47,8 @@ func (expected StartCode) Check(br bitreader.BitReader) (bool, error) {
 	}
 }
 
-// Assert() returns an error if the next bits in the bitstream do not match the expected code.
+// Assert() returns an ErrUnexpectedStartCode if the next bits in the bitstream do not match the expected code.
+// If the expected code is present, the the bits are consumed from the bitstream.
 func (expected StartCode) Assert(br bitreader.BitReader) error {
 	if test, err := expected.Check(br); err != nil {
 		return err
