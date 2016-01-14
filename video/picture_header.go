@@ -45,7 +45,7 @@ func picture_header(br bitreader.BitReader) (*PictureHeader, error) {
 		return nil, err
 	}
 
-	if ph.picture_coding_type == PredictiveCoded || ph.picture_coding_type == BidirectionallyPredictiveCoded {
+	if ph.picture_coding_type == PFrame || ph.picture_coding_type == BFrame {
 		ph.full_pel_forward_vector, err = br.Read32(1)
 		if err != nil {
 			return nil, err
@@ -56,7 +56,7 @@ func picture_header(br bitreader.BitReader) (*PictureHeader, error) {
 			return nil, err
 		}
 	}
-	if ph.picture_coding_type == BidirectionallyPredictiveCoded {
+	if ph.picture_coding_type == BFrame {
 		ph.full_pel_backward_vector, err = br.Read32(1)
 		if err != nil {
 			return nil, err

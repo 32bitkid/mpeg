@@ -273,11 +273,11 @@ func (br *VideoSequence) macroblock_mode(mb *Macroblock) (err error) {
 
 	var typeDecoder macroblockTypeDecoderFn
 	switch br.PictureHeader.picture_coding_type {
-	case IntraCoded:
+	case IFrame:
 		typeDecoder = macroblockTypeDecoder.IFrame
-	case PredictiveCoded:
+	case PFrame:
 		typeDecoder = macroblockTypeDecoder.PFrame
-	case BidirectionallyPredictiveCoded:
+	case BFrame:
 		typeDecoder = macroblockTypeDecoder.BFrame
 	default:
 		panic("not implemented: macroblock type decoder")

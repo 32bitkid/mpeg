@@ -63,7 +63,7 @@ const (
 
 func (pct PictureCodingType) String() string {
 	switch pct {
-	case IntraCoded:
+	case PictureCodingType_IntraCoded:
 		return "I"
 	case PictureCodingType_PredictiveCoded:
 		return "P"
