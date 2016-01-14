@@ -6,6 +6,10 @@ import "image"
 var EOS = errors.New("end of sequence")
 var ErrUnsupportedVideoStream_ISO_IEC_11172_2 = errors.New("unsupported video stream ISO/IEC 11172-2")
 
+// Next() will return the next frame of video decoded from the video stream.
+//
+// Please note, this function will return frames in the order they are *decoded*, which may not
+// be the order they should be displayed.
 func (self *VideoSequence) Next() (image.Image, error) {
 
 	if self.SequenceHeader != nil {
