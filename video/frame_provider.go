@@ -49,10 +49,12 @@ MORE_FRAMES:
 	if nextbits, err := self.Peek32(32); err != nil {
 		return nil, err
 	} else if StartCode(nextbits) == GroupStartCode {
-		if err := self.group_of_pictures_header(); err != nil {
+		if gop, err := ReadGOPHeader(self); err != nil {
 			return nil, err
+		} else {
+			self.GroupOfPicturesHeader = gop
+			self.frameStore.gop()
 		}
-		self.frameStore.gop()
 		if err := self.extension_and_user_data(1); err != nil {
 			return nil, err
 		}

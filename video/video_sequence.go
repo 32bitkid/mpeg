@@ -54,11 +54,6 @@ func (vs *VideoSequence) sequence_extension() (err error) {
 	return
 }
 
-func (vs *VideoSequence) group_of_pictures_header() (err error) {
-	vs.GroupOfPicturesHeader, err = group_of_pictures_header(vs)
-	return
-}
-
 func (vs *VideoSequence) picture_header() (err error) {
 	vs.PictureHeader, err = picture_header(vs)
 	return
