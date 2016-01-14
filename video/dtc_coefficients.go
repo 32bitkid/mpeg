@@ -8,15 +8,8 @@ type dctCoefficient struct {
 	level int32
 }
 
-type dctSpecialToken string
-
-var dctSpecialTokens = struct {
-	EndOfBlock dctSpecialToken
-	Escape     dctSpecialToken
-}{
-	dctSpecialToken("end of block"),
-	dctSpecialToken("escape"),
-}
+type dctEndOfBlock struct{}
+type dctEscape struct{}
 
 type dctCoefficientDecoderFn func(br bitreader.BitReader, n int) (int, int32, bool, error)
 
@@ -32,51 +25,39 @@ func newDCTCoefficientDecoder(tables [2]huffman.HuffmanTable) dctCoefficientDeco
 			decoder = rest
 		}
 
-		val, err := decoder.Decode(br)
-		if err != nil {
+		if val, err := decoder.Decode(br); err != nil {
 			return 0, 0, false, err
-		}
-
-		if token, ok := val.(dctSpecialToken); ok {
-
-			if token == dctSpecialTokens.EndOfBlock {
-				return 0, 0, true, nil
-			}
-
-			if token == dctSpecialTokens.Escape {
-				val, err := br.Read32(6)
-				if err != nil {
-					return 0, 0, false, err
-				}
+		} else if _, ok := val.(dctEndOfBlock); ok {
+			return 0, 0, true, nil
+		} else if _, ok := val.(dctEscape); ok {
+			if val, err := br.Read32(6); err != nil {
+				return 0, 0, false, err
+			} else {
 				run = int(val)
-				sign, err := br.ReadBit()
-				if err != nil {
-					return 0, 0, false, err
-				}
-				val, err = br.Read32(11)
-				if err != nil {
-					return 0, 0, false, err
-				}
-				level = int32(val)
-				if sign {
-					level += -2048
-				}
-				return run, level, false, nil
 			}
 
-		} else if dct, ok := val.(dctCoefficient); ok {
+			if sign, err := br.ReadBit(); err != nil {
+				return 0, 0, false, err
+			} else if sign {
+				level = -2048
+			}
 
+			if val, err := br.Read32(11); err != nil {
+				return 0, 0, false, err
+			} else {
+				level += int32(val)
+			}
+
+			return run, level, false, nil
+		} else if dct, ok := val.(dctCoefficient); ok {
 			run = dct.run
 			level = dct.level
-			sign, err := br.ReadBit()
-			if err != nil {
+			if sign, err := br.ReadBit(); err != nil {
 				return 0, 0, false, err
-			}
-			if sign {
+			} else if sign {
 				level *= -1
 			}
 			return run, level, false, nil
-
 		}
 
 		return 0, 0, false, ErrUnexpectedDecodedValueType
@@ -101,7 +82,7 @@ var dctCoefficientTables = [2][2]huffman.HuffmanTable{
 			"0000 100":     dctCoefficient{2, 2},
 			"0000 111":     dctCoefficient{8, 1},
 			"0000 101":     dctCoefficient{9, 1},
-			"0000 01":      dctSpecialTokens.Escape,
+			"0000 01":      dctEscape{},
 			"0010 0110":    dctCoefficient{0, 5},
 			"0010 0001":    dctCoefficient{0, 6},
 			"0010 0101":    dctCoefficient{1, 3},
@@ -202,7 +183,7 @@ var dctCoefficientTables = [2][2]huffman.HuffmanTable{
 			"0000 0000 0001 1100": dctCoefficient{30, 1},
 			"0000 0000 0001 1011": dctCoefficient{31, 1},
 		}, {
-			"10":           dctSpecialTokens.EndOfBlock,
+			"10":           dctEndOfBlock{},
 			"11":           dctCoefficient{0, 1},
 			"011":          dctCoefficient{1, 1},
 			"0100":         dctCoefficient{0, 2},
@@ -218,7 +199,7 @@ var dctCoefficientTables = [2][2]huffman.HuffmanTable{
 			"0000 100":     dctCoefficient{2, 2},
 			"0000 111":     dctCoefficient{8, 1},
 			"0000 101":     dctCoefficient{9, 1},
-			"0000 01":      dctSpecialTokens.Escape,
+			"0000 01":      dctEscape{},
 			"0010 0110":    dctCoefficient{0, 5},
 			"0010 0001":    dctCoefficient{0, 6},
 			"0010 0101":    dctCoefficient{1, 3},
@@ -337,7 +318,7 @@ var dctCoefficientTables = [2][2]huffman.HuffmanTable{
 			"0000 111":     dctCoefficient{2, 2},
 			"0000 101":     dctCoefficient{8, 1},
 			"1111 000":     dctCoefficient{9, 1},
-			"0000 01":      dctSpecialTokens.Escape,
+			"0000 01":      dctEscape{},
 			"1110 1":       dctCoefficient{0, 5},
 			"0001 01":      dctCoefficient{0, 6},
 			"1111 001":     dctCoefficient{1, 3},
@@ -438,7 +419,7 @@ var dctCoefficientTables = [2][2]huffman.HuffmanTable{
 			"0000 0000 0001 1100": dctCoefficient{30, 1},
 			"0000 0000 0001 1011": dctCoefficient{31, 1},
 		}, {
-			"0110":         dctSpecialTokens.EndOfBlock,
+			"0110":         dctEndOfBlock{},
 			"10":           dctCoefficient{0, 1},
 			"010":          dctCoefficient{1, 1},
 			"110":          dctCoefficient{0, 2},
@@ -454,7 +435,7 @@ var dctCoefficientTables = [2][2]huffman.HuffmanTable{
 			"0000 111":     dctCoefficient{2, 2},
 			"0000 101":     dctCoefficient{8, 1},
 			"1111 000":     dctCoefficient{9, 1},
-			"0000 01":      dctSpecialTokens.Escape,
+			"0000 01":      dctEscape{},
 			"1110 1":       dctCoefficient{0, 5},
 			"0001 01":      dctCoefficient{0, 6},
 			"1111 001":     dctCoefficient{1, 3},
