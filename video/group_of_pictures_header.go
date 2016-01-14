@@ -1,11 +1,12 @@
 package video
 
 import "github.com/32bitkid/bitreader"
+import "fmt"
 
 type GroupOfPicturesHeader struct {
-	timeCode   uint32 // 25 bslbf
-	ClosedGOP  bool   // 1 uimsbf
-	BrokenLink bool   // 1 uimsbf
+	timeCode   int32 // 25 bslbf
+	ClosedGOP  bool  // 1 uimsbf
+	BrokenLink bool  // 1 uimsbf
 }
 
 // ReadGOPHeader parses a group_of_pictures header from the given bitstream.
@@ -19,7 +20,7 @@ func ReadGOPHeader(br bitreader.BitReader) (*GroupOfPicturesHeader, error) {
 	if time_code, err := br.Read32(25); err != nil {
 		return nil, err
 	} else {
-		goph.timeCode = time_code
+		goph.timeCode = int32(time_code)
 	}
 
 	if closed_gop, err := br.ReadBit(); err != nil {
@@ -37,25 +38,6 @@ func ReadGOPHeader(br bitreader.BitReader) (*GroupOfPicturesHeader, error) {
 	return &goph, next_start_code(br)
 }
 
-// TimeCode represents the associated time code with the first picture following the
-// Group of Pictures header with a TemporalReference = 0. DropFrame will only be true
-// if the desired framerate is 29.97Hz.
-//
-// TimeCode appears in the bitstream as a 25-bit integer that has the following layout:
-//
-//  ├1b┤
-//  ┌──┬──────────────────┬──────────────────────┬──┬──────────────────────┬──────────────────────┐
-//  │DF│Hours             │Minutes               │MB│Seconds               │Pictures              │
-//  └──┴──────────────────┴──────────────────────┴──┴──────────────────────┴──────────────────────┘
-//  ├───────────────────────────────────────────25 bits───────────────────────────────────────────┤
-type TimeCode struct {
-	DropFrame bool
-	Hours     int
-	Minutes   int
-	Seconds   int
-	Pictures  int
-}
-
 // Returns a parsed TimeCode from the raw GOP header data.
 func (gop *GroupOfPicturesHeader) TimeCode() TimeCode {
 	return TimeCode{
@@ -65,4 +47,32 @@ func (gop *GroupOfPicturesHeader) TimeCode() TimeCode {
 		Seconds:   (gop.timeCode >> 6) & 0x3F,
 		Pictures:  (gop.timeCode) & 0x3F,
 	}
+}
+
+// TimeCode represents the associated time code with the first picture following the
+// Group of Pictures header with a TemporalReference = 0. DropFrame will only be true
+// if the desired framerate is 29.97Hz.
+//
+// TimeCode appears in the bitstream as a 25-bit integer that has the following layout:
+//
+//  ┌──┬──────────────────┬──────────────────────┬──┬──────────────────────┬──────────────────────┐
+//  │DF│Hours             │Minutes               │MB│Seconds               │Pictures              │
+//  └──┴──────────────────┴──────────────────────┴──┴──────────────────────┴──────────────────────┘
+//  ├───────────────────────────────────────────25 bits───────────────────────────────────────────┤
+type TimeCode struct {
+	DropFrame bool  // 1-bit
+	Hours     int32 // 5-bit
+	Minutes   int32 // 6-bit
+	Seconds   int32 // 6-bit
+	Pictures  int32 // 6-bit
+}
+
+// String formats the time code as a string in SMPTE format: "HH:MM:SS:FF". If the timecode is
+// in drop frame, then the separator between seconds and frames is replaced with a ";" character.
+func (tc TimeCode) String() string {
+	secondsFramesSep := ":"
+	if tc.DropFrame {
+		secondsFramesSep = ";"
+	}
+	return fmt.Sprintf("%d:%02d:%02d%s%02d", tc.Hours, tc.Minutes, tc.Seconds, secondsFramesSep, tc.Pictures)
 }
