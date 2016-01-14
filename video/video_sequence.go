@@ -30,7 +30,7 @@ func NewVideoSequence(r io.Reader) *VideoSequence {
 	}
 }
 
-// AlignTo() will trash all bits until the stream is aligned with the desired start code or error is produced.
+// AlignTo will trash all bits until the stream is aligned with the desired start code or error is produced.
 func (br *VideoSequence) AlignTo(startCode StartCode) error {
 	if !br.IsByteAligned() {
 		if _, err := br.ByteAlign(); err != nil {
