@@ -21,7 +21,7 @@ func (ph PictureHeader) String() string {
 
 func picture_header(br bitreader.BitReader) (*PictureHeader, error) {
 
-	err := PictureStartCode.assert(br)
+	err := PictureStartCode.Assert(br)
 	if err != nil {
 		return nil, err
 	}

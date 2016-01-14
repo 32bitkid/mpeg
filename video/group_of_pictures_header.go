@@ -11,7 +11,7 @@ type GroupOfPicturesHeader struct {
 
 func group_of_pictures_header(br bitreader.BitReader) (*GroupOfPicturesHeader, error) {
 
-	if err := GroupStartCode.assert(br); err != nil {
+	if err := GroupStartCode.Assert(br); err != nil {
 		return nil, err
 	}
 

@@ -1,8 +1,10 @@
 package video
 
 import "github.com/32bitkid/bitreader"
-import "fmt"
 
+// StartCode is a 32 bit code that acts as a marker in a coded bitstream.
+// They usually signal the structure of following bits, and how the bits
+// should be interpreted.
 type StartCode uint32
 
 const (
@@ -21,16 +23,14 @@ const (
 	GroupStartCode          StartCode = (StartCodePrefix << 8) | 0xB8
 )
 
+// IsSlice() returns true if the StartCode falls within the
+// acceptable range of codes designated as slice start codes.
 func (code StartCode) IsSlice() bool {
 	return code >= MinSliceStartCode && code <= MaxSliceStartCode
 }
 
-func (code StartCode) String() string {
-	return fmt.Sprintf("[%08x]", uint32(code))
-}
-
-// Check if the next bits in the bitstream matches the expected code
-func (expected StartCode) check(br bitreader.BitReader) (bool, error) {
+// Check() will return true if the next bits in the bitstream match the expected code.
+func (expected StartCode) Check(br bitreader.BitReader) (bool, error) {
 	if nextbits, err := br.Peek32(32); err != nil {
 		return false, err
 	} else {
@@ -38,9 +38,9 @@ func (expected StartCode) check(br bitreader.BitReader) (bool, error) {
 	}
 }
 
-// Assert the next bits in the bit stream match the expected startcode
-func (expected StartCode) assert(br bitreader.BitReader) error {
-	if test, err := expected.check(br); err != nil {
+// Assert() returns an error if the next bits in the bitstream do not match the expected code.
+func (expected StartCode) Assert(br bitreader.BitReader) error {
+	if test, err := expected.Check(br); err != nil {
 		return err
 	} else if test != true {
 		return ErrUnexpectedStartCode

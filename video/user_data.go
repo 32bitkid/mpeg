@@ -3,7 +3,7 @@ package video
 type UserData []byte
 
 func (br *VideoSequence) user_data() (UserData, error) {
-	if err := UserDataStartCode.assert(br); err != nil {
+	if err := UserDataStartCode.Assert(br); err != nil {
 		return nil, err
 	}
 
