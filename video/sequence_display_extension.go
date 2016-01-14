@@ -14,7 +14,7 @@ type SequenceDisplayExtension struct {
 
 func sequence_display_extension(br bitreader.BitReader) (*SequenceDisplayExtension, error) {
 
-	err := SequenceDisplayExtensionID.assert(br)
+	err := SequenceDisplayExtensionID.Assert(br)
 	if err != nil {
 		return nil, err
 	}

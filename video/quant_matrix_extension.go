@@ -19,7 +19,7 @@ package video
 //
 func (vs *VideoSequence) quant_matrix_extension() error {
 
-	QuantMatrixExtensionID.assert(vs)
+	QuantMatrixExtensionID.Assert(vs)
 
 	if load, err := vs.ReadBit(); err != nil {
 		return err

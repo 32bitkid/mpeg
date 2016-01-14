@@ -22,7 +22,7 @@ func sequence_extension(br bitreader.BitReader) (*SequenceExtension, error) {
 		return nil, err
 	}
 
-	err = SequenceExtensionID.assert(br)
+	err = SequenceExtensionID.Assert(br)
 	if err != nil {
 		return nil, err
 	}
