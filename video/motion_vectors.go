@@ -50,7 +50,7 @@ type motionVectorData struct {
 	previous    motionVectorsFormed
 }
 
-func (motionVector *motionVectorData) update_actual(r, s, t int, f_code FCode) {
+func (motionVector *motionVectorData) update_actual(r, s, t int, f_code fCode) {
 
 	code := motionVector.code
 	residual := motionVector.residual

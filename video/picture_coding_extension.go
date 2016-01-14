@@ -2,10 +2,10 @@ package video
 
 import "github.com/32bitkid/bitreader"
 
-type FCode [2][2]uint32
+type fCode [2][2]uint32
 
 type PictureCodingExtension struct {
-	f_code                     FCode
+	f_code                     fCode
 	intra_dc_precision         uint32           // 2 uimsbf
 	picture_structure          PictureStructure // 2 uimsbf
 	top_field_first            bool             // 1 uimsbf
