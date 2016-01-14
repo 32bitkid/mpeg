@@ -2,15 +2,6 @@ package video
 
 import "github.com/32bitkid/bitreader"
 
-type PictureStructure uint32
-
-const (
-	_ PictureStructure = iota
-	PictureStructure_TopField
-	PictureStructure_BottomField
-	PictureStructure_FramePicture
-)
-
 type FCode [2][2]uint32
 
 type PictureCodingExtension struct {
