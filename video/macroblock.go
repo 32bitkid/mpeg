@@ -12,7 +12,7 @@ type Macroblock struct {
 	field_motion_type            uint32
 	dct_type                     bool
 
-	cpb int
+	cbp codedBlockPattern
 }
 
 func (br *VideoSequence) macroblock(
@@ -124,10 +124,10 @@ func (br *VideoSequence) macroblock(
 	}
 
 	if mb.macroblock_type.macroblock_pattern {
-		if cpb, err := coded_block_pattern(br, br.SequenceExtension.chroma_format); err != nil {
+		if cbp, err := coded_block_pattern(br, br.SequenceExtension.chroma_format); err != nil {
 			return 0, nil
 		} else {
-			mb.cpb = cpb
+			mb.cbp = cbp
 		}
 	}
 
@@ -142,7 +142,7 @@ func (br *VideoSequence) macroblock(
 	}
 
 	mb_address += mb.macroblock_address_increment
-	pattern_code := mb.decodePatternCode(br.SequenceExtension.chroma_format)
+	pattern_code := mb.cbp.decode(mb.macroblock_type.macroblock_intra, mb.macroblock_type.macroblock_pattern, br.SequenceExtension.chroma_format)
 
 	var b block
 	var cb clampedblock
@@ -241,32 +241,6 @@ func updateFrameSlice(i, mb_address int, interlaced bool, frameSlice *image.YCbC
 		copy(channel[di:di+8], cb[si:si+8])
 	}
 
-}
-
-type PatternCode [12]bool
-
-func (mb *Macroblock) decodePatternCode(chroma_format ChromaFormat) (pattern_code PatternCode) {
-	for i := 0; i < 12; i++ {
-		if mb.macroblock_type.macroblock_intra {
-			pattern_code[i] = true
-		} else {
-			pattern_code[i] = false
-		}
-	}
-
-	if mb.macroblock_type.macroblock_pattern {
-		for i := 0; i < 6; i++ {
-			if mask := 1 << uint(5-i); mb.cpb&mask == mask {
-				pattern_code[i] = true
-			}
-		}
-
-		if chroma_format == ChromaFormat422 || chroma_format == ChromaFormat444 {
-			panic("unsupported: coded block pattern chroma format")
-		}
-	}
-
-	return
 }
 
 func (br *VideoSequence) macroblock_mode(mb *Macroblock) (err error) {
