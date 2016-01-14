@@ -24,7 +24,7 @@ func (vs *VideoSequence) quant_matrix_extension() error {
 	if load, err := vs.ReadBit(); err != nil {
 		return err
 	} else if load {
-		var intra_quantiser_matrix QuantisationMatrix
+		var intra_quantiser_matrix quantisationMatrix
 		for v := 0; v < 8; v++ {
 			for u := 0; u < 8; u++ {
 				if val, err := vs.Read32(8); err != nil {
@@ -41,7 +41,7 @@ func (vs *VideoSequence) quant_matrix_extension() error {
 	if load, err := vs.ReadBit(); err != nil {
 		return err
 	} else if load {
-		var non_intra_quantiser_matrix QuantisationMatrix
+		var non_intra_quantiser_matrix quantisationMatrix
 		for v := 0; v < 8; v++ {
 			for u := 0; u < 8; u++ {
 				if val, err := vs.Read32(8); err != nil {
@@ -58,7 +58,7 @@ func (vs *VideoSequence) quant_matrix_extension() error {
 	if load, err := vs.ReadBit(); err != nil {
 		return err
 	} else if load {
-		var chroma_intra_quantiser_matrix QuantisationMatrix
+		var chroma_intra_quantiser_matrix quantisationMatrix
 		for v := 0; v < 8; v++ {
 			for u := 0; u < 8; u++ {
 				if val, err := vs.Read32(8); err != nil {
@@ -74,7 +74,7 @@ func (vs *VideoSequence) quant_matrix_extension() error {
 	if load, err := vs.ReadBit(); err != nil {
 		return err
 	} else if load {
-		var chroma_non_intra_quantiser_matrix QuantisationMatrix
+		var chroma_non_intra_quantiser_matrix quantisationMatrix
 		for v := 0; v < 8; v++ {
 			for u := 0; u < 8; u++ {
 				if val, err := vs.Read32(8); err != nil {

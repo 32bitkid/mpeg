@@ -20,7 +20,7 @@ type VideoSequence struct {
 	sequenceHeaders
 	pictureHeaders
 
-	quantisationMatricies [4]QuantisationMatrix
+	quantisationMatricies [4]quantisationMatrix
 	frameStore
 }
 

@@ -1,12 +1,12 @@
 package video
 
-type QuantisationMatrix [8][8]uint8
+type quantisationMatrix [8][8]uint8
 
 var defaultQuantisationMatrices = struct {
-	Intra    QuantisationMatrix
-	NonIntra QuantisationMatrix
+	Intra    quantisationMatrix
+	NonIntra quantisationMatrix
 }{
-	QuantisationMatrix{
+	quantisationMatrix{
 		{8, 16, 19, 22, 26, 27, 29, 34},
 		{16, 16, 22, 24, 27, 29, 34, 37},
 		{19, 22, 26, 27, 29, 34, 34, 38},
@@ -16,7 +16,7 @@ var defaultQuantisationMatrices = struct {
 		{26, 27, 29, 34, 38, 46, 56, 69},
 		{27, 29, 35, 38, 46, 56, 69, 83},
 	},
-	QuantisationMatrix{
+	quantisationMatrix{
 		{16, 16, 16, 16, 16, 16, 16, 16},
 		{16, 16, 16, 16, 16, 16, 16, 16},
 		{16, 16, 16, 16, 16, 16, 16, 16},

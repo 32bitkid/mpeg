@@ -17,8 +17,8 @@ type SequenceHeader struct {
 	load_intra_quantiser_matrix     bool
 	load_non_intra_quantiser_matrix bool
 
-	intra_quantiser_matrix     QuantisationMatrix
-	non_intra_quantiser_matrix QuantisationMatrix
+	intra_quantiser_matrix     quantisationMatrix
+	non_intra_quantiser_matrix quantisationMatrix
 }
 
 func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {

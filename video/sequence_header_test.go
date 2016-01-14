@@ -27,7 +27,7 @@ func TestSequenceHeader(t *testing.T) {
 		vbv_buffer_size_value:       488,
 		constrained_parameters_flag: false,
 		load_intra_quantiser_matrix: false,
-		non_intra_quantizer_matrix: QuantisationMatrix{
+		non_intra_quantiser_matrix: quantisationMatrix{
 			{16, 17, 17, 18, 18, 18, 19, 19},
 			{19, 19, 20, 20, 20, 20, 20, 21},
 			{21, 21, 21, 21, 21, 22, 22, 22},
@@ -71,8 +71,8 @@ func TestSequenceHeader(t *testing.T) {
 		t.Fatal("intra_quantiser_matrix")
 	}
 
-	if actual.non_intra_quantizer_matrix != expected.non_intra_quantizer_matrix {
-		t.Fatal("non_intra_quantizer_matrix")
+	if actual.non_intra_quantiser_matrix != expected.non_intra_quantiser_matrix {
+		t.Fatal("non_intra_quantiser_matrix")
 	}
 
 }
