@@ -6,11 +6,11 @@ import "image"
 var EOS = errors.New("end of sequence")
 var ErrUnsupportedVideoStream_ISO_IEC_11172_2 = errors.New("unsupported video stream ISO/IEC 11172-2")
 
-// Next will return the next frame of video decoded from the video stream.
+// step() will return the next frame of video decoded from the video stream.
 //
 // Please note, this function will return frames in the order they are *decoded*, which may not
 // be the order they should be displayed.
-func (self *VideoSequence) Next() (image.Image, error) {
+func (self *VideoSequence) step() (*image.YCbCr, error) {
 
 	if self.SequenceHeader != nil {
 		goto RESUME
@@ -54,6 +54,7 @@ MORE_FRAMES:
 		} else {
 			self.GroupOfPicturesHeader = gop
 			self.frameStore.gop()
+			self.frameCounter = 0
 		}
 		if err := self.extension_and_user_data(1); err != nil {
 			return nil, err

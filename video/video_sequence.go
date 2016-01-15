@@ -1,6 +1,7 @@
 package video
 
 import "io"
+import "image"
 import "github.com/32bitkid/bitreader"
 
 type sequenceHeaders struct {
@@ -22,6 +23,7 @@ type VideoSequence struct {
 
 	quantisationMatricies [4]quantisationMatrix
 	frameStore
+	frameCounter uint32
 }
 
 func NewVideoSequence(r io.Reader) *VideoSequence {
@@ -62,4 +64,23 @@ func (vs *VideoSequence) picture_header() (err error) {
 func (vs *VideoSequence) picture_coding_extension() (err error) {
 	vs.PictureCodingExtension, err = picture_coding_extension(vs)
 	return
+}
+
+// Next() will return the next frame of video decoded from the video stream.
+func (vs *VideoSequence) Next() (*image.YCbCr, error) {
+	// Try to get a previously decoded frame out of the frameStore.
+	if img := vs.frameStore.tryGet(vs.frameCounter); img != nil {
+		vs.frameCounter++
+		return img, nil
+	}
+
+	// Step until a temporal match is found.
+	for {
+		if img, err := vs.step(); err != nil {
+			return nil, err
+		} else if vs.PictureHeader.temporal_reference == vs.frameCounter {
+			vs.frameCounter++
+			return img, nil
+		}
+	}
 }
