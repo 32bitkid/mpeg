@@ -21,7 +21,8 @@ type SequenceHeader struct {
 	non_intra_quantiser_matrix quantisationMatrix
 }
 
-func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
+// ReadSequenceHeader reads a sequence header from the bit stream.
+func ReadSequenceHeader(br bitreader.BitReader) (*SequenceHeader, error) {
 
 	var err error
 
@@ -52,8 +53,7 @@ func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
 		return nil, err
 	}
 
-	err = marker_bit(br)
-	if err != nil {
+	if err := marker_bit(br); err != nil {
 		return nil, err
 	}
 
@@ -102,7 +102,7 @@ func sequence_header(br bitreader.BitReader) (*SequenceHeader, error) {
 
 func (vs *VideoSequence) sequence_header() (err error) {
 
-	sh, err := sequence_header(vs)
+	sh, err := ReadSequenceHeader(vs)
 	if err != nil {
 		return err
 	}
