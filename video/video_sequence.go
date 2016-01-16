@@ -66,6 +66,19 @@ func (vs *VideoSequence) picture_coding_extension() (err error) {
 	return
 }
 
+func (vs *VideoSequence) Size() (width int, height int) {
+	if vs.SequenceHeader == nil {
+		return -1, -1
+	}
+	width = int(vs.SequenceHeader.horizontal_size_value)
+	height = int(vs.SequenceHeader.vertical_size_value)
+	if vs.SequenceExtension != nil {
+		width |= int(vs.SequenceExtension.horizontal_size_extension << 12)
+		height |= int(vs.SequenceExtension.vertical_size_extension << 12)
+	}
+	return
+}
+
 // Next() will return the next frame of video decoded from the video stream.
 func (vs *VideoSequence) Next() (*image.YCbCr, error) {
 	// Try to get a previously decoded frame out of the frameStore.
