@@ -2,20 +2,12 @@ package video
 
 import "image"
 
-func createFrameBuffer(w, h uint32, cf ChromaFormat) *image.YCbCr {
+func createFrameBuffer(w, h int, cf ChromaFormat) *image.YCbCr {
 
-	horizontalMacroblocks := w >> 4
-	verticalMacroblocks := h >> 4
+	horizontalMacroblocks := (w + 15) >> 4
+	verticalMacroblocks := (h + 15) >> 4
 
-	if (w & 0xf) != 0 {
-		horizontalMacroblocks++
-	}
-
-	if (h & 0xf) != 0 {
-		verticalMacroblocks++
-	}
-
-	r := image.Rect(0, 0, int(horizontalMacroblocks<<4), int(verticalMacroblocks<<4))
+	r := image.Rect(0, 0, horizontalMacroblocks<<4, verticalMacroblocks<<4)
 
 	var subsampleRatio image.YCbCrSubsampleRatio
 	switch cf {
@@ -32,7 +24,8 @@ func createFrameBuffer(w, h uint32, cf ChromaFormat) *image.YCbCr {
 
 func (self *VideoSequence) picture_data() (frame *image.YCbCr, err error) {
 
-	frame = createFrameBuffer(self.SequenceHeader.horizontal_size_value, self.SequenceHeader.vertical_size_value, self.SequenceExtension.chroma_format)
+	w, h := self.Size()
+	frame = createFrameBuffer(w, h, self.SequenceExtension.chroma_format)
 
 	for {
 		if err := self.slice(frame); err != nil {
