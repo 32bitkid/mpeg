@@ -9,6 +9,8 @@ compression/decompression.
 This package is experimental and is not intended for
 use in production environments.
 
+[![GoDoc](https://godoc.org/github.com/32bitkid/mpeg?status.svg)](https://godoc.org/github.com/32bitkid/mpeg)
+
 ## Composition
 
 This library is split into four sub-packages:
