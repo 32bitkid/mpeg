@@ -50,7 +50,7 @@ type motionVectorData struct {
 	previous    motionVectorsFormed
 }
 
-func (motionVector *motionVectorData) update_actual(r, s, t int, f_code fCode) {
+func (motionVector *motionVectorData) update_actual(r, s, t int, f_code fCode, motion_vector_format motionVectorFormat, picture_structure PictureStructure) {
 
 	code := motionVector.code
 	residual := motionVector.residual
@@ -72,6 +72,11 @@ func (motionVector *motionVectorData) update_actual(r, s, t int, f_code fCode) {
 	}
 
 	prediction := motionVector.predictions[r][s][t]
+	if motion_vector_format == motionVectorFormat_Field &&
+		t == 1 &&
+		picture_structure == PictureStructure_FramePicture {
+		prediction >>= 1
+	}
 
 	vector := prediction + delta
 	if vector < low {
@@ -83,6 +88,12 @@ func (motionVector *motionVectorData) update_actual(r, s, t int, f_code fCode) {
 
 	motionVector.predictions[r][s][t] = vector
 	motionVector.actual[r][s][t] = vector
+
+	if motion_vector_format == motionVectorFormat_Field &&
+		t == 1 &&
+		picture_structure == PictureStructure_FramePicture {
+		motionVector.predictions[r][s][t] <<= 1
+	}
 }
 
 func (mvd *motionVectorData) reset() {
@@ -133,7 +144,7 @@ func (fp *VideoSequence) motion_vectors(s int, mb *Macroblock, mvd *motionVector
 			panic("unsupported: dmv[]")
 		}
 
-		mvd.update_actual(r, s, t, f_code)
+		mvd.update_actual(r, s, t, f_code, mvd.info.motion_vector_format, fp.PictureCodingExtension.picture_structure)
 
 		return nil
 	}
