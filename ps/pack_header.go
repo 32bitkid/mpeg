@@ -1,7 +1,6 @@
 package ps
 
 import "github.com/32bitkid/bitreader"
-import "errors"
 
 type PackHeader struct {
 	SystemClockReferenceBase      uint32
@@ -10,14 +9,10 @@ type PackHeader struct {
 	*SystemHeader
 }
 
-var ErrNoPackStartCode = errors.New("no pack start code")
+func NewPackHeader(r bitreader.BitReader) (*PackHeader, error) {
 
-func readPackHeader(r bitreader.BitReader) (*PackHeader, error) {
-
-	if nextbits, err := r.Read32(32); err != nil {
+	if err := PackStartCode.Assert(r); err != nil {
 		return nil, err
-	} else if StartCode(nextbits) != PackStartCode {
-		return nil, ErrNoPackStartCode
 	}
 
 	if nextbits, err := r.Read32(2); err != nil {
@@ -107,9 +102,9 @@ func readPackHeader(r bitreader.BitReader) (*PackHeader, error) {
 		}
 	}
 
-	if nextbits, err := r.Peek32(32); err != nil {
+	if t, err := SystemHeaderStartCode.Check(r); err != nil {
 		return nil, err
-	} else if StartCode(nextbits) == SystemHeaderStartCode {
+	} else if t == true {
 		packHeader.SystemHeader, err = readSystemHeader(r)
 		if err != nil {
 			return nil, err

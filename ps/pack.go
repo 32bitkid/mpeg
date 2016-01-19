@@ -22,7 +22,7 @@ func readPack(r bitreader.BitReader) (*Pack, <-chan bool, error) {
 		packs: make(chan *pes.Packet),
 	}
 
-	pack.PackHeader, err = readPackHeader(r)
+	pack.PackHeader, err = NewPackHeader(r)
 	if err != nil {
 		return nil, nil, err
 	}
