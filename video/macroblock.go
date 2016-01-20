@@ -44,7 +44,7 @@ func (br *VideoSequence) macroblock(
 	}
 
 	// Copy skipped macroblocks for PFrames and BFrames
-	if mb.macroblock_address_increment > 1 {
+	if mb_address != -1 && mb.macroblock_address_increment > 1 {
 		switch br.PictureHeader.picture_coding_type {
 		case PFrame:
 			pframe_copy_macroblocks(
