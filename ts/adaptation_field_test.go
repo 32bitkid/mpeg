@@ -5,7 +5,7 @@ import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/mpeg/ts"
 
 func TestAdaptationField(t *testing.T) {
-	reader := bitreader.NewBitReader(adaptationFieldReader())
+	reader := bitreader.NewReader(adaptationFieldReader())
 	packet, err := ts.NewPacket(reader)
 	if err != nil {
 		t.Fatal(err)

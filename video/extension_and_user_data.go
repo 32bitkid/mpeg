@@ -28,7 +28,7 @@ func (br *VideoSequence) extension_data(i int) error {
 			break
 		}
 
-		br.Trash(32)
+		br.Skip(32)
 
 		switch i {
 		case 0: /* follows sequence_extension() */

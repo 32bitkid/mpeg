@@ -68,7 +68,7 @@ func picture_coding_extension(br bitreader.BitReader) (*PictureCodingExtension, 
 		pce.picture_structure = PictureStructure(picture_structure)
 	}
 
-	pce.top_field_first, err = br.ReadBit()
+	pce.top_field_first, err = br.Read1()
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func picture_coding_extension(br bitreader.BitReader) (*PictureCodingExtension, 
 		return nil, err
 	}
 
-	pce.concealment_motion_vectors, err = br.ReadBit()
+	pce.concealment_motion_vectors, err = br.Read1()
 	if err != nil {
 		return nil, err
 	}
@@ -98,28 +98,28 @@ func picture_coding_extension(br bitreader.BitReader) (*PictureCodingExtension, 
 		return nil, err
 	}
 
-	pce.repeat_first_field, err = br.ReadBit()
+	pce.repeat_first_field, err = br.Read1()
 	if err != nil {
 		return nil, err
 	}
 
-	pce.chroma_420_type, err = br.ReadBit()
+	pce.chroma_420_type, err = br.Read1()
 	if err != nil {
 		return nil, err
 	}
 
-	pce.progressive_frame, err = br.ReadBit()
+	pce.progressive_frame, err = br.Read1()
 	if err != nil {
 		return nil, err
 	}
 
-	pce.composite_display_flag, err = br.ReadBit()
+	pce.composite_display_flag, err = br.Read1()
 	if err != nil {
 		return nil, err
 	}
 
 	if pce.composite_display_flag {
-		pce.v_axis, err = br.ReadBit()
+		pce.v_axis, err = br.Read1()
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +127,7 @@ func picture_coding_extension(br bitreader.BitReader) (*PictureCodingExtension, 
 		if err != nil {
 			return nil, err
 		}
-		pce.sub_carrier, err = br.ReadBit()
+		pce.sub_carrier, err = br.Read1()
 		if err != nil {
 			return nil, err
 		}

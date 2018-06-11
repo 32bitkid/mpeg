@@ -21,7 +21,7 @@ func (vs *VideoSequence) quant_matrix_extension() error {
 
 	QuantMatrixExtensionID.Assert(vs)
 
-	if load, err := vs.ReadBit(); err != nil {
+	if load, err := vs.Read1(); err != nil {
 		return err
 	} else if load {
 		var intra_quantiser_matrix quantisationMatrix
@@ -38,7 +38,7 @@ func (vs *VideoSequence) quant_matrix_extension() error {
 		vs.quantisationMatricies[2] = intra_quantiser_matrix
 	}
 
-	if load, err := vs.ReadBit(); err != nil {
+	if load, err := vs.Read1(); err != nil {
 		return err
 	} else if load {
 		var non_intra_quantiser_matrix quantisationMatrix
@@ -55,7 +55,7 @@ func (vs *VideoSequence) quant_matrix_extension() error {
 		vs.quantisationMatricies[3] = non_intra_quantiser_matrix
 	}
 
-	if load, err := vs.ReadBit(); err != nil {
+	if load, err := vs.Read1(); err != nil {
 		return err
 	} else if load {
 		var chroma_intra_quantiser_matrix quantisationMatrix
@@ -71,7 +71,7 @@ func (vs *VideoSequence) quant_matrix_extension() error {
 		vs.quantisationMatricies[2] = chroma_intra_quantiser_matrix
 	}
 
-	if load, err := vs.ReadBit(); err != nil {
+	if load, err := vs.Read1(); err != nil {
 		return err
 	} else if load {
 		var chroma_non_intra_quantiser_matrix quantisationMatrix

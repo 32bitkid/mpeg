@@ -11,7 +11,7 @@ import (
 // Step through a bit stream one packet at a time.
 func Example() {
 	reader := base64.NewDecoder(base64.StdEncoding, strings.NewReader(shortTsStream))
-	br := bitreader.NewBitReader(reader)
+	br := bitreader.NewReader(reader)
 
 	packet := new(ts.Packet)
 	for {

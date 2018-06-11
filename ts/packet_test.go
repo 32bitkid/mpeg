@@ -6,7 +6,7 @@ import "github.com/32bitkid/bitreader"
 import "github.com/32bitkid/mpeg/ts"
 
 func TestPacketParsing(t *testing.T) {
-	reader := bitreader.NewBitReader(nullPacketReader())
+	reader := bitreader.NewReader(nullPacketReader())
 	packet, err := ts.NewPacket(reader)
 	if err != nil {
 		t.Fatal(err)
@@ -18,7 +18,7 @@ func TestPacketParsing(t *testing.T) {
 
 func TestEOFAfterPacket(t *testing.T) {
 	var err error
-	reader := bitreader.NewBitReader(nullPacketReader())
+	reader := bitreader.NewReader(nullPacketReader())
 	_, err = ts.NewPacket(reader)
 	_, err = ts.NewPacket(reader)
 	if err != io.EOF {
@@ -27,7 +27,7 @@ func TestEOFAfterPacket(t *testing.T) {
 }
 
 func TestIncompletePacket(t *testing.T) {
-	reader := bitreader.NewBitReader(io.LimitReader(nullPacketReader(), 4))
+	reader := bitreader.NewReader(io.LimitReader(nullPacketReader(), 4))
 	_, err := ts.NewPacket(reader)
 	if err != io.ErrUnexpectedEOF {
 		t.Fatalf("unexpected error. expected %v, got %v", io.ErrUnexpectedEOF, err)

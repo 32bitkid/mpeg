@@ -71,21 +71,21 @@ func (packet *Packet) Next(br bitreader.BitReader) (err error) {
 		}
 	}
 
-	if err = br.Trash(8); err != nil {
+	if err = br.Skip(8); err != nil {
 		return
 	}
 
-	packet.TransportErrorIndicator, err = br.ReadBit()
+	packet.TransportErrorIndicator, err = br.Read1()
 	if err != nil {
 		return
 	}
 
-	packet.PayloadUnitStartIndicator, err = br.ReadBit()
+	packet.PayloadUnitStartIndicator, err = br.Read1()
 	if err != nil {
 		return
 	}
 
-	packet.TransportPriority, err = br.ReadBit()
+	packet.TransportPriority, err = br.Read1()
 	if err != nil {
 		return
 	}
@@ -139,7 +139,7 @@ func (packet *Packet) Next(br bitreader.BitReader) (err error) {
 }
 
 func isAligned(br bitreader.BitReader) (bool, error) {
-	if br.IsByteAligned() == false {
+	if br.IsAligned() == false {
 		return false, nil
 	}
 
@@ -152,8 +152,8 @@ func isAligned(br bitreader.BitReader) (bool, error) {
 }
 
 func realign(br bitreader.BitReader) error {
-	if br.IsByteAligned() == false {
-		br.ByteAlign()
+	if br.IsAligned() == false {
+		br.Align()
 	}
 
 	for i := 0; i < 188; i++ {
@@ -164,7 +164,7 @@ func realign(br bitreader.BitReader) error {
 		if val == SyncByte {
 			return nil
 		}
-		if err := br.Trash(8); err != nil {
+		if err := br.Skip(8); err != nil {
 			return err
 		}
 	}

@@ -75,12 +75,12 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 	if nextbits, err := br.Peek32(1); err != nil {
 		return err
 	} else if nextbits == 1 {
-		s.intra_slice_flag, err = br.ReadBit()
+		s.intra_slice_flag, err = br.Read1()
 		if err != nil {
 			return err
 		}
 
-		s.intra_slice, err = br.ReadBit()
+		s.intra_slice, err = br.Read1()
 		if err != nil {
 			return err
 		}
@@ -96,7 +96,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 				return err
 			} else if nextbits != 1 {
 				break
-			} else if err := br.Trash(1); err != nil {
+			} else if err := br.Skip(1); err != nil {
 				return err
 			}
 
@@ -108,7 +108,7 @@ func (br *VideoSequence) slice(frame *image.YCbCr) error {
 		}
 	}
 
-	if err := br.Trash(1); err != nil {
+	if err := br.Skip(1); err != nil {
 		return err
 	}
 

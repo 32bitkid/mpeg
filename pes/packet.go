@@ -64,7 +64,7 @@ func (packet *Packet) Next(reader bitreader.BitReader) error {
 		return ErrStartCodePrefixNotFound
 	}
 
-	reader.Trash(24)
+	reader.Skip(24)
 
 	packet.StreamID, err = reader.Read32(8)
 	if err != nil {

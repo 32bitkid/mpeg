@@ -6,7 +6,7 @@ import "io"
 // Creates a new MPEG-2 Transport Stream Demultiplexer
 func NewDemuxer(reader io.Reader) *Demuxer {
 	return &Demuxer{
-		reader:    bitreader.NewBitReader(reader),
+		reader:    bitreader.NewReader(reader),
 		skipUntil: alwaysTrueTester,
 		takeWhile: alwaysTrueTester,
 	}

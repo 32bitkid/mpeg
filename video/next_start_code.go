@@ -12,8 +12,8 @@ func (self *VideoSequence) next_start_code() (err error) {
 }
 
 func next_start_code(br bitreader.BitReader) error {
-	if !br.IsByteAligned() {
-		if _, err := br.ByteAlign(); err != nil {
+	if !br.IsAligned() {
+		if _, err := br.Align(); err != nil {
 			return err
 		}
 	}
@@ -34,7 +34,7 @@ func next_start_code(br bitreader.BitReader) error {
 }
 
 func marker_bit(br bitreader.BitReader) error {
-	if marker, err := br.ReadBit(); err != nil {
+	if marker, err := br.Read1(); err != nil {
 		return err
 	} else if marker == false {
 		return ErrMissingMarkerBit

@@ -17,7 +17,7 @@ type packreader struct {
 
 func NewPackReader(r io.Reader) io.Reader {
 	return &packreader{
-		br:        bitreader.NewBitReader(r),
+		br:        bitreader.NewReader(r),
 		remainder: &bytes.Buffer{},
 	}
 }
@@ -76,6 +76,6 @@ MORE_PACKETS:
 
 PROGRAM_END:
 
-	pr.br.Trash(32)
+	pr.br.Skip(32)
 	return n, io.EOF
 }

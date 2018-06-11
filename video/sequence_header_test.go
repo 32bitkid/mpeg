@@ -11,9 +11,9 @@ func TestSequenceHeader(t *testing.T) {
 		`AAABs1AC0Ddt3S9BEBEREhISExMTExQUFBQUFRUVFRUVFhYWFhYWF` +
 			`hcXFxcXFxcXGBgYGBgYGBkZGRkZGRoaGhoaGxsbGxwcHB0dHg==`)
 
-	br := bitreader.NewBitReader(bytes.NewReader(testData))
+	br := bitreader.NewReader(bytes.NewReader(testData))
 
-	actual, err := sequence_header(br)
+	actual, err := ReadSequenceHeader(br)
 	if err != nil && err != io.EOF {
 		t.Fatal(err)
 	}

@@ -35,7 +35,7 @@ func (expected StartCode) Assert(br bitreader.BitReader) error {
 	} else if test != true {
 		return ErrUnexpectedStartCode
 	}
-	if err := br.Trash(32); err != nil {
+	if err := br.Skip(32); err != nil {
 		return err
 	}
 	return nil

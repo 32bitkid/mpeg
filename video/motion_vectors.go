@@ -16,9 +16,9 @@ func absInt(in int) int {
 type motionVectorsFormed uint
 
 const (
-	motionVectorsFormed_None         = motionVectorsFormed(0)
-	motionVectorsFormed_FrameForward = motionVectorsFormed(1 << (iota - 1))
-	motionVectorsFormed_FrameBackward
+	motionVectorsFormed_None          = motionVectorsFormed(0)
+	motionVectorsFormed_FrameForward  = motionVectorsFormed(1 << 0)
+	motionVectorsFormed_FrameBackward = motionVectorsFormed(1 << 1)
 )
 
 func (mvf *motionVectorsFormed) set(mb_type *MacroblockType, pct PictureCodingType) {

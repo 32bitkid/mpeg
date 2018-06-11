@@ -30,7 +30,7 @@ func (br *VideoSequence) macroblock(
 		if nextbits, err := br.Peek32(11); err != nil {
 			return 0, err
 		} else if nextbits == 0x08 { // 0000 0001 000
-			br.Trash(11)
+			br.Skip(11)
 			mb.macroblock_address_increment += 33
 		} else {
 			break
@@ -290,7 +290,7 @@ func (br *VideoSequence) macroblock_mode(mb *Macroblock) (err error) {
 	if br.PictureCodingExtension.picture_structure == PictureStructure_FramePicture &&
 		br.PictureCodingExtension.frame_pred_frame_dct == 0 &&
 		(mb.macroblock_type.macroblock_intra || mb.macroblock_type.macroblock_pattern) {
-		mb.dct_type, err = br.ReadBit() //dct_type 1 uimsbf
+		mb.dct_type, err = br.Read1() //dct_type 1 uimsbf
 		if err != nil {
 			return err
 		}

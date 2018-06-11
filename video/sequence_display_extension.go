@@ -25,7 +25,7 @@ func sequence_display_extension(br bitreader.BitReader) (*SequenceDisplayExtensi
 		return nil, err
 	}
 
-	sde.colour_description, err = br.ReadBit()
+	sde.colour_description, err = br.Read1()
 	if sde.colour_description {
 		sde.colour_primaries, err = br.Read32(8)
 		if err != nil {

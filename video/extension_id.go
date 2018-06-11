@@ -55,7 +55,7 @@ func (expected ExtensionID) Assert(br bitreader.BitReader) error {
 	} else if test != true {
 		return ErrUnexpectedExtensionID
 	}
-	if err := br.Trash(4); err != nil {
+	if err := br.Skip(4); err != nil {
 		return err
 	}
 	return nil

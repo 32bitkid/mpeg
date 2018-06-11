@@ -7,7 +7,7 @@ import "github.com/32bitkid/bitreader"
 // NewPayloadReader creates a new reader that provides only Payload bytes from the source PES stream
 func NewPayloadReader(source io.Reader) io.Reader {
 	return &payloadReader{
-		br:            bitreader.NewBitReader(source),
+		br:            bitreader.NewReader(source),
 		currentPacket: new(Packet),
 	}
 }

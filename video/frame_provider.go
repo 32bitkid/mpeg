@@ -99,7 +99,7 @@ RESUME:
 		return nil, err
 	} else if StartCode(nextbits) == SequenceEndStartCode {
 		// consume SequenceEndStartCode
-		if err := self.Trash(32); err != nil {
+		if err := self.Skip(32); err != nil {
 			return nil, err
 		}
 		goto END_OF_STREAM

@@ -23,13 +23,13 @@ func ReadGOPHeader(br bitreader.BitReader) (*GroupOfPicturesHeader, error) {
 		goph.timeCode = int32(time_code)
 	}
 
-	if closed_gop, err := br.ReadBit(); err != nil {
+	if closed_gop, err := br.Read1(); err != nil {
 		return nil, err
 	} else {
 		goph.ClosedGOP = closed_gop
 	}
 
-	if broken_link, err := br.ReadBit(); err != nil {
+	if broken_link, err := br.Read1(); err != nil {
 		return nil, err
 	} else {
 		goph.BrokenLink = broken_link

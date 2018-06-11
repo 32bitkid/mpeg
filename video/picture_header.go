@@ -69,13 +69,13 @@ func picture_header(br bitreader.BitReader) (*PictureHeader, error) {
 	}
 
 	for {
-		if extraBit, err := br.PeekBit(); err != nil {
+		if extraBit, err := br.Peek1(); err != nil {
 			return nil, err
 		} else if extraBit == false {
 			break
 		}
 
-		if err := br.Trash(1); err != nil {
+		if err := br.Skip(1); err != nil {
 			return nil, err
 		}
 
@@ -87,7 +87,7 @@ func picture_header(br bitreader.BitReader) (*PictureHeader, error) {
 		}
 	}
 
-	if err := br.Trash(1); err != nil {
+	if err := br.Skip(1); err != nil {
 		return nil, err
 	}
 

@@ -36,7 +36,7 @@ func newDCTCoefficientDecoder(tables [2]huffman.HuffmanTable) dctCoefficientDeco
 				run = int(val)
 			}
 
-			if sign, err := br.ReadBit(); err != nil {
+			if sign, err := br.Read1(); err != nil {
 				return 0, 0, false, err
 			} else if sign {
 				level = -2048
@@ -52,7 +52,7 @@ func newDCTCoefficientDecoder(tables [2]huffman.HuffmanTable) dctCoefficientDeco
 		} else if dct, ok := val.(dctCoefficient); ok {
 			run = dct.run
 			level = dct.level
-			if sign, err := br.ReadBit(); err != nil {
+			if sign, err := br.Read1(); err != nil {
 				return 0, 0, false, err
 			} else if sign {
 				level *= -1

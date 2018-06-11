@@ -25,24 +25,24 @@ func readExtension(r bitreader.BitReader) (*Extension, uint32, error) {
 	var bytesRead uint32 = 0
 	extension := Extension{}
 
-	if extension.PrivateDataFlag, err = r.ReadBit(); err != nil {
+	if extension.PrivateDataFlag, err = r.Read1(); err != nil {
 		return nil, 0, err
 	}
-	if extension.PackHeaderFieldFlag, err = r.ReadBit(); err != nil {
+	if extension.PackHeaderFieldFlag, err = r.Read1(); err != nil {
 		return nil, 0, err
 	}
-	if extension.ProgramPacketSequenceCounterFlag, err = r.ReadBit(); err != nil {
+	if extension.ProgramPacketSequenceCounterFlag, err = r.Read1(); err != nil {
 		return nil, 0, err
 	}
-	if extension.P_STD_BufferFlag, err = r.ReadBit(); err != nil {
-		return nil, 0, err
-	}
-
-	if err = r.Trash(3); err != nil {
+	if extension.P_STD_BufferFlag, err = r.Read1(); err != nil {
 		return nil, 0, err
 	}
 
-	if extension.ExtensionFlag2, err = r.ReadBit(); err != nil {
+	if err = r.Skip(3); err != nil {
+		return nil, 0, err
+	}
+
+	if extension.ExtensionFlag2, err = r.Read1(); err != nil {
 		return nil, 0, err
 	}
 

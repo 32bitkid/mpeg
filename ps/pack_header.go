@@ -89,7 +89,7 @@ func NewPackHeader(r bitreader.BitReader) (*PackHeader, error) {
 		return nil, ErrMarkerNotFound
 	}
 
-	if err := r.Trash(5); err != nil {
+	if err := r.Skip(5); err != nil {
 		return nil, err
 	}
 
@@ -97,7 +97,7 @@ func NewPackHeader(r bitreader.BitReader) (*PackHeader, error) {
 		return nil, err
 	} else {
 		for pack_stuffing_length > 0 {
-			r.Trash(8) // stuffing_byte
+			r.Skip(8) // stuffing_byte
 			pack_stuffing_length--
 		}
 	}

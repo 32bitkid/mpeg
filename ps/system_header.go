@@ -23,7 +23,7 @@ type SystemHeaderStream struct {
 
 func readSystemHeader(r bitreader.BitReader) (*SystemHeader, error) {
 
-	if err := r.Trash(32); err != nil {
+	if err := r.Skip(32); err != nil {
 		return nil, err
 	}
 
@@ -59,25 +59,25 @@ func readSystemHeader(r bitreader.BitReader) (*SystemHeader, error) {
 		systemHeader.AudioBound = ab
 	}
 
-	if fixed, err := r.ReadBit(); err != nil {
+	if fixed, err := r.Read1(); err != nil {
 		return nil, err
 	} else {
 		systemHeader.Fixed = fixed
 	}
 
-	if csps, err := r.ReadBit(); err != nil {
+	if csps, err := r.Read1(); err != nil {
 		return nil, err
 	} else {
 		systemHeader.CSPS = csps
 	}
 
-	if sal, err := r.ReadBit(); err != nil {
+	if sal, err := r.Read1(); err != nil {
 		return nil, err
 	} else {
 		systemHeader.SystemAudioLock = sal
 	}
 
-	if svl, err := r.ReadBit(); err != nil {
+	if svl, err := r.Read1(); err != nil {
 		return nil, err
 	} else {
 		systemHeader.SystemVideoLock = svl
@@ -95,13 +95,13 @@ func readSystemHeader(r bitreader.BitReader) (*SystemHeader, error) {
 		systemHeader.AudioBound = ab
 	}
 
-	if prr, err := r.ReadBit(); err != nil {
+	if prr, err := r.Read1(); err != nil {
 		return nil, err
 	} else {
 		systemHeader.PacketRateRestriction = prr
 	}
 
-	if err := r.Trash(7); err != nil {
+	if err := r.Skip(7); err != nil {
 		return nil, err
 	}
 
@@ -126,7 +126,7 @@ func readSystemHeader(r bitreader.BitReader) (*SystemHeader, error) {
 			return nil, ErrMarkerNotFound
 		}
 
-		if scale, err := r.ReadBit(); err != nil {
+		if scale, err := r.Read1(); err != nil {
 			return nil, err
 		} else {
 			stream.P_STD_BufferBoundScale = scale

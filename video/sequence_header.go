@@ -61,11 +61,11 @@ func ReadSequenceHeader(br bitreader.BitReader) (*SequenceHeader, error) {
 		return nil, err
 	}
 
-	if sh.constrained_parameters_flag, err = br.ReadBit(); err != nil {
+	if sh.constrained_parameters_flag, err = br.Read1(); err != nil {
 		return nil, err
 	}
 
-	sh.load_intra_quantiser_matrix, err = br.ReadBit()
+	sh.load_intra_quantiser_matrix, err = br.Read1()
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func ReadSequenceHeader(br bitreader.BitReader) (*SequenceHeader, error) {
 		}
 	}
 
-	sh.load_non_intra_quantiser_matrix, err = br.ReadBit()
+	sh.load_non_intra_quantiser_matrix, err = br.Read1()
 	if err != nil {
 		return nil, err
 	}

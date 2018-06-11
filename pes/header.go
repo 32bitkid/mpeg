@@ -42,22 +42,22 @@ func readHeader(reader bitreader.BitReader) (*Header, uint32, error) {
 		return nil, 0, err
 	}
 
-	header.Priority, err = reader.ReadBit()
+	header.Priority, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	header.DataAlignmentIndicator, err = reader.ReadBit()
+	header.DataAlignmentIndicator, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	header.Copyright, err = reader.ReadBit()
+	header.Copyright, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	header.OrignalOrCopy, err = reader.ReadBit()
+	header.OrignalOrCopy, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}
@@ -67,32 +67,32 @@ func readHeader(reader bitreader.BitReader) (*Header, uint32, error) {
 		return nil, 0, err
 	}
 
-	header.EscrFlag, err = reader.ReadBit()
+	header.EscrFlag, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	header.EsRateFlag, err = reader.ReadBit()
+	header.EsRateFlag, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	header.DsmTrickModeFlag, err = reader.ReadBit()
+	header.DsmTrickModeFlag, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	header.AdditionalCopyInfoFlag, err = reader.ReadBit()
+	header.AdditionalCopyInfoFlag, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	header.CrcFlag, err = reader.ReadBit()
+	header.CrcFlag, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	header.ExtensionFlag, err = reader.ReadBit()
+	header.ExtensionFlag, err = reader.Read1()
 	if err != nil {
 		return nil, 0, err
 	}

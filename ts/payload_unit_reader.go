@@ -22,7 +22,7 @@ const (
 // packets match the packet tester.
 func NewPayloadUnitReader(source io.Reader, where PacketTester) io.Reader {
 	return &payloadUnitBuffer{
-		br:             bitreader.NewBitReader(source),
+		br:             bitreader.NewReader(source),
 		where:          where,
 		startIndicator: where.And(IsPayloadUnitStart),
 		state:          drained,

@@ -8,7 +8,7 @@ import "github.com/32bitkid/bitreader"
 // that delivers just the packet payload bytes.
 func NewPayloadReader(source io.Reader, where PacketTester) StreamControlReader {
 	return &payloadReader{
-		br:        bitreader.NewBitReader(source),
+		br:        bitreader.NewReader(source),
 		where:     where,
 		closed:    false,
 		skipUntil: nil,

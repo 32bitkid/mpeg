@@ -28,14 +28,14 @@ type VideoSequence struct {
 
 func NewVideoSequence(r io.Reader) *VideoSequence {
 	return &VideoSequence{
-		BitReader: bitreader.NewBitReader(r),
+		BitReader: bitreader.NewReader(r),
 	}
 }
 
 // AlignTo will trash all bits until the stream is aligned with the desired start code or error is produced.
 func (br *VideoSequence) AlignTo(startCode StartCode) error {
-	if !br.IsByteAligned() {
-		if _, err := br.ByteAlign(); err != nil {
+	if !br.IsAligned() {
+		if _, err := br.Align(); err != nil {
 			return err
 		}
 	}
@@ -45,7 +45,7 @@ func (br *VideoSequence) AlignTo(startCode StartCode) error {
 			return err
 		} else if StartCode(val) == startCode {
 			return nil
-		} else if err := br.Trash(8); err != nil {
+		} else if err := br.Skip(8); err != nil {
 			return err
 		}
 	}
