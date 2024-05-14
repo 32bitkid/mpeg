@@ -1,0 +1,6 @@
+github.com/32bitkid/bitreader v1.0.1 h1:BlmpTTTL1us9nQ+EUh4M/r5/mY+j4JeC5qOCgL/08ms=
+github.com/32bitkid/bitreader v1.0.1/go.mod h1:wiZHryiWx8YsSuS17YiR7Be4rz6FNxxQl/zs1eWJBMo=
+github.com/32bitkid/clog v0.0.0-20180710165031-6446106e4bb6 h1:OcH5CxXMMbzxfkAyRQBPx8R2HWhGPd02y9zE43bkDRs=
+github.com/32bitkid/clog v0.0.0-20180710165031-6446106e4bb6/go.mod h1:HXml394fonrOYIBPmkxKyWIrKO3HJZASQNtPrNe7WXE=
+github.com/32bitkid/huffman v0.0.0-20180710165318-84139c04a627 h1:JdwszkxAm/joNnnstdrero6jzh9vLko3hCWpe37XEKw=
+github.com/32bitkid/huffman v0.0.0-20180710165318-84139c04a627/go.mod h1:UZ6+Fa0bHvevqk31wB1AQ85wuAtISzFucvZgP90ygOI=
