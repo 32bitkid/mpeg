@@ -1,5 +1,7 @@
 package video
 
+import "fmt"
+
 // PictureCodingType defines the encoding used for a frame within a video
 // bitstream.
 //
@@ -14,34 +16,33 @@ package video
 // data from a previously decoded reference frame, the samples are then added
 // to the encoded samples in the bitstream to reconstruct the final block.
 //
-//    x──────────────────────┐   x───┬──────────────────┐
-//    │╲               ┌ ─ ─ ┼ ─ ▶   │                  │
-//    │ MV                   │   ├───┘                  │
-//    │  ╲───┐         │     │   │                      │
-//    │  │   │─ ─ ─ ─ ─      │   │                      │
-//    │  └───┘               │   │                      │
-//    │                      │   │                      │
-//    │                      │   │                      │
-//    │                      │   │                      │
-//    └──────────────────────┘   └──────────────────────┘
-//        Reference Frame                P-Frame
+//	x──────────────────────┐   x───┬──────────────────┐
+//	│╲               ┌ ─ ─ ┼ ─ ▶   │                  │
+//	│ MV                   │   ├───┘                  │
+//	│  ╲───┐         │     │   │                      │
+//	│  │   │─ ─ ─ ─ ─      │   │                      │
+//	│  └───┘               │   │                      │
+//	│                      │   │                      │
+//	│                      │   │                      │
+//	│                      │   │                      │
+//	└──────────────────────┘   └──────────────────────┘
+//	    Reference Frame                P-Frame
 //
 // Bi-directionally coded picture is a picture coded using motion compensated
 // sample from either a past frame and/or a future frame. B-Frames can contain
 // "forward" and/or "backward" projections.
 //
-//    x──────────────────────┐   x───┬──────────────────┐   x──────────────────────┐
-//    │╲               ┌ ─ ─ ┼ ─ ▶   ◀ ─ ─ ─ ─ ─ ─ ─    │   │╲─MV──┌───┐           │
-//    │ MV                   │   ├───┘              └ ─ ┼ ─ ┼ ─ ─ ─│   │           │
-//    │  ╲───┐         │     │   │                      │   │      └───┘           │
-//    │  │   │─ ─ ─ ─ ─      │   │                      │   │                      │
-//    │  └───┘               │   │                      │   │                      │
-//    │                      │   │                      │   │                      │
-//    │                      │   │                      │   │                      │
-//    │                      │   │                      │   │                      │
-//    └──────────────────────┘   └──────────────────────┘   └──────────────────────┘
-//      Past Reference Frame             B-Frame             Future Reference Frame
-//
+//	x──────────────────────┐   x───┬──────────────────┐   x──────────────────────┐
+//	│╲               ┌ ─ ─ ┼ ─ ▶   ◀ ─ ─ ─ ─ ─ ─ ─    │   │╲─MV──┌───┐           │
+//	│ MV                   │   ├───┘              └ ─ ┼ ─ ┼ ─ ─ ─│   │           │
+//	│  ╲───┐         │     │   │                      │   │      └───┘           │
+//	│  │   │─ ─ ─ ─ ─      │   │                      │   │                      │
+//	│  └───┘               │   │                      │   │                      │
+//	│                      │   │                      │   │                      │
+//	│                      │   │                      │   │                      │
+//	│                      │   │                      │   │                      │
+//	└──────────────────────┘   └──────────────────────┘   └──────────────────────┘
+//	  Past Reference Frame             B-Frame             Future Reference Frame
 type PictureCodingType uint32
 
 const (
@@ -72,5 +73,5 @@ func (pct PictureCodingType) String() string {
 	case PictureCodingType_DCIntraCoded:
 		return "D"
 	}
-	return string(uint32(pct)) + "?"
+	return fmt.Sprintf("%v?", uint32(pct))
 }
